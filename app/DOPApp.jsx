@@ -151,7 +151,7 @@ export default function DOPApp() {
 
   // ─── Login gate ───────────────────────────────────────────────────────────
   if (!user) {
-    return <LoginScreen onLogin={(u, f) => { setUser(u); setFirstName(f); }} />;
+    return <LoginScreen onLogin={u => { setUser(u); setFirstName(u); }} />;
   }
 
   // ─── First-time setup gate ─────────────────────────────────────────────────

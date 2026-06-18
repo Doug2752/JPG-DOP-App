@@ -1,87 +1,93 @@
 import React, { useState } from 'react';
-import { GOLD, DARK, BORDER } from '../utils/constants';
-import { USERS } from '../utils/constants';
-import { inp, gbtn } from './styles';
 
-const LOGO_SRC = '/jpglogo.png';
+const VALID_CREDENTIALS = { Doug: 'JPG2026' };
 
-export default function LoginScreen({ onLogin }) {
-  const [sel, setSel] = useState('Doug');
-  const [pass, setPass] = useState('');
-  const [err, setErr] = useState('');
+export default function Login({ onLogin }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const attempt = () => {
-    const u = USERS[sel];
-    if (!u || pass !== u.password) { setErr('Invalid password.'); return; }
-    setErr('');
-    onLogin(sel, u.firstName);
-  };
+  function handleSubmit(e) {
+    e.preventDefault();
+    const expected = VALID_CREDENTIALS[username.trim()];
+    if (!expected || password !== expected) {
+      setError('Invalid username or password.');
+      return;
+    }
+    setError('');
+    onLogin(username.trim());
+  }
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: `radial-gradient(ellipse at center, #2a2a2a 0%, #111 100%)`,
-      fontFamily: 'sans-serif', padding: 20,
+      minHeight: '100vh',
+      background: '#B8860B',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: 'Arial, sans-serif',
     }}>
-      <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
-        <img src={LOGO_SRC} alt="Jones Performance Group" style={{ width: 260, marginBottom: 32 }} />
-
-        <div style={{
-          background: '#fff', borderRadius: 12, padding: '32px 28px',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.4)',
-        }}>
-          <div style={{ fontSize: 22, fontWeight: 900, color: DARK, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 4 }}>
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '12px',
+        width: '420px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+        border: '2px solid #000000',
+      }}>
+        <div style={{ padding: '32px 40px 16px 40px' }}>
+          <img
+            src="/jpglogo.png"
+            style={{ width: '260px', display: 'block', marginLeft: 'auto', marginRight: 'auto', marginBottom: '0px', position: 'relative', left: '-14px' }}
+          />
+          <div style={{ fontSize: '42px', fontWeight: 900, letterSpacing: '0.08em', color: '#000000', textAlign: 'center', margin: 0, padding: 0, marginTop: '0px', marginLeft: '-28px' }}>
             DOP
           </div>
-          <div style={{ fontSize: 11, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 28 }}>
-            Daily Operational Process
+          <div style={{ fontSize: '13px', letterSpacing: '0.15em', color: '#555555', textAlign: 'center', marginTop: '4px', marginBottom: '20px', marginLeft: '-28px' }}>
+            DAILY OPERATIONAL PROCESS
           </div>
-
-          <div style={{ textAlign: 'left', marginBottom: 14 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 5 }}>
-              User
+          <form onSubmit={handleSubmit}>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', letterSpacing: '0.1em', color: '#000000', marginBottom: '4px', display: 'block' }}>
+              USER
             </label>
-            <select
-              value={sel}
-              onChange={e => setSel(e.target.value)}
-              style={{ ...inp, cursor: 'pointer', height: 34 }}
-            >
-              {Object.keys(USERS).map(k => (
-                <option key={k} value={k}>{USERS[k].firstName}</option>
-              ))}
-            </select>
-          </div>
-
-          <div style={{ textAlign: 'left', marginBottom: 20 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', letterSpacing: 1, display: 'block', marginBottom: 5 }}>
-              Password
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoComplete="username"
+              autoFocus
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #CCCCCC', background: '#F0F0F0', color: '#2A2A2A', fontSize: '14px', boxSizing: 'border-box' }}
+            />
+            <label style={{ fontSize: '11px', fontWeight: 'bold', letterSpacing: '0.1em', color: '#000000', marginTop: '16px', marginBottom: '4px', display: 'block' }}>
+              PASSWORD
             </label>
             <input
               type="password"
-              value={pass}
-              onChange={e => setPass(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && attempt()}
-              style={inp}
-              placeholder="Enter password..."
-              autoFocus
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit(e)}
+              autoComplete="current-password"
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #CCCCCC', background: '#F0F0F0', color: '#2A2A2A', fontSize: '14px', boxSizing: 'border-box' }}
             />
-          </div>
-
-          {err && (
-            <div style={{ color: '#c0392b', fontSize: 12, fontWeight: 600, marginBottom: 12 }}>{err}</div>
-          )}
-
-          <button onClick={attempt} style={gbtn({ width: '100%', padding: '11px', fontSize: 13 })}>
-            Enter DOP
-          </button>
-
-          <div style={{ marginTop: 16, fontSize: 10, color: '#bbb' }}>
-            Doug: jpg2026 · Test: test123
+            {error && (
+              <div style={{ color: '#B02020', fontSize: '12px', textAlign: 'center', marginTop: '10px' }}>
+                {error}
+              </div>
+            )}
+            <button
+              type="submit"
+              style={{ width: '100%', padding: '12px', background: '#B8860B', color: '#000000', fontWeight: 'bold', fontSize: '14px', letterSpacing: '0.1em', border: 'none', borderRadius: '6px', cursor: 'pointer', marginTop: '20px' }}
+            >
+              ENTER
+            </button>
+          </form>
+          <div style={{ marginTop: '12px', textAlign: 'center', lineHeight: 1.8, fontSize: '11px', color: '#000000', letterSpacing: '0.08em' }}>
+            <div>JONES PERFORMANCE GROUP LLC</div>
+            <div>ACCESS BY AUTHORIZATION ONLY</div>
           </div>
         </div>
-
-        <div style={{ marginTop: 20, fontSize: 9, color: '#555', letterSpacing: 2, textTransform: 'uppercase' }}>
-          Jones Performance Group LLC — Confidential
+        <div style={{ background: '#FFFFFF', borderTop: '1px solid #EEEEEE', height: '28px', lineHeight: '28px', textAlign: 'center', fontSize: '9px', color: '#888888', letterSpacing: '0.05em' }}>
+          © 2026 Jones Performance Group LLC · DOP · Confidential · All Rights Reserved
         </div>
       </div>
     </div>
