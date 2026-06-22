@@ -27,8 +27,12 @@ function findPMItem(id) {
 }
 
 export default function DOPApp() {
-  const [user, setUser] = useState(null);
-  const [firstName, setFirstName] = useState('');
+  const [user, setUser] = useState(
+    () => new URLSearchParams(window.location.search).get('hub_user') ?? null
+  );
+  const [firstName, setFirstName] = useState(
+    () => new URLSearchParams(window.location.search).get('hub_user') ?? ''
+  );
   const [view, setView] = useState('form');
   const [setup, setSetup] = useState(defaultSetup());
   const [form, setForm] = useState(emptyForm());
