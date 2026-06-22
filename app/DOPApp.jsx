@@ -77,6 +77,14 @@ export default function DOPApp() {
     }
   }, [form.pmGood, form.pmBad]);
 
+  // Auto-open instructions modal on first-ever visit (after login + setup complete)
+  useEffect(() => {
+    if (!user || !setup.setupComplete) return;
+    if (!localStorage.getItem('dop_instructions_seen')) {
+      setShowInstructions(true);
+    }
+  }, [user, setup.setupComplete]);
+
   async function loadQuote() {
     const fallback = getDailyQuote(BACKUP_QUOTES);
     try {
@@ -225,7 +233,12 @@ export default function DOPApp() {
 
   return (
     <div style={{ minHeight: '100vh', background: BG, fontFamily: 'sans-serif' }} onClick={() => setShowDatePicker(false)}>
-      {showInstructions && <FormInstructionsModal onClose={() => setShowInstructions(false)} />}
+      {showInstructions && (
+        <FormInstructionsModal onClose={() => {
+          setShowInstructions(false);
+          localStorage.setItem('dop_instructions_seen', '1');
+        }} />
+      )}
 
       {/* Sticky Nav */}
       <div style={{
@@ -259,7 +272,7 @@ export default function DOPApp() {
           <button
             onClick={() => setShowInstructions(true)}
             style={{ background: GOLD, border: 'none', color: '#fff', fontWeight: 700, fontSize: 11, cursor: 'pointer', padding: '3px 8px', borderRadius: 4, marginLeft: 4 }}
-          >? Help</button>
+          >Set-Up and Instructions</button>
         </div>
 
         <div style={{ marginLeft: 8 }}>
