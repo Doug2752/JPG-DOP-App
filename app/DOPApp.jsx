@@ -10,7 +10,7 @@ import { emptyForm, defaultSetup, isDayComplete, getDailyQuote } from '../utils/
 import { storage } from '../services/storage';
 import { fetchDailyQuote } from '../services/ai';
 
-import LoginScreen from '../components/LoginScreen';
+import LoginScreen, { VALID_CREDENTIALS } from '../components/LoginScreen';
 import SetupScreen from '../components/SetupScreen';
 import FormInstructionsModal from '../components/FormInstructionsModal';
 import ArchiveView from '../components/ArchiveView';
@@ -27,12 +27,16 @@ function findPMItem(id) {
 }
 
 export default function DOPApp() {
-  const [user, setUser] = useState(
-    () => new URLSearchParams(window.location.search).get('hub_user') ?? null
-  );
-  const [firstName, setFirstName] = useState(
-    () => new URLSearchParams(window.location.search).get('hub_user') ?? ''
-  );
+  const [user, setUser] = useState(() => {
+    const raw = new URLSearchParams(window.location.search).get('hub_user');
+    if (!raw) return null;
+    return Object.keys(VALID_CREDENTIALS).find(k => k.toLowerCase() === raw.trim().toLowerCase()) ?? null;
+  });
+  const [firstName, setFirstName] = useState(() => {
+    const raw = new URLSearchParams(window.location.search).get('hub_user');
+    if (!raw) return '';
+    return Object.keys(VALID_CREDENTIALS).find(k => k.toLowerCase() === raw.trim().toLowerCase()) ?? '';
+  });
   const [view, setView] = useState('form');
   const [setup, setSetup] = useState(defaultSetup());
   const [form, setForm] = useState(emptyForm());
