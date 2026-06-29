@@ -1,3 +1,10 @@
+# DOP Priority 1 Pre-Check 2
+
+---
+
+## components/Shared.jsx
+
+```jsx
 import React from 'react';
 import { GOLD, GOLD_LIGHT, STEEL, DARK, BORDER } from '../utils/constants';
 import { PIT_URL } from '../utils/constants';
@@ -5,10 +12,9 @@ import { PIT_URL } from '../utils/constants';
 export function RecommendedBadge() {
   return (
     <span style={{
-      fontSize: 9, fontWeight: 800, color: '#000', background: GOLD,
+      fontSize: 9, fontWeight: 800, color: '#fff', background: GOLD,
       borderRadius: 3, padding: '1px 5px', marginLeft: 5,
       textTransform: 'uppercase', letterSpacing: 0.5,
-      border: '1.5px solid #000',
     }}>
       Recommended
     </span>
@@ -89,14 +95,15 @@ export function PITButton() {
       target="_blank"
       rel="noreferrer"
       style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#111', border: `1.5px solid ${GOLD}`, borderRadius: 5,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
+        background: '#111', border: `2px solid ${GOLD}`, borderRadius: 8,
         padding: '14px 20px', textDecoration: 'none', marginBottom: 14, cursor: 'pointer',
       }}
     >
-      <span style={{ color: GOLD, fontWeight: 700, fontSize: 14, letterSpacing: 0.5 }}>
-        Open Personal Investment Time (PIT)
-      </span>
+      <span style={{ color: '#fff', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}>Open</span>
+      <span style={{ color: GOLD, fontWeight: 900, fontSize: 20, letterSpacing: 4 }}>PIT</span>
+      <span style={{ color: '#aaa', fontSize: 11, letterSpacing: 1 }}>Personal Investment Time</span>
+      <span style={{ color: GOLD, fontSize: 18, fontWeight: 900 }}>↗</span>
     </a>
   );
 }
@@ -105,7 +112,7 @@ export function QuoteBox({ quote }) {
   if (!quote) return null;
   return (
     <div style={{
-      background: '#1a1a1a', borderRadius: 5, padding: '16px 20px',
+      background: '#1a1a1a', borderRadius: 8, padding: '16px 20px',
       border: `1px solid ${GOLD}`, textAlign: 'center',
     }}>
       <div style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>
@@ -146,3 +153,4 @@ export function ColumnHeader() {
     </div>
   );
 }
+```

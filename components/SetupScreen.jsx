@@ -5,9 +5,7 @@ import { inp } from './styles';
 import { ColumnHeader, SectionDivider, RecommendedBadge } from './Shared';
 import SetupRow from './SetupRow';
 import ReorderPanel from './ReorderPanel';
-import SetupInstructions from './SetupInstructions';
-
-const LOGO_SRC = '/jpglogo.png';
+import BrandBar from './BrandBar';
 
 function findAMItem(id) {
   return AM_STANDARD.find(i => i.id === id) || AM_COMMON.find(i => i.id === id) || null;
@@ -25,9 +23,8 @@ function SH({ color, label, sub }) {
   );
 }
 
-export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
+export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form, upd, showDatePicker, setShowDatePicker, goToday, loadArchive }) {
   const [local, setLocal] = useState(JSON.parse(JSON.stringify(setup)));
-  const [instrOpen, setInstrOpen] = useState(true);
 
   const setDur = (id, val) => setLocal(p => ({ ...p, durations: { ...p.durations, [id]: val } }));
   const setAMCust = (id, val) => setLocal(p => {
@@ -89,24 +86,19 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f8f6', padding: '0 0 60px', fontFamily: 'sans-serif' }}>
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ background: '#fff', borderBottom: `2px solid ${GOLD}`, padding: '28px 28px 24px', textAlign: 'center' }}>
-          <img src={LOGO_SRC} alt="JPG" style={{ width: 200, marginBottom: 16 }} />
-          <div style={{ fontSize: 34, fontWeight: 900, color: DARK, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 4 }}>
-            DOP Setup
-          </div>
-          <div style={{ fontSize: 13, color: '#888', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
-            Daily Operational Process
-          </div>
-          <div style={{ fontSize: 13, color: MID }}>Configure your personal daily system.</div>
-        </div>
-
+      <BrandBar
+        form={form}
+        upd={upd}
+        showDatePicker={showDatePicker}
+        setShowDatePicker={setShowDatePicker}
+        goToday={goToday}
+        loadArchive={loadArchive}
+        readOnlyDate={setup.lastUpdated ?? null}
+      />
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div style={{ padding: '20px 16px 0' }}>
-          <SetupInstructions open={instrOpen} onToggle={() => setInstrOpen(!instrOpen)} />
-
           {/* Bedtime */}
-          <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 16, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 16, overflow: 'hidden' }}>
             <div style={{
               background: '#333', padding: '14px 18px', display: 'flex',
               alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10,
@@ -126,7 +118,7 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
           </div>
 
           {/* AM Required */}
-          <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
             <SH color={GOLD} label="AM Required Items" sub="PIT is required and cannot be removed. All sub-categories are locked." />
             <ColumnHeader />
             {AM_STANDARD.map(item => (
@@ -137,7 +129,7 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
           </div>
 
           {/* AM Common */}
-          <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
             <SH color="#7A6010" label="AM Common Life Tasks" sub="Recommended items are pre-selected. Select any that apply to your morning." />
             <ColumnHeader />
             {AM_COMMON.map(item => (
@@ -168,7 +160,7 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
           />
 
           {/* PM Required */}
-          <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
             <SH color={STEEL} label="PM Required Items" sub="PM PIT, Prep for Tomorrow, and Evening Meal are required." />
             <ColumnHeader />
             {PM_STANDARD.map(item => {
@@ -184,7 +176,7 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
           </div>
 
           {/* PM Common */}
-          <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
             <SH color={STEEL_MID} label="PM Common Life Tasks" sub="Select evening tasks that apply to your routine." />
             <ColumnHeader />
             {PM_COMMON.map(item => (
@@ -217,8 +209,8 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime }) {
           <button
             onClick={() => onSave({ ...local, setupComplete: true })}
             style={{
-              width: '100%', padding: 16, borderRadius: 8, border: 'none',
-              background: GOLD, color: '#fff', fontWeight: 900, fontSize: 16,
+              width: '100%', padding: 16, borderRadius: 8, border: '1.5px solid #000',
+              background: GOLD_LIGHT, color: '#000', fontWeight: 900, fontSize: 16,
               cursor: 'pointer', letterSpacing: 0.5, marginBottom: 10,
             }}
           >

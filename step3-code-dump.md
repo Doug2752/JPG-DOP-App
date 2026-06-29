@@ -1,3 +1,81 @@
+# Step 3 Code Dump
+
+---
+
+## 1. Open PIT Box/Button — `components/Shared.jsx` (PITButton component)
+
+```jsx
+// components/Shared.jsx
+
+export function PITButton() {
+  return (
+    <a
+      href={PIT_URL}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
+        background: '#111', border: `2px solid ${GOLD}`, borderRadius: 8,
+        padding: '14px 20px', textDecoration: 'none', marginBottom: 14, cursor: 'pointer',
+      }}
+    >
+      <span style={{ color: '#fff', fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}>Open</span>
+      <span style={{ color: GOLD, fontWeight: 900, fontSize: 20, letterSpacing: 4 }}>PIT</span>
+      <span style={{ color: '#aaa', fontSize: 11, letterSpacing: 1 }}>Personal Investment Time</span>
+      <span style={{ color: GOLD, fontSize: 18, fontWeight: 900 }}>↗</span>
+    </a>
+  );
+}
+```
+
+---
+
+## 2. Tomorrow's Priorities Block — `components/PMBlock.jsx`
+
+```jsx
+// components/PMBlock.jsx — "Tomorrow's Priorities" section
+
+      {/* Tomorrow's Priorities */}
+      <div style={{ background: '#1a1a1a', padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
+        <div style={{ color: RED, fontWeight: 900, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }}>
+          Tomorrow's Priorities
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px', background: RED_LIGHT, borderBottom: `2px solid ${RED}` }}>
+        <label style={{ ...lbl, color: RED, marginBottom: 6 }}>Tomorrow's One Thing</label>
+        <input
+          type="text"
+          value={form.tomorrowOneThing || ''}
+          onChange={e => upd('tomorrowOneThing', e.target.value)}
+          style={{ ...inp, border: `2px solid ${RED}`, background: '#fff' }}
+          placeholder="The single most important action tomorrow..."
+        />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ flex: 1, height: 1, background: BORDER }} />
+        <span style={{ fontSize: 10, fontWeight: 800, color: '#bbb', letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Optional</span>
+        <div style={{ flex: 1, height: 1, background: BORDER }} />
+      </div>
+      <div style={{ padding: '4px 16px 14px' }}>
+        <label style={lbl}>
+          Tomorrow's Appointments & Must-Do's{' '}
+          <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(also in PIT)</span>
+        </label>
+        <textarea
+          value={form.tomorrowAppts || ''}
+          onChange={e => upd('tomorrowAppts', e.target.value)}
+          rows={3}
+          style={{ ...inp, resize: 'vertical', marginBottom: 12 }}
+          placeholder="Key appointments and tasks for tomorrow..."
+        />
+      </div>
+```
+
+---
+
+## 3. Full constants.js — `utils/constants.js`
+
+```js
 export const GOLD = '#B8860B';
 export const GOLD_LIGHT = '#ddb94a';
 export const STEEL = '#2C4A6B';
@@ -154,3 +232,134 @@ export const PM_CUSTOM_IDS = ['pm_c1', 'pm_c2', 'pm_c3', 'pm_c4', 'pm_c5'];
 export const AM_DEFAULT_RECOMMENDED = ['am_fitness', 'personal_prep', 'breakfast', 'make_bed'];
 export const PM_DEFAULT_COMMON = ['pm_fitness', 'pm_read', 'pm_bed', 'pm_lights_out'];
 export const PM_DEFAULT_TOP = ['prep_tomorrow', 'evening_meal', 'pm_pit'];
+```
+
+---
+
+## 4. AM Block Outer Container — `components/AMBlock.jsx` (full file)
+
+```jsx
+import React from 'react';
+import { GOLD, GOLD_LIGHT, DARK, BORDER } from '../utils/constants';
+import { AM_SUB_IDS } from '../utils/constants';
+import { inp, lbl } from './styles';
+import { CheckRow, PITButton, QuoteBox, TapScore } from './Shared';
+
+export default function AMBlock({
+  form, setup, allAMRows, amDone,
+  toggleAM, toggleAMPitAll, upd, saveForm, quote,
+}) {
+  return (
+    <>
+      <PITButton />
+
+      {/* Morning Evaluation */}
+      <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, padding: '16px 18px', marginBottom: 14, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ fontWeight: 800, fontSize: 12, color: GOLD, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 10 }}>
+          Morning Evaluation — How Do I Feel Right Now?
+        </div>
+        <TapScore value={form.morningEval} onChange={v => upd('morningEval', v)} color={GOLD} />
+      </div>
+
+      {/* AM Checklist */}
+      <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: GOLD, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ color: '#fff', fontWeight: 900, fontSize: 15, letterSpacing: 2, textTransform: 'uppercase' }}>AM Block</span>
+          <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 }}>{amDone} / {allAMRows.length} done</span>
+        </div>
+
+        {allAMRows.map(item => {
+          if (item.id === 'pit') {
+            const allSubChecked = AM_SUB_IDS.every(id => !!(form.amChecks && form.amChecks[id]));
+            return (
+              <div key="pit" style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                borderBottom: `1px solid ${BORDER}`,
+                background: form.amChecks?.pit ? GOLD_LIGHT : 'transparent',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontWeight: 700, fontSize: 13, color: form.amChecks?.pit ? GOLD : DARK }}>PIT</span>
+                  <span style={{ color: '#999', fontSize: 11, marginLeft: 6 }}>
+                    — Personal Investment Time — No Phone Until PIT Is Complete
+                  </span>
+                  <span style={{ fontSize: 9, color: GOLD, fontWeight: 700, marginLeft: 8, letterSpacing: 1, textTransform: 'uppercase' }}>Required</span>
+                </div>
+                <button
+                  onClick={toggleAMPitAll}
+                  style={{
+                    fontSize: 10, fontWeight: 800,
+                    color: '#000',
+                    background: allSubChecked ? GOLD : GOLD_LIGHT,
+                    border: '1.5px solid #000', borderRadius: 4,
+                    padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: 0.5,
+                  }}
+                >{allSubChecked ? '✓ All Done' : 'Check All'}</button>
+                <button
+                  onClick={() => toggleAM('pit')}
+                  style={{
+                    width: 36, height: 36, borderRadius: 6,
+                    border: `2px solid ${form.amChecks?.pit ? GOLD : BORDER}`,
+                    background: form.amChecks?.pit ? GOLD : '#fff',
+                    color: form.amChecks?.pit ? '#fff' : '#ccc',
+                    cursor: 'pointer', fontSize: 17, fontWeight: 900,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}
+                >{form.amChecks?.pit ? '✓' : ''}</button>
+              </div>
+            );
+          }
+          return (
+            <CheckRow
+              key={item.id}
+              item={item}
+              checked={!!(form.amChecks && form.amChecks[item.id])}
+              onToggle={() => toggleAM(item.id)}
+              duration={setup.durations[item.id]}
+              blockColor={GOLD}
+            />
+          );
+        })}
+
+        {/* AM Deviation */}
+        <div style={{ padding: '12px 16px 4px', borderTop: `1px solid ${GOLD_LIGHT}` }}>
+          <label style={lbl}>
+            AM Deviation{' '}
+            <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(optional)</span>
+          </label>
+          <textarea
+            value={form.amDeviation || ''}
+            onChange={e => upd('amDeviation', e.target.value)}
+            rows={2}
+            style={{ ...inp, resize: 'vertical', marginBottom: 14 }}
+            placeholder="Note anything abnormal or items not completed..."
+          />
+        </div>
+
+        {/* AM Lock + Quote */}
+        <div style={{ margin: '8px 0 0', padding: '16px 18px', background: `linear-gradient(135deg, ${GOLD_LIGHT} 0%, #fff 100%)`, border: `1.5px solid ${GOLD}`, borderRadius: 8, textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+            {form.amLocked ? 'AM Block — Locked' : 'AM Block Complete'}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: DARK, fontStyle: 'italic', marginBottom: 12 }}>
+            Foundation set. Move into the day.
+          </div>
+          <button
+            onClick={() => saveForm({ ...form, amLocked: !form.amLocked, amLockedAt: !form.amLocked ? new Date().toISOString() : null })}
+            style={{
+              padding: '8px 20px', borderRadius: 6,
+              border: form.amLocked ? 'none' : '1.5px solid #000',
+              background: form.amLocked ? '#2ecc71' : GOLD_LIGHT,
+              color: form.amLocked ? '#fff' : '#000', fontWeight: 800, fontSize: 12,
+              letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
+            }}
+          >{form.amLocked ? '✓ AM Locked' : 'Lock AM Block'}</button>
+        </div>
+
+        <div style={{ padding: '0 16px 16px' }}>
+          <QuoteBox quote={quote} />
+        </div>
+      </div>
+    </>
+  );
+}
+```

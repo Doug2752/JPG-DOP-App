@@ -8,7 +8,7 @@ export default function PMBlock({
   togglePM, upd, saveForm, complete, saved,
 }) {
   return (
-    <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+    <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
       {/* PM Block header */}
       <div style={{ background: STEEL, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ color: '#fff', fontWeight: 900, fontSize: 15, letterSpacing: 2, textTransform: 'uppercase' }}>PM Block</span>
@@ -123,7 +123,7 @@ export default function PMBlock({
       <div style={{
         margin: '12px 16px 0', padding: '16px 18px',
         background: `linear-gradient(135deg, ${STEEL_LIGHT} 0%, #fff 100%)`,
-        border: `1.5px solid ${STEEL}`, borderRadius: 8, textAlign: 'center',
+        border: `1.5px solid ${STEEL}`, borderRadius: 5, textAlign: 'center',
       }}>
         <div style={{ fontSize: 11, fontWeight: 800, color: STEEL, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
           {form.pmLocked ? 'PM Block — Locked' : 'PM Block Complete'}
@@ -143,7 +143,7 @@ export default function PMBlock({
       </div>
 
       {/* Day Complete + Saved indicator */}
-      <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, padding: '12px 20px', margin: '14px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, padding: '12px 20px', margin: '14px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         {complete ? (
           <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ Day Complete — Well executed.</div>
         ) : (

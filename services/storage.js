@@ -1,17 +1,42 @@
-function getStore() {
-  if (typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function') {
-    return window.storage;
-  }
-  const mem = {};
-  return {
-    get: k => Promise.resolve(mem[k] !== undefined ? { key: k, value: mem[k] } : null),
-    set: (k, v) => { mem[k] = v; return Promise.resolve({ key: k, value: v }); },
-    delete: k => { delete mem[k]; return Promise.resolve({ key: k, deleted: true }); },
-    list: p => {
-      const ks = Object.keys(mem).filter(k => !p || k.startsWith(p));
-      return Promise.resolve({ keys: ks });
-    },
-  };
+function safeParse(v) {
+  try { return JSON.parse(v); } catch (_) { return v; }
 }
 
-export const storage = getStore();
+export const storage = {
+  get: (k) => {
+    try {
+      const v = localStorage.getItem(k);
+      return Promise.resolve(v !== null ? { key: k, value: v } : null);
+    } catch (e) {
+      return Promise.resolve(null);
+    }
+  },
+  set: (k, v) => {
+    try {
+      localStorage.setItem(k, v);
+      return Promise.resolve({ key: k, value: v });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  delete: (k) => {
+    try {
+      localStorage.removeItem(k);
+      return Promise.resolve({ key: k, deleted: true });
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  },
+  list: (prefix) => {
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!prefix || k.startsWith(prefix)) keys.push(k);
+      }
+      return Promise.resolve({ keys });
+    } catch (e) {
+      return Promise.resolve({ keys: [] });
+    }
+  },
+};

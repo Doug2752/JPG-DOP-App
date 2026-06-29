@@ -13,7 +13,7 @@ export default function AMBlock({
       <PITButton />
 
       {/* Morning Evaluation */}
-      <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, padding: '16px 18px', marginBottom: 14, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, padding: '16px 18px', marginBottom: 14, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ fontWeight: 800, fontSize: 12, color: GOLD, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 10 }}>
           Morning Evaluation — How Do I Feel Right Now?
         </div>
@@ -21,7 +21,7 @@ export default function AMBlock({
       </div>
 
       {/* AM Checklist */}
-      <div style={{ background: '#fff', borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ background: GOLD, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ color: '#fff', fontWeight: 900, fontSize: 15, letterSpacing: 2, textTransform: 'uppercase' }}>AM Block</span>
           <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 }}>{amDone} / {allAMRows.length} done</span>
@@ -47,9 +47,9 @@ export default function AMBlock({
                   onClick={toggleAMPitAll}
                   style={{
                     fontSize: 10, fontWeight: 800,
-                    color: allSubChecked ? '#fff' : GOLD,
-                    background: allSubChecked ? GOLD : 'transparent',
-                    border: `1.5px solid ${GOLD}`, borderRadius: 4,
+                    color: '#000',
+                    background: allSubChecked ? GOLD : GOLD_LIGHT,
+                    border: '1.5px solid #000', borderRadius: 4,
                     padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: 0.5,
                   }}
                 >{allSubChecked ? '✓ All Done' : 'Check All'}</button>
@@ -95,7 +95,7 @@ export default function AMBlock({
         </div>
 
         {/* AM Lock + Quote */}
-        <div style={{ margin: '8px 0 0', padding: '16px 18px', background: `linear-gradient(135deg, ${GOLD_LIGHT} 0%, #fff 100%)`, border: `1.5px solid ${GOLD}`, borderRadius: 8, textAlign: 'center' }}>
+        <div style={{ margin: '8px 0 0', padding: '16px 18px', background: `linear-gradient(135deg, ${GOLD_LIGHT} 0%, #fff 100%)`, border: `1.5px solid ${GOLD}`, borderRadius: 5, textAlign: 'center' }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
             {form.amLocked ? 'AM Block — Locked' : 'AM Block Complete'}
           </div>
@@ -105,9 +105,10 @@ export default function AMBlock({
           <button
             onClick={() => saveForm({ ...form, amLocked: !form.amLocked, amLockedAt: !form.amLocked ? new Date().toISOString() : null })}
             style={{
-              padding: '8px 20px', borderRadius: 6, border: 'none',
-              background: form.amLocked ? '#2ecc71' : GOLD,
-              color: '#fff', fontWeight: 800, fontSize: 12,
+              padding: '8px 20px', borderRadius: 6,
+              border: form.amLocked ? 'none' : '1.5px solid #000',
+              background: form.amLocked ? '#2ecc71' : GOLD_LIGHT,
+              color: form.amLocked ? '#fff' : '#000', fontWeight: 800, fontSize: 12,
               letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
             }}
           >{form.amLocked ? '✓ AM Locked' : 'Lock AM Block'}</button>

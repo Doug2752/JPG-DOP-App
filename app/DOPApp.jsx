@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GOLD, DARK, BG } from '../utils/constants';
+import { BG } from '../utils/constants';
 import {
   AM_STANDARD, AM_COMMON, AM_CUSTOM_IDS, AM_SUB_IDS,
   PM_STANDARD, PM_COMMON, PM_CUSTOM_IDS, PM_SUB_IDS,
@@ -16,8 +16,8 @@ import FormInstructionsModal from '../components/FormInstructionsModal';
 import ArchiveView from '../components/ArchiveView';
 import AMBlock from '../components/AMBlock';
 import PMBlock from '../components/PMBlock';
-
-const LOGO_SRC = '/jpglogo.png';
+import Header from '../components/Header';
+import BrandBar from '../components/BrandBar';
 
 function findAMItem(id) {
   return AM_STANDARD.find(i => i.id === id) || AM_COMMON.find(i => i.id === id) || null;
@@ -64,7 +64,9 @@ export default function DOPApp() {
         if (ad && ad.value) setArchiveDates(JSON.parse(ad.value));
         const st = await storage.get(sk + 'streak');
         if (st && st.value) setStreak(parseInt(st.value) || 0);
-      } catch (_) {}
+      } catch (e) {
+        console.error('[DOP] setup-load failed:', e);
+      }
     })();
     loadQuote();
   }, [user]);
@@ -139,8 +141,9 @@ export default function DOPApp() {
   };
 
   async function saveSetup(s) {
-    setSetup(s);
-    try { await storage.set(sk + 'setup', JSON.stringify(s)); } catch (_) {}
+    const stamped = { ...s, lastUpdated: new Date().toISOString() };
+    setSetup(stamped);
+    try { await storage.set(sk + 'setup', JSON.stringify(stamped)); } catch (e) { console.error('[DOP] saveSetup failed:', e); }
     setView('form');
   }
 
@@ -168,16 +171,6 @@ export default function DOPApp() {
   // ─── Login gate ───────────────────────────────────────────────────────────
   if (!user) {
     return <LoginScreen onLogin={u => { setUser(u); setFirstName(u); }} />;
-  }
-
-  // ─── First-time setup gate ─────────────────────────────────────────────────
-  if (!setup.setupComplete) {
-    return <SetupScreen setup={setup} onSave={saveSetup} isFirstTime={true} />;
-  }
-
-  // ─── Setup view ───────────────────────────────────────────────────────────
-  if (view === 'setup') {
-    return <SetupScreen setup={setup} onSave={saveSetup} onCancel={() => setView('form')} isFirstTime={false} />;
   }
 
   // ─── Build ordered row lists ───────────────────────────────────────────────
@@ -237,143 +230,58 @@ export default function DOPApp() {
 
   return (
     <div style={{ minHeight: '100vh', background: BG, fontFamily: 'sans-serif' }} onClick={() => setShowDatePicker(false)}>
-      {showInstructions && (
-        <FormInstructionsModal onClose={() => {
-          setShowInstructions(false);
-          localStorage.setItem('dop_instructions_seen', '1');
-        }} />
-      )}
+      <Header
+        view={view}
+        goToday={goToday}
+        setView={setView}
+        isToday={isToday}
+        setupComplete={setup.setupComplete}
+        streak={streak}
+        firstName={firstName}
+        showInstructions={showInstructions}
+        onInstructions={() => setShowInstructions(true)}
+        onLogout={() => { setUser(null); setFirstName(''); }}
+      />
 
-      {/* Sticky Nav */}
-      <div style={{
-        background: '#111', borderBottom: `2px solid ${GOLD}`, minHeight: 56,
-        display: 'flex', alignItems: 'center', padding: '0 16px',
-        position: 'sticky', top: 0, zIndex: 100, gap: 12,
-      }}>
-        <img src={LOGO_SRC} alt="JPG" style={{ height: 36, width: 'auto', flexShrink: 0 }} />
-
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 1, flexShrink: 0 }}>
-          <span style={{ color: GOLD, fontWeight: 900, fontSize: 22, lineHeight: 1 }}>D</span>
-          <span style={{ color: '#ccc', fontWeight: 600, fontSize: 10, marginRight: 3 }}>aily</span>
-          <span style={{ color: GOLD, fontWeight: 900, fontSize: 22, lineHeight: 1 }}>O</span>
-          <span style={{ color: '#ccc', fontWeight: 600, fontSize: 10, marginRight: 3 }}>perational</span>
-          <span style={{ color: GOLD, fontWeight: 900, fontSize: 22, lineHeight: 1 }}>P</span>
-          <span style={{ color: '#ccc', fontWeight: 600, fontSize: 10 }}>rocess</span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginLeft: 8 }}>
-          {[
-            ['Today', goToday, view === 'form' && isToday],
-            ['Archive', () => setView('archive'), view === 'archive'],
-            ['Setup', () => setView('setup'), view === 'setup'],
-          ].map(([label, onClick, active]) => (
-            <button key={label} onClick={onClick} style={{
-              background: 'transparent', border: 'none',
-              color: active ? GOLD : '#888', fontWeight: 600, fontSize: 12,
-              cursor: 'pointer', padding: '4px 8px',
-            }}>{label}</button>
-          ))}
-          <button
-            onClick={() => setShowInstructions(true)}
-            style={{ background: GOLD, border: 'none', color: '#fff', fontWeight: 700, fontSize: 11, cursor: 'pointer', padding: '3px 8px', borderRadius: 4, marginLeft: 4 }}
-          >Set-Up and Instructions</button>
-        </div>
-
-        <div style={{ marginLeft: 8 }}>
-          <div style={{
-            background: complete ? GOLD : '#2a2a2a',
-            color: complete ? '#fff' : '#888',
-            borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 700, transition: 'all 0.3s',
-          }}>{progressLabel}</div>
-        </div>
-
-        <div style={{ flex: 1 }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {streak > 0 && (
-            <div style={{ background: GOLD, color: '#fff', borderRadius: 12, padding: '2px 10px', fontSize: 11, fontWeight: 700 }}>
-              {streak}🔥
-            </div>
-          )}
-          <span style={{ color: '#aaa', fontSize: 12 }}>{firstName}</span>
-          <button
-            onClick={() => { setUser(null); setFirstName(''); }}
-            style={{ background: 'transparent', border: 'none', color: '#555', fontSize: 11, cursor: 'pointer' }}
-          >Logout</button>
-        </div>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>
+        {showInstructions && (
+          <FormInstructionsModal onClose={() => {
+            setShowInstructions(false);
+            localStorage.setItem('dop_instructions_seen', '1');
+          }} />
+        )}
       </div>
 
+      {/* Setup view — first time or returning via nav */}
+      {(!setup.setupComplete || view === 'setup') && (
+        <SetupScreen
+          setup={setup}
+          onSave={saveSetup}
+          onCancel={setup.setupComplete ? () => setView('form') : undefined}
+          isFirstTime={!setup.setupComplete}
+          form={form}
+          upd={upd}
+          showDatePicker={showDatePicker}
+          setShowDatePicker={setShowDatePicker}
+          goToday={goToday}
+          loadArchive={loadArchive}
+        />
+      )}
+
       {/* Archive view */}
-      {view === 'archive' && <ArchiveView archiveDates={archiveDates} loadArchive={loadArchive} />}
+      {setup.setupComplete && view === 'archive' && <ArchiveView archiveDates={archiveDates} loadArchive={loadArchive} />}
 
       {/* Main form view */}
-      {view === 'form' && (
-        <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 0 60px' }}>
-          {/* Brand bar */}
-          <div style={{ background: '#fff', borderBottom: `1px solid ${GOLD}`, padding: '16px 20px 14px', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <img src={LOGO_SRC} alt="JPG" style={{ height: 76, width: 'auto', flexShrink: 0, display: 'block' }} />
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 2, marginBottom: 8 }}>
-                <span style={{ fontSize: 38, fontWeight: 900, color: '#000', lineHeight: 1 }}>D</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#000', letterSpacing: 0.5, marginRight: 6 }}>aily</span>
-                <span style={{ fontSize: 38, fontWeight: 900, color: '#000', lineHeight: 1 }}>O</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#000', letterSpacing: 0.5, marginRight: 6 }}>perational</span>
-                <span style={{ fontSize: 38, fontWeight: 900, color: '#000', lineHeight: 1 }}>P</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#000', letterSpacing: 0.5 }}>rocess</span>
-              </div>
-
-              {/* Date picker */}
-              <div style={{ position: 'relative', display: 'inline-block', marginTop: 2 }} onClick={e => e.stopPropagation()}>
-                <button
-                  onClick={() => setShowDatePicker(p => !p)}
-                  style={{
-                    background: '#fff', border: `1px solid ${GOLD}`, borderRadius: 5,
-                    padding: '4px 14px', fontSize: 12, fontWeight: 600, color: DARK,
-                    cursor: 'pointer', letterSpacing: 0.3,
-                  }}
-                >
-                  {fmtDate(form.date)}
-                  <span style={{ marginLeft: 8, fontSize: 16, color: GOLD, lineHeight: 1 }}>▾</span>
-                </button>
-                {showDatePicker && (
-                  <div style={{
-                    position: 'absolute', top: '110%', left: '50%', transform: 'translateX(-50%)',
-                    background: '#fff', border: `1px solid ${GOLD}`, borderRadius: 8,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)', padding: 12, zIndex: 200, minWidth: 260,
-                  }}>
-                    <div style={{ fontSize: 11, color: '#888', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                      Jump to date
-                    </div>
-                    <input
-                      type="date"
-                      value={form.date}
-                      max={todayStr()}
-                      onChange={e => {
-                        const newDate = e.target.value;
-                        if (!newDate) return;
-                        setShowDatePicker(false);
-                        if (newDate === todayStr()) goToday(); else loadArchive(newDate);
-                      }}
-                      style={{ width: '100%', padding: '6px 8px', borderRadius: 5, border: `1px solid ${GOLD}`, fontSize: 13, fontFamily: 'sans-serif', boxSizing: 'border-box' }}
-                    />
-                    {archiveDate && (
-                      <button
-                        onClick={() => { setShowDatePicker(false); goToday(); }}
-                        style={{ width: '100%', marginTop: 8, padding: '6px', borderRadius: 5, border: `1px solid ${GOLD}`, background: '#fff', color: DARK, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-                      >Back to Today</button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Never Twice */}
-              <div style={{ marginTop: 8, border: `1.5px solid ${GOLD}`, borderRadius: 5, padding: '3px 12px', display: 'inline-block' }}>
-                <span style={{ fontWeight: 800, fontSize: 11, color: DARK }}>Never Twice</span>
-                <span style={{ fontSize: 9, color: GOLD, marginLeft: 8 }}>Miss one — never miss the second.</span>
-              </div>
-            </div>
-            <div style={{ width: 72, flexShrink: 0 }} />
-          </div>
+      {setup.setupComplete && view === 'form' && (
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 0 60px' }}>
+          <BrandBar
+            form={form}
+            upd={upd}
+            showDatePicker={showDatePicker}
+            setShowDatePicker={setShowDatePicker}
+            goToday={goToday}
+            loadArchive={loadArchive}
+          />
 
           {/* Archive banner */}
           {!isToday && (

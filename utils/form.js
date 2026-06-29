@@ -49,6 +49,7 @@ export function emptyForm(date) {
     pmDeviation: '',
     tomorrowOneThing: '',
     tomorrowAppts: '',
+    neverTwiceRead: false,
   };
 }
 

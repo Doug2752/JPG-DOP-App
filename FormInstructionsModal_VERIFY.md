@@ -1,3 +1,4 @@
+```jsx
 import React from 'react';
 import { GOLD, DARK, MID } from '../utils/constants';
 
@@ -11,15 +12,6 @@ const SECTIONS = [
   { h: 'PM PIT', b: 'PM PIT is your nightly investment in self-awareness. Log your Day Evaluation score, note what went well, and note what to improve. This closes the loop on the day — honest, brief, and consistent.' },
   { h: "Tomorrow's Priorities", b: "Lock in your One Thing for tomorrow before you close the day. This single action — written the night before — is one of the most effective performance habits you can build. The appointments section is optional and supplementary." },
   { h: 'Never Twice', b: 'Miss one day — never miss the second. One missed day is an interruption. Two is a pattern.' },
-  { h: 'AM Required Items', b: 'PIT is required and cannot be removed. All sub-categories are locked: Thankful For, To Accomplish, N-I-T, Daily Devotional, and Daily Book Study.' },
-  { h: 'AM Common Life Tasks', b: 'These are optional items that many people include in their morning routine. Recommended items are pre-selected. Toggle any on or off.' },
-  { h: 'Custom AM Items', b: 'Write up to 5 of your own AM checklist items. Type a name — it will appear in your daily checklist.' },
-  { h: 'Reorder AM Items', b: 'Arrange your selected AM items in the exact order you complete them each morning. Use the arrows to move items up or down.' },
-  { h: 'PM Required Items', b: 'PM PIT, Prep for Tomorrow, and Evening Meal are required. PM PIT is your nightly close-out — brief, honest, and consistent.' },
-  { h: 'PM Common Life Tasks', b: 'Select evening tasks that apply to your personal routine.' },
-  { h: 'Custom PM Items', b: 'Write up to 5 of your own PM checklist items.' },
-  { h: 'Reorder PM Items', b: 'Arrange your selected PM items in the order you complete them each evening.' },
-  { h: 'Target Bedtime', b: 'Set your target bedtime once. It will appear on your Bed item each day as your personal standard.' },
 ];
 
 export default function FormInstructionsModal({ onClose }) {
@@ -63,3 +55,4 @@ export default function FormInstructionsModal({ onClose }) {
     </div>
   );
 }
+```

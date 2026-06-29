@@ -1,5 +1,57 @@
+# DOP App Overview
+
+---
+
+## 1. Complete File Tree
+
+Generated with: `find . -not -path '*/.git/*' -not -path '*/node_modules/*' -not -path '*/dist/*'`  
+(`node_modules/` and `dist/` are excluded — generated/third-party content; both folders exist at project root)
+
+```
+C:\JPG-PROJECTS\JPG-DOP-App
+├── .git/
+├── .gitignore
+├── JPG-DOP-App-main/
+│   └── JPG DOP v13 — Daily Operational Process.html
+├── app/
+│   └── DOPApp.jsx
+├── components/
+│   ├── AMBlock.jsx
+│   ├── ArchiveView.jsx
+│   ├── FormInstructionsModal.jsx
+│   ├── LoginScreen.jsx
+│   ├── PMBlock.jsx
+│   ├── ReorderPanel.jsx
+│   ├── SetupInstructions.jsx
+│   ├── SetupRow.jsx
+│   ├── SetupScreen.jsx
+│   ├── Shared.jsx
+│   └── styles.js
+├── dist/                          (built output — not expanded)
+├── node_modules/                  (dependencies — not expanded)
+├── public/
+│   └── jpglogo.png
+├── services/
+│   ├── ai.js
+│   └── storage.js
+├── utils/
+│   ├── constants.js
+│   ├── date.js
+│   └── form.js
+├── index.html
+├── main.jsx
+├── package-lock.json
+├── package.json
+└── vite.config.js
+```
+
+---
+
+## 2. utils/constants.js — Complete Verbatim Contents
+
+```js
 export const GOLD = '#B8860B';
-export const GOLD_LIGHT = '#ddb94a';
+export const GOLD_LIGHT = '#f5e6c8';
 export const STEEL = '#2C4A6B';
 export const STEEL_LIGHT = '#d0dceb';
 export const STEEL_MID = '#1f3a5a';
@@ -12,6 +64,11 @@ export const BG = '#f8f8f6';
 export const BORDER = '#d0c8b8';
 
 export const PIT_URL = 'PASTE_PIT_APP_URL_HERE';
+
+export const USERS = {
+  Doug: { password: 'jpg2026', firstName: 'Doug' },
+  Test: { password: 'test123', firstName: 'Test' },
+};
 
 export const BACKUP_QUOTES = [
   { text: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.', author: 'Aristotle' },
@@ -154,3 +211,79 @@ export const PM_CUSTOM_IDS = ['pm_c1', 'pm_c2', 'pm_c3', 'pm_c4', 'pm_c5'];
 export const AM_DEFAULT_RECOMMENDED = ['am_fitness', 'personal_prep', 'breakfast', 'make_bed'];
 export const PM_DEFAULT_COMMON = ['pm_fitness', 'pm_read', 'pm_bed', 'pm_lights_out'];
 export const PM_DEFAULT_TOP = ['prep_tomorrow', 'evening_meal', 'pm_pit'];
+```
+
+---
+
+## 3. utils/form.js — Complete Verbatim Contents
+
+```js
+import {
+  AM_STANDARD, AM_COMMON, AM_CUSTOM_IDS,
+  PM_STANDARD, PM_COMMON, PM_CUSTOM_IDS,
+  AM_DEFAULT_RECOMMENDED, PM_DEFAULT_COMMON, PM_DEFAULT_TOP,
+} from './constants';
+import { todayStr } from './date';
+
+export function defaultCustomLabels(ids) {
+  const obj = {};
+  ids.forEach(id => { obj[id] = ''; });
+  return obj;
+}
+
+export function defaultDurations() {
+  const d = {};
+  [...AM_STANDARD, ...AM_COMMON].forEach(i => { d[i.id] = ''; });
+  AM_CUSTOM_IDS.forEach(id => { d[id] = ''; });
+  [...PM_STANDARD, ...PM_COMMON].forEach(i => { d[i.id] = ''; });
+  PM_CUSTOM_IDS.forEach(id => { d[id] = ''; });
+  return d;
+}
+
+export function defaultSetup() {
+  return {
+    amSelected: AM_STANDARD.map(i => i.id),
+    amCommonSelected: AM_DEFAULT_RECOMMENDED.slice(),
+    amOrder: ['pit', ...AM_DEFAULT_RECOMMENDED],
+    pmSelected: PM_STANDARD.map(i => i.id),
+    pmCommonSelected: PM_DEFAULT_COMMON.slice(),
+    pmOrder: [...PM_DEFAULT_TOP, ...PM_DEFAULT_COMMON],
+    amCustomLabels: defaultCustomLabels(AM_CUSTOM_IDS),
+    pmCustomLabels: defaultCustomLabels(PM_CUSTOM_IDS),
+    durations: defaultDurations(),
+    bedtime: '9:00 PM',
+    setupComplete: false,
+  };
+}
+
+export function emptyForm(date) {
+  return {
+    date: date || todayStr(),
+    morningEval: null,
+    eveningEval: null,
+    amChecks: {},
+    pmChecks: {},
+    pmGood: '',
+    pmBad: '',
+    amDeviation: '',
+    pmDeviation: '',
+    tomorrowOneThing: '',
+    tomorrowAppts: '',
+  };
+}
+
+export function isDayComplete(form) {
+  if (!form) return false;
+  if (form.morningEval === null || form.eveningEval === null) return false;
+  const amChecked = form.amChecks && Object.values(form.amChecks).some(v => v);
+  if (!amChecked) return false;
+  const pmChecked = form.pmChecks && Object.values(form.pmChecks).some(v => v);
+  const pmTextFilled = (form.pmGood && form.pmGood.trim().length > 0) || (form.pmBad && form.pmBad.trim().length > 0);
+  return !!(pmChecked || pmTextFilled);
+}
+
+export function getDailyQuote(quotes) {
+  const day = Math.floor(Date.now() / 86400000);
+  return quotes[day % quotes.length];
+}
+```

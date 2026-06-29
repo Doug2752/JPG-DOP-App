@@ -38,9 +38,10 @@ export default function SetupRow({
         )}
       </div>
       <input
-        type="text"
+        type="number"
+        min="0"
         value={duration || ''}
-        onChange={e => onDurChange && onDurChange(e.target.value)}
+        onChange={e => onDurChange && onDurChange(e.target.value === '' ? '' : Number(e.target.value))}
         placeholder="min"
         style={{
           width: 54, padding: '5px 6px', borderRadius: 4, border: `1px solid ${BORDER}`,

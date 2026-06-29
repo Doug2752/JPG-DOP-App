@@ -4,8 +4,8 @@ import { fmtDate } from '../utils/date';
 
 export default function ArchiveView({ archiveDates, loadArchive }) {
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto', padding: '16px 16px 60px' }}>
-      <div style={{ background: '#fff', borderRadius: 8, padding: '18px 20px', border: `1px solid ${BORDER}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
+      <div style={{ background: '#fff', borderRadius: 5, padding: '18px 20px', border: `1px solid ${BORDER}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ fontWeight: 800, fontSize: 13, color: DARK, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 14 }}>
           Archive — Last 30 Days
         </div>
