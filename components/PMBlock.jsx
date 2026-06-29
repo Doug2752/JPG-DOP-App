@@ -70,38 +70,40 @@ export default function PMBlock({
       })}
 
       {/* Tomorrow's Priorities */}
-      <div style={{ background: '#1a1a1a', padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
-        <div style={{ color: RED, fontWeight: 900, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }}>
-          Tomorrow's Priorities
+      <div style={{ borderRadius: 5, overflow: 'hidden', marginBottom: 14 }}>
+        <div style={{ background: '#1a1a1a', padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
+          <div style={{ color: RED, fontWeight: 900, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }}>
+            Tomorrow's Priorities
+          </div>
         </div>
-      </div>
-      <div style={{ padding: '14px 16px', background: RED_LIGHT, borderBottom: `2px solid ${RED}` }}>
-        <label style={{ ...lbl, color: RED, marginBottom: 6 }}>Tomorrow's One Thing</label>
-        <input
-          type="text"
-          value={form.tomorrowOneThing || ''}
-          onChange={e => upd('tomorrowOneThing', e.target.value)}
-          style={{ ...inp, border: `2px solid ${RED}`, background: '#fff' }}
-          placeholder="The single most important action tomorrow..."
-        />
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: `1px solid ${BORDER}` }}>
-        <div style={{ flex: 1, height: 1, background: BORDER }} />
-        <span style={{ fontSize: 10, fontWeight: 800, color: '#bbb', letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Optional</span>
-        <div style={{ flex: 1, height: 1, background: BORDER }} />
-      </div>
-      <div style={{ padding: '4px 16px 14px' }}>
-        <label style={lbl}>
-          Tomorrow's Appointments & Must-Do's{' '}
-          <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(also in PIT)</span>
-        </label>
-        <textarea
-          value={form.tomorrowAppts || ''}
-          onChange={e => upd('tomorrowAppts', e.target.value)}
-          rows={3}
-          style={{ ...inp, resize: 'vertical', marginBottom: 12 }}
-          placeholder="Key appointments and tasks for tomorrow..."
-        />
+        <div style={{ padding: '14px 16px', background: RED_LIGHT, borderBottom: `2px solid ${RED}`, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+          <label style={{ ...lbl, color: RED, marginBottom: 6 }}>Tomorrow's One Thing</label>
+          <input
+            type="text"
+            value={form.tomorrowOneThing || ''}
+            onChange={e => upd('tomorrowOneThing', e.target.value)}
+            style={{ ...inp, border: `2px solid ${RED}`, background: '#fff' }}
+            placeholder="The single most important action tomorrow..."
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: `1px solid ${BORDER}` }}>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
+          <span style={{ fontSize: 10, fontWeight: 800, color: '#bbb', letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Optional</span>
+          <div style={{ flex: 1, height: 1, background: BORDER }} />
+        </div>
+        <div style={{ padding: '4px 16px 14px' }}>
+          <label style={lbl}>
+            Tomorrow's Appointments & Must-Do's{' '}
+            <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(also in PIT)</span>
+          </label>
+          <textarea
+            value={form.tomorrowAppts || ''}
+            onChange={e => upd('tomorrowAppts', e.target.value)}
+            rows={3}
+            style={{ ...inp, resize: 'vertical', marginBottom: 12 }}
+            placeholder="Key appointments and tasks for tomorrow..."
+          />
+        </div>
       </div>
 
       {/* PM Deviation */}
