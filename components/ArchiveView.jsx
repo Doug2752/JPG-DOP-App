@@ -1,8 +1,9 @@
 import React from 'react';
 import { GOLD, DARK, BORDER, BG } from '../utils/constants';
 import { fmtDate } from '../utils/date';
+import FormInstructionsModal from './FormInstructionsModal';
 
-export default function ArchiveView({ archiveDates, loadArchive }) {
+export default function ArchiveView({ archiveDates, loadArchive, showInstructions, onCloseInstructions }) {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 16px 60px' }}>
       <div style={{ background: '#fff', borderRadius: 5, padding: '18px 20px', border: `1px solid ${BORDER}`, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -32,6 +33,11 @@ export default function ArchiveView({ archiveDates, loadArchive }) {
             ))
         )}
       </div>
+      {showInstructions && (
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>
+          <FormInstructionsModal onClose={onCloseInstructions} />
+        </div>
+      )}
     </div>
   );
 }

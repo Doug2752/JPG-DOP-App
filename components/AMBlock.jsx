@@ -3,14 +3,22 @@ import { GOLD, GOLD_LIGHT, DARK, BORDER } from '../utils/constants';
 import { AM_SUB_IDS } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, QuoteBox, TapScore } from './Shared';
+import FormInstructionsModal from './FormInstructionsModal';
 
 export default function AMBlock({
   form, setup, allAMRows, amDone,
   toggleAM, toggleAMPitAll, upd, saveForm, quote,
+  showInstructions, onCloseInstructions,
 }) {
   return (
     <>
       <PITButton />
+
+      {showInstructions && (
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>
+          <FormInstructionsModal onClose={onCloseInstructions} />
+        </div>
+      )}
 
       {/* Morning Evaluation */}
       <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, padding: '16px 18px', marginBottom: 14, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>

@@ -46,7 +46,7 @@ export default function Header({
         <button
           style={{ padding: '6px 14px', borderRadius: 5, border: `1.5px solid ${GOLD}`, background: 'transparent', color: GOLD, fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.5, whiteSpace: 'nowrap' }}
           onClick={onInstructions}
-        >{showInstructions ? 'Close Help' : 'Set-Up and Instructions'}</button>
+        >{showInstructions ? 'Close Set-Up and Instructions' : 'Set-Up and Instructions'}</button>
         <span style={{ color: '#aaa', fontSize: 12 }}>{firstName}</span>
         <button
           style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 12 }}

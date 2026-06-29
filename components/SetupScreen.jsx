@@ -6,6 +6,7 @@ import { ColumnHeader, SectionDivider, RecommendedBadge } from './Shared';
 import SetupRow from './SetupRow';
 import ReorderPanel from './ReorderPanel';
 import BrandBar from './BrandBar';
+import FormInstructionsModal from './FormInstructionsModal';
 
 function findAMItem(id) {
   return AM_STANDARD.find(i => i.id === id) || AM_COMMON.find(i => i.id === id) || null;
@@ -23,7 +24,7 @@ function SH({ color, label, sub }) {
   );
 }
 
-export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form, upd, showDatePicker, setShowDatePicker, goToday, loadArchive }) {
+export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form, upd, showDatePicker, setShowDatePicker, goToday, loadArchive, showInstructions, onCloseInstructions }) {
   const [local, setLocal] = useState(JSON.parse(JSON.stringify(setup)));
 
   const setDur = (id, val) => setLocal(p => ({ ...p, durations: { ...p.durations, [id]: val } }));
@@ -116,6 +117,12 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form
               />
             </div>
           </div>
+
+          {showInstructions && (
+            <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>
+              <FormInstructionsModal onClose={onCloseInstructions} />
+            </div>
+          )}
 
           {/* AM Required */}
           <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>

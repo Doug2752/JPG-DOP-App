@@ -239,18 +239,9 @@ export default function DOPApp() {
         streak={streak}
         firstName={firstName}
         showInstructions={showInstructions}
-        onInstructions={() => setShowInstructions(true)}
+        onInstructions={() => setShowInstructions(prev => !prev)}
         onLogout={() => { setUser(null); setFirstName(''); }}
       />
-
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>
-        {showInstructions && (
-          <FormInstructionsModal onClose={() => {
-            setShowInstructions(false);
-            localStorage.setItem('dop_instructions_seen', '1');
-          }} />
-        )}
-      </div>
 
       {/* Setup view — first time or returning via nav */}
       {(!setup.setupComplete || view === 'setup') && (
@@ -265,11 +256,26 @@ export default function DOPApp() {
           setShowDatePicker={setShowDatePicker}
           goToday={goToday}
           loadArchive={loadArchive}
+          showInstructions={showInstructions}
+          onCloseInstructions={() => {
+            setShowInstructions(false);
+            localStorage.setItem('dop_instructions_seen', '1');
+          }}
         />
       )}
 
       {/* Archive view */}
-      {setup.setupComplete && view === 'archive' && <ArchiveView archiveDates={archiveDates} loadArchive={loadArchive} />}
+      {setup.setupComplete && view === 'archive' && (
+        <ArchiveView
+          archiveDates={archiveDates}
+          loadArchive={loadArchive}
+          showInstructions={showInstructions}
+          onCloseInstructions={() => {
+            setShowInstructions(false);
+            localStorage.setItem('dop_instructions_seen', '1');
+          }}
+        />
+      )}
 
       {/* Main form view */}
       {setup.setupComplete && view === 'form' && (
@@ -302,6 +308,11 @@ export default function DOPApp() {
               upd={upd}
               saveForm={saveForm}
               quote={quote}
+              showInstructions={showInstructions}
+              onCloseInstructions={() => {
+                setShowInstructions(false);
+                localStorage.setItem('dop_instructions_seen', '1');
+              }}
             />
             <PMBlock
               form={form}
