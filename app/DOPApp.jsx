@@ -217,7 +217,7 @@ export default function DOPApp() {
     const inStd = setup.pmSelected?.includes(id);
     const inCom = (setup.pmCommonSelected || []).includes(id);
     if (inStd || inCom || item.locked) {
-      if (id === 'pm_bed') allPMRows.push({ ...item, desc: 'Target: ' + (setup.bedtime || '9:00 PM') });
+      if (id === 'pm_bed') allPMRows.push({ ...item, desc: 'Target: ' + (setup.bedtime || '9:00 PM') + '  ·  Can be checked off in advance, before bedtime actually happens.' });
       else allPMRows.push(item);
     }
   });

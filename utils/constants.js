@@ -132,7 +132,7 @@ export const PM_COMMON = [
   { id: 'pm_fitness', label: 'PM Fitness', desc: 'Evening Workout — Home or Gym' },
   { id: 'pm_read', label: 'Read / Study / Learning', desc: 'Books, course material, certification, skill development' },
   { id: 'pm_bed', label: 'Bed', desc: '' },
-  { id: 'pm_lights_out', label: 'Lights Out', desc: '' },
+  { id: 'pm_lights_out', label: 'Lights Out', desc: 'Can be checked off in advance, before bedtime actually happens.' },
   { id: 'pm_pet_care', label: 'Pet Care', desc: 'Evening walk, feeding, medication' },
   { id: 'pm_children_hw', label: "Children's Homework / School Help", desc: 'Review assignments, school prep for tomorrow' },
   { id: 'pm_family_time', label: 'Family Time', desc: 'Deliberate, present time with spouse or children' },
