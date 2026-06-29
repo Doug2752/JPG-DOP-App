@@ -95,11 +95,11 @@ export default function AMBlock({
         </div>
 
         {/* AM Lock + Quote */}
-        <div style={{ margin: '8px 0 0', padding: '16px 18px', background: `linear-gradient(135deg, ${GOLD_LIGHT} 0%, #fff 100%)`, border: `1.5px solid ${GOLD}`, borderRadius: 5, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+        <div style={{ margin: '8px 0 0', padding: '16px 18px', background: GOLD, border: `1.5px solid ${GOLD}`, borderRadius: 5, textAlign: 'center' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#000', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
             {form.amLocked ? 'AM Block — Locked' : 'AM Block Complete'}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: DARK, fontStyle: 'italic', marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#000', fontStyle: 'italic', marginBottom: 12 }}>
             Foundation set. Move into the day.
           </div>
           <button
@@ -114,7 +114,7 @@ export default function AMBlock({
           >{form.amLocked ? '✓ AM Locked' : 'Lock AM Block'}</button>
         </div>
 
-        <div style={{ padding: '0 16px 16px' }}>
+        <div style={{ padding: '0 0 16px', marginTop: 16 }}>
           <QuoteBox quote={quote} />
         </div>
       </div>

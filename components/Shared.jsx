@@ -106,7 +106,7 @@ export function QuoteBox({ quote }) {
   return (
     <div style={{
       background: '#1a1a1a', borderRadius: 5, padding: '16px 20px',
-      border: `1px solid ${GOLD}`, textAlign: 'center',
+      border: `1px solid ${GOLD}`, textAlign: 'center', width: '100%',
     }}>
       <div style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>
         Today's Takeaway
