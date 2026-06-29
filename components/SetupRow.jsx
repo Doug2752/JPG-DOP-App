@@ -8,6 +8,7 @@ export default function SetupRow({
   duration, onDurChange,
   labelVal, onLabelChange,
   lightColor, isLocked, showBadge,
+  onRemove,
 }) {
   const bg = lightColor || GOLD_LIGHT;
   return (
@@ -58,6 +59,16 @@ export default function SetupRow({
           accentColor: GOLD, flexShrink: 0, marginLeft: 8,
         }}
       />
+      {onRemove && (
+        <button
+          onClick={onRemove}
+          style={{
+            background: 'none', border: 'none', color: '#c0392b',
+            fontSize: 11, fontWeight: 700, cursor: 'pointer',
+            padding: '0 2px', letterSpacing: 0.3, whiteSpace: 'nowrap',
+          }}
+        >Remove</button>
+      )}
     </div>
   );
 }

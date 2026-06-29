@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BG } from '../utils/constants';
 import {
-  AM_STANDARD, AM_COMMON, AM_CUSTOM_IDS, AM_SUB_IDS,
-  PM_STANDARD, PM_COMMON, PM_CUSTOM_IDS, PM_SUB_IDS,
+  AM_STANDARD, AM_COMMON, AM_SUB_IDS,
+  PM_STANDARD, PM_COMMON, PM_SUB_IDS,
   BACKUP_QUOTES,
 } from '../utils/constants';
 import { todayStr, fmtDate } from '../utils/date';
-import { emptyForm, defaultSetup, isDayComplete, getDailyQuote } from '../utils/form';
+import { emptyForm, defaultSetup, isDayComplete, getDailyQuote, migrateSetup } from '../utils/form';
 import { storage } from '../services/storage';
 import { fetchDailyQuote } from '../services/ai';
 
@@ -56,7 +56,7 @@ export default function DOPApp() {
     (async () => {
       try {
         const sv = await storage.get(sk + 'setup');
-        if (sv && sv.value) setSetup(JSON.parse(sv.value));
+        if (sv && sv.value) setSetup(migrateSetup(JSON.parse(sv.value)));
         const today = todayStr();
         const fd = await storage.get(sk + 'form_' + today);
         if (fd && fd.value) setForm(JSON.parse(fd.value)); else setForm(emptyForm(today));
@@ -187,7 +187,8 @@ export default function DOPApp() {
     }
     const item = findAMItem(id);
     if (!item) {
-      const label = setup.amCustomLabels?.[id];
+      const ci = (setup.amCustomItems || []).find(i => i.id === id);
+      const label = ci ? ci.label : null;
       if (label && label.trim()) allAMRows.push({ id, label, sub: false });
       return;
     }
@@ -208,7 +209,8 @@ export default function DOPApp() {
     }
     const item = findPMItem(id);
     if (!item) {
-      const label = setup.pmCustomLabels?.[id];
+      const ci = (setup.pmCustomItems || []).find(i => i.id === id);
+      const label = ci ? ci.label : null;
       if (label && label.trim()) allPMRows.push({ id, label, sub: false });
       return;
     }

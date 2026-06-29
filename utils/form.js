@@ -1,22 +1,14 @@
 import {
-  AM_STANDARD, AM_COMMON, AM_CUSTOM_IDS,
-  PM_STANDARD, PM_COMMON, PM_CUSTOM_IDS,
+  AM_STANDARD, AM_COMMON,
+  PM_STANDARD, PM_COMMON,
   AM_DEFAULT_RECOMMENDED, PM_DEFAULT_COMMON, PM_DEFAULT_TOP,
 } from './constants';
 import { todayStr } from './date';
 
-export function defaultCustomLabels(ids) {
-  const obj = {};
-  ids.forEach(id => { obj[id] = ''; });
-  return obj;
-}
-
 export function defaultDurations() {
   const d = {};
   [...AM_STANDARD, ...AM_COMMON].forEach(i => { d[i.id] = ''; });
-  AM_CUSTOM_IDS.forEach(id => { d[id] = ''; });
   [...PM_STANDARD, ...PM_COMMON].forEach(i => { d[i.id] = ''; });
-  PM_CUSTOM_IDS.forEach(id => { d[id] = ''; });
   return d;
 }
 
@@ -28,12 +20,45 @@ export function defaultSetup() {
     pmSelected: PM_STANDARD.map(i => i.id),
     pmCommonSelected: PM_DEFAULT_COMMON.slice(),
     pmOrder: [...PM_DEFAULT_TOP, ...PM_DEFAULT_COMMON],
-    amCustomLabels: defaultCustomLabels(AM_CUSTOM_IDS),
-    pmCustomLabels: defaultCustomLabels(PM_CUSTOM_IDS),
+    amCustomItems: [{ id: 'am_c_0', label: '' }],
+    pmCustomItems: [{ id: 'pm_c_0', label: '' }],
     durations: defaultDurations(),
     bedtime: '9:00 PM',
     setupComplete: false,
   };
+}
+
+const OLD_AM_IDS = ['am_c1', 'am_c2', 'am_c3', 'am_c4', 'am_c5'];
+const OLD_PM_IDS = ['pm_c1', 'pm_c2', 'pm_c3', 'pm_c4', 'pm_c5'];
+
+export function migrateSetup(saved) {
+  if (saved.amCustomItems && saved.pmCustomItems) return saved;
+
+  const oldAMLabels = saved.amCustomLabels || {};
+  const amItems = [];
+  let ai = 0;
+  OLD_AM_IDS.forEach(oldId => {
+    const label = (oldAMLabels[oldId] || '').trim();
+    if (label) amItems.push({ id: 'am_c_' + ai++, label });
+  });
+  if (amItems.length === 0) amItems.push({ id: 'am_c_0', label: '' });
+
+  const oldPMLabels = saved.pmCustomLabels || {};
+  const pmItems = [];
+  let pi = 0;
+  OLD_PM_IDS.forEach(oldId => {
+    const label = (oldPMLabels[oldId] || '').trim();
+    if (label) pmItems.push({ id: 'pm_c_' + pi++, label });
+  });
+  if (pmItems.length === 0) pmItems.push({ id: 'pm_c_0', label: '' });
+
+  const amOrder = (saved.amOrder || []).filter(id => !OLD_AM_IDS.includes(id));
+  amItems.filter(i => i.label).forEach(i => { if (!amOrder.includes(i.id)) amOrder.push(i.id); });
+
+  const pmOrder = (saved.pmOrder || []).filter(id => !OLD_PM_IDS.includes(id));
+  pmItems.filter(i => i.label).forEach(i => { if (!pmOrder.includes(i.id)) pmOrder.push(i.id); });
+
+  return { ...saved, amCustomItems: amItems, pmCustomItems: pmItems, amOrder, pmOrder };
 }
 
 export function emptyForm(date) {

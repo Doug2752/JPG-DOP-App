@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { GOLD, GOLD_LIGHT, STEEL, STEEL_LIGHT, STEEL_MID, STEEL_DARK, BORDER, DARK, MID } from '../utils/constants';
-import { AM_STANDARD, AM_COMMON, AM_CUSTOM_IDS, PM_STANDARD, PM_COMMON, PM_CUSTOM_IDS } from '../utils/constants';
-import { inp } from './styles';
-import { ColumnHeader, SectionDivider, RecommendedBadge } from './Shared';
+import { AM_STANDARD, AM_COMMON, PM_STANDARD, PM_COMMON } from '../utils/constants';
+import { inp, gbtn } from './styles';
+import { ColumnHeader } from './Shared';
 import SetupRow from './SetupRow';
 import ReorderPanel from './ReorderPanel';
 import BrandBar from './BrandBar';
@@ -29,19 +29,35 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form
 
   const setDur = (id, val) => setLocal(p => ({ ...p, durations: { ...p.durations, [id]: val } }));
   const setAMCust = (id, val) => setLocal(p => {
-    const labels = { ...p.amCustomLabels, [id]: val };
+    const items = p.amCustomItems.map(i => i.id === id ? { ...i, label: val } : i);
     const order = p.amOrder.slice();
     if (val.trim() && !order.includes(id)) order.push(id);
     if (!val.trim()) { const oi = order.indexOf(id); if (oi >= 0) order.splice(oi, 1); }
-    return { ...p, amCustomLabels: labels, amOrder: order };
+    return { ...p, amCustomItems: items, amOrder: order };
   });
   const setPMCust = (id, val) => setLocal(p => {
-    const labels = { ...p.pmCustomLabels, [id]: val };
+    const items = p.pmCustomItems.map(i => i.id === id ? { ...i, label: val } : i);
     const order = p.pmOrder.slice();
     if (val.trim() && !order.includes(id)) order.push(id);
     if (!val.trim()) { const oi = order.indexOf(id); if (oi >= 0) order.splice(oi, 1); }
-    return { ...p, pmCustomLabels: labels, pmOrder: order };
+    return { ...p, pmCustomItems: items, pmOrder: order };
   });
+  const addAMCustom = () => setLocal(p => ({
+    ...p, amCustomItems: [...p.amCustomItems, { id: 'am_custom_' + Date.now(), label: '' }],
+  }));
+  const addPMCustom = () => setLocal(p => ({
+    ...p, pmCustomItems: [...p.pmCustomItems, { id: 'pm_custom_' + Date.now(), label: '' }],
+  }));
+  const removeAMCustom = id => setLocal(p => ({
+    ...p,
+    amCustomItems: p.amCustomItems.filter(i => i.id !== id),
+    amOrder: p.amOrder.filter(oid => oid !== id),
+  }));
+  const removePMCustom = id => setLocal(p => ({
+    ...p,
+    pmCustomItems: p.pmCustomItems.filter(i => i.id !== id),
+    pmOrder: p.pmOrder.filter(oid => oid !== id),
+  }));
   const toggleAMCommon = id => setLocal(p => {
     const sel = p.amCommonSelected.slice();
     const order = p.amOrder.slice();
@@ -146,22 +162,33 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form
                 duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
                 lightColor={GOLD_LIGHT} showBadge={!!item.recommended} />
             ))}
-            <SectionDivider label="Write Your Own — Custom AM Items" />
-            {AM_CUSTOM_IDS.map(id => {
-              const hasLabel = !!(local.amCustomLabels[id] && local.amCustomLabels[id].trim());
+            <div style={{
+              background: '#f5f5f5', borderTop: `1px solid ${BORDER}`,
+              borderBottom: `1px solid ${BORDER}`, padding: '7px 14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                Write Your Own — Custom AM Items
+              </span>
+              <button onClick={addAMCustom} style={gbtn({ padding: '3px 10px', fontSize: 10 })}>+ Add</button>
+            </div>
+            {local.amCustomItems.map((item, idx) => {
+              const hasLabel = !!(item.label && item.label.trim());
               return (
-                <SetupRow key={id} item={{ id, label: '', desc: '', sub: false }}
-                  checked={hasLabel} onToggle={() => { if (hasLabel) setAMCust(id, ''); }}
-                  duration={local.durations[id]} onDurChange={v => setDur(id, v)}
-                  labelVal={local.amCustomLabels[id]} onLabelChange={v => setAMCust(id, v)}
-                  lightColor="#f0f0f0" />
+                <SetupRow key={item.id} item={{ id: item.id, label: '', desc: '', sub: false }}
+                  checked={hasLabel} onToggle={() => { if (hasLabel) setAMCust(item.id, ''); }}
+                  duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
+                  labelVal={item.label} onLabelChange={v => setAMCust(item.id, v)}
+                  lightColor="#f0f0f0"
+                  onRemove={idx > 0 ? () => removeAMCustom(item.id) : null} />
               );
             })}
           </div>
 
           <ReorderPanel
             order={local.amOrder} findItem={findAMItem}
-            customLabels={local.amCustomLabels} customIds={AM_CUSTOM_IDS}
+            customLabels={Object.fromEntries(local.amCustomItems.map(i => [i.id, i.label]))}
+            customIds={local.amCustomItems.map(i => i.id)}
             onMove={moveAM} color={GOLD}
             title="Reorder AM Items — Match Your Morning Routine"
           />
@@ -193,22 +220,33 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form
                 duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
                 lightColor={STEEL_LIGHT} />
             ))}
-            <SectionDivider label="Write Your Own — Custom PM Items" />
-            {PM_CUSTOM_IDS.map(id => {
-              const hasLabel = !!(local.pmCustomLabels[id] && local.pmCustomLabels[id].trim());
+            <div style={{
+              background: '#f5f5f5', borderTop: `1px solid ${BORDER}`,
+              borderBottom: `1px solid ${BORDER}`, padding: '7px 14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+                Write Your Own — Custom PM Items
+              </span>
+              <button onClick={addPMCustom} style={gbtn({ padding: '3px 10px', fontSize: 10 })}>+ Add</button>
+            </div>
+            {local.pmCustomItems.map((item, idx) => {
+              const hasLabel = !!(item.label && item.label.trim());
               return (
-                <SetupRow key={id} item={{ id, label: '', desc: '', sub: false }}
-                  checked={hasLabel} onToggle={() => { if (hasLabel) setPMCust(id, ''); }}
-                  duration={local.durations[id]} onDurChange={v => setDur(id, v)}
-                  labelVal={local.pmCustomLabels[id]} onLabelChange={v => setPMCust(id, v)}
-                  lightColor="#eef3f8" />
+                <SetupRow key={item.id} item={{ id: item.id, label: '', desc: '', sub: false }}
+                  checked={hasLabel} onToggle={() => { if (hasLabel) setPMCust(item.id, ''); }}
+                  duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
+                  labelVal={item.label} onLabelChange={v => setPMCust(item.id, v)}
+                  lightColor="#eef3f8"
+                  onRemove={idx > 0 ? () => removePMCustom(item.id) : null} />
               );
             })}
           </div>
 
           <ReorderPanel
             order={local.pmOrder} findItem={findPMItem}
-            customLabels={local.pmCustomLabels} customIds={PM_CUSTOM_IDS}
+            customLabels={Object.fromEntries(local.pmCustomItems.map(i => [i.id, i.label]))}
+            customIds={local.pmCustomItems.map(i => i.id)}
             onMove={movePM} color={STEEL_DARK}
             title="Reorder PM Items — Match Your Evening Routine"
           />
