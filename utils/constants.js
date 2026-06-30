@@ -118,8 +118,6 @@ export const AM_COMMON = [
 export const AM_CUSTOM_IDS = ['am_c1', 'am_c2', 'am_c3', 'am_c4', 'am_c5'];
 
 export const PM_STANDARD = [
-  { id: 'prep_tomorrow', label: 'Prep for Tomorrow', desc: 'Prepare as many things as possible for tomorrow morning (food, clothes, items to take, etc.)', defaultOn: true, locked: false },
-  { id: 'evening_meal', label: 'Evening Meal / Snack', desc: '', defaultOn: true, locked: false },
   { id: 'pm_pit', label: 'PM PIT', desc: 'Evening Personal Investment Time — log your day', defaultOn: true, locked: true },
   { id: 'pm_eval', label: 'Day Evaluation', desc: '1–10 score for today', defaultOn: true, locked: true, sub: true, parentId: 'pm_pit' },
   { id: 'pm_good', label: 'What Went Well', desc: 'Write in — wins, progress, positives', defaultOn: true, locked: true, sub: true, parentId: 'pm_pit' },
@@ -129,13 +127,16 @@ export const PM_STANDARD = [
 export const PM_SUB_IDS = ['pm_eval', 'pm_good', 'pm_bad'];
 
 export const PM_COMMON = [
+  { id: 'prep_tomorrow', label: 'Prep for Tomorrow', desc: 'Prepare as many things as possible for tomorrow morning (food, clothes, items to take, etc.)', recommended: true },
+  { id: 'pm_social', label: 'Social / Relationship Time', desc: 'Intentional time with people that matter', recommended: true },
+  { id: 'pm_selfcare', label: 'Personal Care', desc: 'Grooming, hygiene, health routine', recommended: true },
+  { id: 'pm_bed', label: 'Bed', desc: '', recommended: true },
+  { id: 'pm_lights_out', label: 'Lights Out', desc: 'Can be checked off in advance, before bedtime actually happens.', recommended: true },
+  { id: 'evening_meal', label: 'Evening Meal / Snack', desc: '' },
   { id: 'pm_fitness', label: 'PM Fitness', desc: 'Evening Workout — Home or Gym' },
   { id: 'pm_read', label: 'Read / Study / Learning', desc: 'Books, course material, certification, skill development' },
-  { id: 'pm_bed', label: 'Bed', desc: '' },
-  { id: 'pm_lights_out', label: 'Lights Out', desc: 'Can be checked off in advance, before bedtime actually happens.' },
   { id: 'pm_pet_care', label: 'Pet Care', desc: 'Evening walk, feeding, medication' },
   { id: 'pm_children_hw', label: "Children's Homework / School Help", desc: 'Review assignments, school prep for tomorrow' },
-  { id: 'pm_family_time', label: 'Family Time', desc: 'Deliberate, present time with spouse or children' },
   { id: 'pm_family_call', label: 'Family / Friend Call', desc: 'Call parent, sibling, close friend — maintain connection' },
   { id: 'pm_medication', label: 'Evening Medication / Supplements', desc: 'PM dose — follow your protocol' },
   { id: 'pm_household', label: 'Household Tasks', desc: 'Dishes, laundry, cleaning, tidying up' },
@@ -145,12 +146,10 @@ export const PM_COMMON = [
   { id: 'pm_meditation', label: 'Evening Meditation', desc: 'Wind-down, breathwork, quiet reflection' },
   { id: 'pm_journaling', label: 'Journaling', desc: 'Capture the day — wins, lessons, thoughts' },
   { id: 'pm_faith', label: 'Faith Practice', desc: 'Evening prayer, scripture, or spiritual reading' },
-  { id: 'pm_social', label: 'Social / Relationship Time', desc: 'Intentional time with people that matter' },
-  { id: 'pm_selfcare', label: 'Personal Care', desc: 'Grooming, hygiene, health routine' },
 ];
 
 export const PM_CUSTOM_IDS = ['pm_c1', 'pm_c2', 'pm_c3', 'pm_c4', 'pm_c5'];
 
 export const AM_DEFAULT_RECOMMENDED = ['am_fitness', 'personal_prep', 'breakfast', 'make_bed'];
-export const PM_DEFAULT_COMMON = ['pm_fitness', 'pm_read', 'pm_bed', 'pm_lights_out'];
-export const PM_DEFAULT_TOP = ['prep_tomorrow', 'evening_meal', 'pm_pit'];
+export const PM_DEFAULT_COMMON = ['prep_tomorrow', 'pm_social', 'pm_selfcare', 'pm_bed', 'pm_lights_out'];
+export const PM_DEFAULT_TOP = ['pm_pit'];

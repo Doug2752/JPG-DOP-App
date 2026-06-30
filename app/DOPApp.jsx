@@ -195,7 +195,7 @@ export default function DOPApp() {
     if (setup.amCommonSelected.includes(id)) allAMRows.push(item);
   });
 
-  const pmOrder = setup.pmOrder || ['prep_tomorrow', 'evening_meal', 'pm_pit'];
+  const pmOrder = setup.pmOrder || ['pm_pit'];
   const allPMRows = [];
   pmOrder.forEach(id => {
     if (id === 'pm_pit') {

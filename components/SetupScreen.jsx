@@ -195,25 +195,37 @@ export default function SetupScreen({ setup, onSave, onCancel, isFirstTime, form
 
           {/* PM Required */}
           <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
-            <SH color={STEEL} label="PM Required Items" sub="PM PIT, Prep for Tomorrow, and Evening Meal are required." />
+            <SH color={STEEL} label="PM Required Items" sub="PM PIT is required and cannot be removed. All sub-items are locked." />
             <ColumnHeader />
             {PM_STANDARD.map(item => {
               const isChecked = local.pmSelected.includes(item.id) || !!item.locked;
               return (
                 <SetupRow key={item.id} item={item} checked={isChecked}
                   onToggle={() => { if (!item.sub && !item.locked) togglePMStd(item.id); }}
-                  duration={item.id === 'pm_bed' ? local.bedtime || '' : local.durations[item.id]}
-                  onDurChange={item.id === 'pm_bed' ? null : v => setDur(item.id, v)}
+                  duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
                   lightColor={STEEL_LIGHT} isLocked={!!item.locked} />
               );
             })}
           </div>
 
+          {/* PM Recommended */}
+          <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
+            <SH color={STEEL_MID} label="PM Recommended Items" sub="Recommended items are pre-selected. Select any that apply to your evening." />
+            <ColumnHeader />
+            {PM_COMMON.filter(item => item.recommended).map(item => (
+              <SetupRow key={item.id} item={item}
+                checked={(local.pmCommonSelected || []).includes(item.id)}
+                onToggle={() => togglePMCommon(item.id)}
+                duration={local.durations[item.id]} onDurChange={v => setDur(item.id, v)}
+                lightColor={STEEL_LIGHT} showBadge={true} />
+            ))}
+          </div>
+
           {/* PM Common */}
           <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden' }}>
-            <SH color={STEEL_MID} label="PM Common Life Tasks" sub="Select evening tasks that apply to your routine." />
+            <SH color={STEEL_DARK} label="PM Common Life Tasks" sub="Select additional evening tasks that apply to your routine." />
             <ColumnHeader />
-            {PM_COMMON.map(item => (
+            {PM_COMMON.filter(item => !item.recommended).map(item => (
               <SetupRow key={item.id} item={item}
                 checked={(local.pmCommonSelected || []).includes(item.id)}
                 onToggle={() => togglePMCommon(item.id)}
