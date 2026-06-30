@@ -136,12 +136,12 @@ export default function PMBlock({
         <button
           onClick={() => saveForm({ ...form, pmLocked: !form.pmLocked, pmLockedAt: !form.pmLocked ? new Date().toISOString() : null })}
           style={{
-            padding: '8px 20px', borderRadius: 6, border: 'none',
-            background: form.pmLocked ? '#2ecc71' : STEEL,
-            color: '#fff', fontWeight: 800, fontSize: 12,
+            padding: form.pmLocked ? 0 : '8px 20px', borderRadius: 6, border: 'none',
+            background: form.pmLocked ? 'transparent' : STEEL,
+            color: form.pmLocked ? '#000' : '#fff', fontWeight: 800, fontSize: 12,
             letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
           }}
-        >{form.pmLocked ? '✓ PM Locked' : 'Lock PM Block'}</button>
+        >{form.pmLocked ? 'Finished' : 'Click here when PM PIT complete'}</button>
       </div>
 
       {/* Day Complete + Saved indicator */}

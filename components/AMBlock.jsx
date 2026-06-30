@@ -115,11 +115,11 @@ export default function AMBlock({
             style={{
               padding: '8px 20px', borderRadius: 6,
               border: form.amLocked ? 'none' : '1.5px solid #000',
-              background: form.amLocked ? '#2ecc71' : GOLD_LIGHT,
-              color: form.amLocked ? '#fff' : '#000', fontWeight: 800, fontSize: 12,
+              background: form.amLocked ? GOLD : GOLD_LIGHT,
+              color: '#000', fontWeight: 800, fontSize: 12,
               letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
             }}
-          >{form.amLocked ? '✓ AM Locked' : 'Lock AM Block'}</button>
+          >{form.amLocked ? 'Finished' : 'Click here when AM PIT complete'}</button>
         </div>
 
         <div style={{ padding: '0 0 16px', marginTop: 16 }}>
