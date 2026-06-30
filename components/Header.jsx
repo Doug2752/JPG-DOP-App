@@ -24,6 +24,10 @@ export default function Header({
     }}>
       <div style={{ display: 'flex', gap: 8 }}>
         <button
+          style={gbtn({ background: view === 'setup' ? GOLD : '#333', border: 'none' })}
+          onClick={() => setView('setup')}
+        >Configure</button>
+        <button
           style={gbtn({ background: view === 'form' && isToday && setupComplete ? GOLD : '#333', border: 'none' })}
           onClick={goToday}
         >Today</button>
@@ -31,10 +35,6 @@ export default function Header({
           style={gbtn({ background: view === 'archive' ? GOLD : '#333', border: 'none' })}
           onClick={() => setView('archive')}
         >Archive</button>
-        <button
-          style={gbtn({ background: view === 'setup' ? GOLD : '#333', border: 'none' })}
-          onClick={() => setView('setup')}
-        >Configure</button>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
