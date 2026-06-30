@@ -150,7 +150,7 @@ export default function PMBlock({
           <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ Day Complete — Well executed.</div>
         ) : (
           <div style={{ color: '#888', fontSize: 13 }}>
-            Score both evaluations and complete at least one AM and one PM item to mark the day done.
+            Score both AM and PM evaluations and minimally check off completed required items to mark the day complete.
           </div>
         )}
         {saved && <div style={{ color: '#27ae60', fontSize: 11, marginTop: 4 }}>Saved.</div>}
