@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BG, GOLD } from '../utils/constants';
+import { BG, GOLD, GOLD_LIGHT } from '../utils/constants';
 import { storage } from '../services/storage';
 
 const FOUNDATIONS = [
@@ -80,6 +80,62 @@ function selBtn(active) {
   };
 }
 
+function pctLabel(rate) {
+  if (rate === null || rate === undefined || isNaN(Number(rate))) {
+    return '—';
+  }
+  const n = Number(rate);
+  const v = n <= 1 ? n * 100 : n;
+  return Math.round(v) + '%';
+}
+
+function auditBadge(outcome) {
+  switch (outcome) {
+    case 'unlocked':
+      return { label: 'Unlocked', bg: '#1a1a1a', color: GOLD };
+    case 'remediate':
+      return { label: 'Remediate', bg: '#CC2222', color: '#000' };
+    case 'standard':
+    default:
+      return { label: 'Standard', bg: GOLD_LIGHT, color: '#000' };
+  }
+}
+
+const GROUP_TITLE = {
+  color: '#B8860B',
+  fontSize: 16,
+  fontWeight: 700,
+  marginBottom: 10,
+  marginTop: 4,
+};
+
+const BADGE = {
+  fontSize: 11,
+  fontWeight: 700,
+  padding: '3px 10px',
+  borderRadius: 12,
+  whiteSpace: 'nowrap',
+};
+
+const NEUTRAL_TAG = {
+  fontSize: 11,
+  fontWeight: 600,
+  padding: '2px 8px',
+  borderRadius: 4,
+  background: '#eee',
+  color: '#666',
+};
+
+const EMPTY_STATE = {
+  textAlign: 'center',
+  color: '#666',
+  fontSize: 14,
+  padding: '40px 20px',
+  background: 'white',
+  borderRadius: 5,
+  border: '1px solid #d0c8b8',
+};
+
 function emptyDraft(fc) {
   return {
     foundation_core: fc,
@@ -101,6 +157,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [tier, setTier] = useState({ tier: 1, cap: 30 });
   const [saveError, setSaveError] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [historyRecords, setHistoryRecords] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -133,6 +190,22 @@ export default function FourX4View({ onBack, user, onSave }) {
       }
     })();
   }, [user]);
+
+  useEffect(() => {
+    if (!user || section !== 'History') return;
+    (async () => {
+      const hv = await storage.get('4x4_history_' + user);
+      if (hv && hv.value) {
+        try {
+          setHistoryRecords(JSON.parse(hv.value));
+        } catch (_) {
+          setHistoryRecords([]);
+        }
+      } else {
+        setHistoryRecords([]);
+      }
+    })();
+  }, [user, section]);
 
   function updateDraft(i, field, val) {
     setDrafts(prev => {
@@ -472,6 +545,160 @@ export default function FourX4View({ onBack, user, onSave }) {
             }}
             onClick={handleSave}
           >Save 4x4</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── History screen ──────────────────────────────────
+  if (section === 'History') {
+    // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
+    const displayHistoryRecords = [
+      {
+        id: 'h1', foundation_core: 'fitness', name: 'Morning Run',
+        type: 'activation', time_of_day: 'am', frequency: 'daily',
+        weekly_target: null, time_cost_minutes: 20,
+        month_set: '2026-05', active_from: '2026-05-01',
+        active_until: '2026-05-31', status: 'closed',
+        core_outcome: 'advanced', cycle_id: 'c1', attempt_number: 1,
+        linked_to: null, times_completed: 28, times_expected: 31,
+        completion_rate: 0.90, net_time_cost_snapshot: 20,
+        period_date_range: '2026-05-01 to 2026-05-31',
+        audit_outcome: 'unlocked',
+      },
+      {
+        id: 'h2', foundation_core: 'nutrition', name: 'No Sugar',
+        type: 'deactivation', time_of_day: 'both', frequency: 'daily',
+        weekly_target: null, time_cost_minutes: -10,
+        month_set: '2026-05', active_from: '2026-05-01',
+        active_until: '2026-05-31', status: 'incomplete',
+        core_outcome: 'retry', cycle_id: 'c2', attempt_number: 1,
+        linked_to: null, times_completed: 14, times_expected: 31,
+        completion_rate: 0.45, net_time_cost_snapshot: -10,
+        period_date_range: '2026-05-01 to 2026-05-31',
+        audit_outcome: 'remediate',
+      },
+      {
+        id: 'h3', foundation_core: 'sleep', name: 'Bed by 10pm',
+        type: 'activation', time_of_day: 'pm', frequency: 'daily',
+        weekly_target: null, time_cost_minutes: 0,
+        month_set: '2026-04', active_from: '2026-04-01',
+        active_until: '2026-04-30', status: 'closed',
+        core_outcome: 'retry', cycle_id: 'c3', attempt_number: 2,
+        linked_to: 'h0-prev', times_completed: 22, times_expected: 30,
+        completion_rate: 0.73, net_time_cost_snapshot: 0,
+        period_date_range: '2026-04-01 to 2026-04-30',
+        audit_outcome: 'standard',
+      },
+    ];
+    // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
+    const grouped = FOUNDATIONS.map(f => ({
+      label: f.label,
+      value: f.value,
+      records: displayHistoryRecords
+        .filter(r => r.foundation_core === f.value)
+        .sort((a, b) => {
+          const ad = a.active_from || a.period_date_range || '';
+          const bd = b.active_from || b.period_date_range || '';
+          return bd.localeCompare(ad);
+        }),
+    })).filter(g => g.records.length > 0);
+
+    return (
+      <div style={PAGE}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <button
+            style={{
+              background: '#1a1a1a',
+              color: GOLD,
+              border: '1.5px solid ' + GOLD,
+              borderRadius: '5px',
+              padding: '6px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
+              marginBottom: 20,
+            }}
+            onClick={() => setSection(null)}
+          >← Back</button>
+
+          <div style={{
+            color: '#B8860B',
+            fontSize: 22,
+            fontWeight: 700,
+            marginBottom: 20,
+          }}>4x4 Matrix — History</div>
+
+          {displayHistoryRecords.length === 0 && (
+            <div style={EMPTY_STATE}>
+              No history yet. Complete your first month to
+              see results here.
+            </div>
+          )}
+
+          {grouped.map(g => (
+            <div key={g.value} style={{ marginBottom: 24 }}>
+              <div style={GROUP_TITLE}>{g.label}</div>
+              {g.records.map(r => {
+                const badge = auditBadge(r.audit_outcome);
+                const isRetry = !!(
+                  (r.attempt_number && r.attempt_number > 1)
+                  || r.linked_to
+                );
+                return (
+                  <div key={r.id} style={CARD}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                    }}>
+                      <div>
+                        <div style={{
+                          fontWeight: 700,
+                          fontSize: 14,
+                        }}>{r.name}</div>
+                        <div style={{
+                          fontSize: 12,
+                          color: '#666',
+                          marginTop: 2,
+                        }}>{r.period_date_range}</div>
+                      </div>
+                      <div style={{
+                        ...BADGE,
+                        background: badge.bg,
+                        color: badge.color,
+                      }}>{badge.label}</div>
+                    </div>
+
+                    <div style={{ fontSize: 13, marginTop: 8 }}>
+                      {r.times_completed} / {r.times_expected}
+                      {'  completed  —  '}
+                      {pctLabel(r.completion_rate)}
+                    </div>
+
+                    {(r.status === 'incomplete' || isRetry) && (
+                      <div style={{
+                        display: 'flex',
+                        gap: 8,
+                        marginTop: 8,
+                      }}>
+                        {r.status === 'incomplete' && (
+                          <span style={NEUTRAL_TAG}>
+                            Incomplete
+                          </span>
+                        )}
+                        {isRetry && (
+                          <span style={NEUTRAL_TAG}>
+                            Retry #{r.attempt_number || '?'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     );
