@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BG, GOLD } from '../utils/constants';
-import { gbtn } from './styles';
 import { storage } from '../services/storage';
 
 const FOUNDATIONS = [
@@ -53,11 +52,12 @@ const LBL = {
 };
 
 const LAND_BTN = {
-  width: '100%',
-  padding: '16px',
+  alignSelf: 'flex-start',
+  minWidth: 220,
+  padding: '14px 32px',
   borderRadius: '5px',
   background: '#1a1a1a',
-  color: 'white',
+  color: GOLD,
   fontSize: 15,
   fontWeight: 600,
   cursor: 'pointer',
@@ -222,11 +222,17 @@ export default function FourX4View({ onBack, user }) {
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <button
-            style={gbtn({
-              background: GOLD,
-              border: 'none',
+            style={{
+              background: '#1a1a1a',
+              color: GOLD,
+              border: '1.5px solid ' + GOLD,
+              borderRadius: '5px',
+              padding: '6px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
               marginBottom: 20,
-            })}
+            }}
             onClick={() => setSection(null)}
           >← Back</button>
 
@@ -473,11 +479,17 @@ export default function FourX4View({ onBack, user }) {
           padding: '24px',
         }}>
           <button
-            style={gbtn({
-              background: GOLD,
-              border: 'none',
+            style={{
+              background: '#1a1a1a',
+              color: GOLD,
+              border: '1.5px solid ' + GOLD,
+              borderRadius: '5px',
+              padding: '6px 16px',
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: 'pointer',
               marginBottom: 20,
-            })}
+            }}
             onClick={() => setSection(null)}
           >← Back</button>
           <div style={{
@@ -514,13 +526,14 @@ export default function FourX4View({ onBack, user }) {
           <button
             onClick={onBack}
             style={{
-              background: 'none',
-              border: 'none',
+              background: '#1a1a1a',
               color: GOLD,
+              border: '1.5px solid ' + GOLD,
+              borderRadius: '5px',
+              padding: '6px 16px',
+              fontSize: 13,
+              fontWeight: 700,
               cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 600,
-              padding: 0,
               marginRight: 16,
             }}
           >← Back</button>
