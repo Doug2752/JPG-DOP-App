@@ -282,7 +282,10 @@ export default function DOPApp() {
 
       {/* 4x4 Matrix view */}
       {setup.setupComplete && view === '4x4' && (
-        <FourX4View onBack={() => setView('form')} />
+        <FourX4View
+          onBack={() => setView('form')}
+          user={user}
+        />
       )}
 
       {/* Main form view */}
