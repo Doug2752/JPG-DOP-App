@@ -140,9 +140,9 @@ function emptyDraft(fc) {
   return {
     foundation_core: fc,
     name: '',
-    type: 'activation',
-    time_of_day: 'am',
-    frequency: 'daily',
+    type: null,
+    time_of_day: null,
+    frequency: null,
     weekly_target: null,
     time_cost_minutes: null,
     timeDNA: false,
@@ -231,6 +231,30 @@ export default function FourX4View({ onBack, user, onSave }) {
     setSaved(false);
     if (!drafts.every(d => d.name.trim())) {
       setSaveError('All 4 activities must have a name.');
+      return;
+    }
+    if (!drafts.every(d => d.type)) {
+      setSaveError('All 4 activities must have a Type selected.');
+      return;
+    }
+    if (!drafts.every(d => d.time_of_day)) {
+      setSaveError(
+        'All 4 activities must have a Time of Day selected.'
+      );
+      return;
+    }
+    if (!drafts.every(d => d.frequency)) {
+      setSaveError(
+        'All 4 activities must have a Frequency selected.'
+      );
+      return;
+    }
+    if (!drafts.every(
+      d => d.timeDNA || d.time_cost_minutes !== null
+    )) {
+      setSaveError(
+        'All 4 activities must have a Time value or DNA selected.'
+      );
       return;
     }
     if (!drafts.some(d => d.type === 'deactivation')) {
@@ -354,7 +378,11 @@ export default function FourX4View({ onBack, user, onSave }) {
                   placeholder="Describe your activity..."
                   value={d.name}
                   onChange={e =>
-                    updateDraft(i, 'name', e.target.value)
+                    updateDraft(
+                      i,
+                      'name',
+                      e.target.value.toUpperCase()
+                    )
                   }
                 />
 
