@@ -14,6 +14,7 @@ import LoginScreen, { VALID_CREDENTIALS } from '../components/LoginScreen';
 import SetupScreen from '../components/SetupScreen';
 import FormInstructionsModal from '../components/FormInstructionsModal';
 import ArchiveView from '../components/ArchiveView';
+import FourX4View from '../components/FourX4View';
 import AMBlock from '../components/AMBlock';
 import PMBlock from '../components/PMBlock';
 import Header from '../components/Header';
@@ -277,6 +278,11 @@ export default function DOPApp() {
             localStorage.setItem('dop_instructions_seen', '1');
           }}
         />
+      )}
+
+      {/* 4x4 Matrix view */}
+      {setup.setupComplete && view === '4x4' && (
+        <FourX4View onBack={() => setView('form')} />
       )}
 
       {/* Main form view */}

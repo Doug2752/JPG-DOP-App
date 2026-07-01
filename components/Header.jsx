@@ -35,6 +35,27 @@ export default function Header({
           style={gbtn({ background: view === 'archive' ? GOLD : '#333', border: 'none' })}
           onClick={() => setView('archive')}
         >Archive</button>
+        {setupComplete ? (
+          <button
+            style={gbtn({
+              background: view === '4x4' ? GOLD : '#333',
+              border: 'none',
+            })}
+            onClick={() => setView('4x4')}
+          >4x4 Matrix</button>
+        ) : (
+          <div title="Complete DOP Configure setup to unlock 4x4.">
+            <button
+              style={gbtn({
+                background: '#333',
+                border: 'none',
+                opacity: 0.5,
+                cursor: 'not-allowed',
+              })}
+              disabled
+            >4x4 Matrix</button>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
