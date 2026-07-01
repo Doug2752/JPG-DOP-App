@@ -15,6 +15,7 @@ import SetupScreen from '../components/SetupScreen';
 import FormInstructionsModal from '../components/FormInstructionsModal';
 import ArchiveView from '../components/ArchiveView';
 import FourX4View from '../components/FourX4View';
+import FourX4DailyCard from '../components/FourX4DailyCard';
 import AMBlock from '../components/AMBlock';
 import PMBlock from '../components/PMBlock';
 import Header from '../components/Header';
@@ -48,6 +49,7 @@ export default function DOPApp() {
   const [saved, setSaved] = useState(false);
   const [streak, setStreak] = useState(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [fourX4Protocols, setFourX4Protocols] = useState([]);
 
   const sk = (user || 'guest') + '_dop7_';
 
@@ -65,6 +67,16 @@ export default function DOPApp() {
         if (ad && ad.value) setArchiveDates(JSON.parse(ad.value));
         const st = await storage.get(sk + 'streak');
         if (st && st.value) setStreak(parseInt(st.value) || 0);
+        const px = await storage.get(
+          '4x4_protocols_' + user
+        );
+        if (px && px.value) {
+          const all = JSON.parse(px.value);
+          const active = all.filter(
+            p => p.status === 'active'
+          );
+          setFourX4Protocols(active);
+        }
       } catch (e) {
         console.error('[DOP] setup-load failed:', e);
       }
@@ -146,6 +158,23 @@ export default function DOPApp() {
     setSetup(stamped);
     try { await storage.set(sk + 'setup', JSON.stringify(stamped)); } catch (e) { console.error('[DOP] saveSetup failed:', e); }
     setView('form');
+  }
+
+  async function reloadFourX4() {
+    try {
+      const px = await storage.get(
+        '4x4_protocols_' + user
+      );
+      if (px && px.value) {
+        const all = JSON.parse(px.value);
+        const active = all.filter(
+          p => p.status === 'active'
+        );
+        setFourX4Protocols(active);
+      }
+    } catch(e) {
+      console.error('[DOP] 4x4 reload failed:', e);
+    }
   }
 
   function goToday() {
@@ -285,6 +314,7 @@ export default function DOPApp() {
         <FourX4View
           onBack={() => setView('form')}
           user={user}
+          onSave={reloadFourX4}
         />
       )}
 
@@ -325,6 +355,13 @@ export default function DOPApp() {
                 localStorage.setItem('dop_instructions_seen', '1');
               }}
             />
+            {fourX4Protocols.length > 0 && (
+              <FourX4DailyCard
+                protocols={fourX4Protocols}
+                form={form}
+                saveForm={saveForm}
+              />
+            )}
             <PMBlock
               form={form}
               setup={setup}

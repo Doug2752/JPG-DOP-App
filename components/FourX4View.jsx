@@ -91,7 +91,7 @@ function emptyDraft(fc) {
   };
 }
 
-export default function FourX4View({ onBack, user }) {
+export default function FourX4View({ onBack, user, onSave }) {
   const [section, setSection] = useState(null);
   const [drafts, setDrafts] = useState(
     FOUNDATIONS.map(f => emptyDraft(f.value))
@@ -212,6 +212,7 @@ export default function FourX4View({ onBack, user }) {
       '4x4_protocols_' + user,
       JSON.stringify(records)
     );
+    if (onSave) await onSave();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -242,6 +243,13 @@ export default function FourX4View({ onBack, user }) {
             fontWeight: 700,
             marginBottom: 20,
           }}>4x4 Matrix — Set Up / Edit</div>
+
+          <div style={{
+            fontSize: 11,
+            color: '#888',
+            marginBottom: 12,
+            fontStyle: 'italic',
+          }}>Gold = selected</div>
 
           {FOUNDATIONS.map((f, i) => {
             const d = drafts[i];

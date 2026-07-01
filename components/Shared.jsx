@@ -105,13 +105,13 @@ export function QuoteBox({ quote }) {
   if (!quote) return null;
   return (
     <div style={{
-      background: '#1a1a1a', borderRadius: 5, padding: '16px 20px',
+      background: '#ede4cf', borderRadius: 5, padding: '16px 20px',
       border: `1px solid ${GOLD}`, textAlign: 'center', width: '100%',
     }}>
       <div style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>
         Today's Takeaway
       </div>
-      <div style={{ fontSize: 14, color: '#fff', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 8 }}>
+      <div style={{ fontSize: 14, color: '#222', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 8 }}>
         "{quote.text}"
       </div>
       <div style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
