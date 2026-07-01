@@ -67,14 +67,16 @@ const LAND_BTN = {
 
 function selBtn(active) {
   return {
-    borderRadius: 5,
+    background: active ? '#111' : GOLD,
+    color: active ? GOLD : '#000',
+    border: active
+      ? '1.5px solid ' + GOLD
+      : '1.5px solid #000',
+    borderRadius: '5px',
     padding: '6px 14px',
     fontSize: 13,
-    fontWeight: 600,
-    border: 'none',
+    fontWeight: 700,
     cursor: 'pointer',
-    background: active ? GOLD : '#333',
-    color: active ? 'black' : 'white',
   };
 }
 
@@ -249,7 +251,7 @@ export default function FourX4View({ onBack, user, onSave }) {
             color: '#888',
             marginBottom: 12,
             fontStyle: 'italic',
-          }}>Gold = selected</div>
+          }}>Black = selected</div>
 
           {FOUNDATIONS.map((f, i) => {
             const d = drafts[i];
