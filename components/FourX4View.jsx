@@ -327,6 +327,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [tier, setTier] = useState({ tier: 1, cap: 30 });
   const [saveError, setSaveError] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [showExamples, setShowExamples] = useState(false);
   const [historyRecords, setHistoryRecords] = useState([]);
 
   useEffect(() => {
@@ -600,11 +601,96 @@ export default function FourX4View({ onBack, user, onSave }) {
           >Back</button>
 
           <div style={{
-            color: '#B8860B',
-            fontSize: 22,
-            fontWeight: 700,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 8,
             marginBottom: 20,
-          }}>4x4 Matrix — Set Up / Edit</div>
+          }}>
+            <div style={{
+              color: '#B8860B',
+              fontSize: 22,
+              fontWeight: 700,
+            }}>4x4 Matrix — Set Up / Edit</div>
+            <button
+              style={selBtn(showExamples)}
+              onClick={() => setShowExamples(true)}
+            >Common Protocol Examples</button>
+          </div>
+
+          {showExamples && (
+            <div style={INSTR_PANEL}>
+              <div style={INSTR_TITLEBAR}>
+                Common Protocol Examples
+              </div>
+
+              <button
+                onClick={() => setShowExamples(false)}
+                style={INSTR_CLOSE_BTN}
+                aria-label="Close"
+              >✕</button>
+
+              <div style={INSTR_TOP_ITEM}>
+                <span style={INSTR_DOT}>•</span>
+                <div style={{ flex: 1 }}>
+                  <div style={INSTR_TOP_TITLE}>Fitness</div>
+                  <InstrItem mark="—">Add a morning or evening walk into your daily routine</InstrItem>
+                  <InstrItem mark="—">Start stretching in the morning after getting out of bed</InstrItem>
+                  <InstrItem mark="—">Incorporate some strength training at least four times a week</InstrItem>
+                  <InstrItem mark="—">Some sort of workout which makes me sweat at least 4 times a week</InstrItem>
+                </div>
+              </div>
+
+              <div style={INSTR_TOP_ITEM}>
+                <span style={INSTR_DOT}>•</span>
+                <div style={{ flex: 1 }}>
+                  <div style={INSTR_TOP_TITLE}>Nutrition</div>
+                  <InstrItem mark="—">Take supplements every morning</InstrItem>
+                  <InstrItem mark="—">Cut out [blank] from my diet</InstrItem>
+                  <InstrItem mark="—">Drink more water every day, at least 32 ounces</InstrItem>
+                  <InstrItem mark="—">Reduce alcohol consumption to only two times a week</InstrItem>
+                  <InstrItem mark="—">Take my lunch to work at least 4 times a week</InstrItem>
+                  <InstrItem mark="—">Limit eating processed foods</InstrItem>
+                  <InstrItem mark="—">Consume at least 150g of protein a day</InstrItem>
+                  <InstrItem mark="—">Reduce caloric intake by [blank] percentage every day</InstrItem>
+                  <InstrItem mark="—">Track what I eat and drink every day</InstrItem>
+                  <InstrItem mark="—">Make coffee at home before I leave for work instead of buying coffee out</InstrItem>
+                  <InstrItem mark="—">Take a cooking class to learn to eat healthy</InstrItem>
+                </div>
+              </div>
+
+              <div style={INSTR_TOP_ITEM}>
+                <span style={INSTR_DOT}>•</span>
+                <div style={{ flex: 1 }}>
+                  <div style={INSTR_TOP_TITLE}>Sleep</div>
+                  <InstrItem mark="—">Not leaving the TV on while you sleep at night</InstrItem>
+                  <InstrItem mark="—">No scrolling right before bed</InstrItem>
+                  <InstrItem mark="—">Read before bed</InstrItem>
+                  <InstrItem mark="—">No phone use after getting in bed every night</InstrItem>
+                  <InstrItem mark="—">Commit to going to bed by a specific time 5 times a week</InstrItem>
+                </div>
+              </div>
+
+              <div style={{ ...INSTR_TOP_ITEM, marginBottom: 0 }}>
+                <span style={INSTR_DOT}>•</span>
+                <div style={{ flex: 1 }}>
+                  <div style={INSTR_TOP_TITLE}>Mental/Spiritual Health</div>
+                  <InstrItem mark="—">Reduce the amount of phone social media scrolling</InstrItem>
+                  <InstrItem mark="—">Make a purposeful phone call to someone you love</InstrItem>
+                  <InstrItem mark="—">Spend designated time on relationships or family members after work</InstrItem>
+                  <InstrItem mark="—">Protect mental bandwidth by not having meaningless conversations</InstrItem>
+                  <InstrItem mark="—">Work on the ability to say no more often when it's not productive</InstrItem>
+                  <InstrItem mark="—">Commit time every week for a date night</InstrItem>
+                  <InstrItem mark="—">Commit at least 10 minutes a day to my hobby ([hobby])</InstrItem>
+                  <InstrItem mark="—">Take a cold shower on the weekends, minimum of five minutes</InstrItem>
+                  <InstrItem mark="—">Check in with a mentor or someone I trust weekly</InstrItem>
+                  <InstrItem mark="—">Spend 10 minutes in the evening four times a week reading scripture</InstrItem>
+                  <InstrItem mark="—">Spend 5 minutes a day learning something new, at least four times a week</InstrItem>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{
             fontSize: 11,
