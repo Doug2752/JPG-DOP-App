@@ -474,7 +474,7 @@ export default function FourX4View({ onBack, user, onSave }) {
     setSaved(false);
     if (!drafts.every(d => d.foundation_core)) {
       setSaveError(
-        'All 4 activities must have a Foundation Core selected.'
+        'All 4 protocols must have a Foundation Core selected.'
       );
       return;
     }
@@ -485,22 +485,22 @@ export default function FourX4View({ onBack, user, onSave }) {
       return;
     }
     if (!drafts.every(d => d.name.trim())) {
-      setSaveError('All 4 activities must have a name.');
+      setSaveError('All 4 protocols must have a name.');
       return;
     }
     if (!drafts.every(d => d.type)) {
-      setSaveError('All 4 activities must have a Type selected.');
+      setSaveError('All 4 protocols must have a Type selected.');
       return;
     }
     if (!drafts.every(d => d.time_of_day)) {
       setSaveError(
-        'All 4 activities must have a Time of Day selected.'
+        'All 4 protocols must have a Time of Day selected.'
       );
       return;
     }
     if (!drafts.every(d => d.frequency)) {
       setSaveError(
-        'All 4 activities must have a Frequency selected.'
+        'All 4 protocols must have a Frequency selected.'
       );
       return;
     }
@@ -508,13 +508,13 @@ export default function FourX4View({ onBack, user, onSave }) {
       d => d.timeDNA || d.time_cost_minutes !== null
     )) {
       setSaveError(
-        'All 4 activities must have a Time value or DNA selected.'
+        'All 4 protocols must have a Time value or DNA selected.'
       );
       return;
     }
     if (!drafts.some(d => d.type === 'deactivation')) {
       setSaveError(
-        'At least 1 activity must be a deactivation.'
+        'At least 1 protocol must be a deactivation.'
       );
       return;
     }
@@ -675,7 +675,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                     marginBottom: 10,
                     boxSizing: 'border-box',
                   }}
-                  placeholder="Describe your activity..."
+                  placeholder="Describe your protocol..."
                   value={d.name}
                   onChange={e =>
                     updateDraft(
@@ -855,7 +855,7 @@ export default function FourX4View({ onBack, user, onSave }) {
               fontSize: 13,
               fontWeight: 600,
               marginBottom: 8,
-            }}>4x4 activities saved!</div>
+            }}>4x4 protocols saved!</div>
           )}
 
           <button
@@ -1054,7 +1054,7 @@ export default function FourX4View({ onBack, user, onSave }) {
           </div>
 
           <div>
-            <div style={GROUP_TITLE}>Time Cost by Activity</div>
+            <div style={GROUP_TITLE}>Time Cost by Protocol</div>
             <div style={CARD}>
               {metricColumns(FOUNDATIONS.map(f => {
                 const p = displayActiveProtocols.find(
@@ -1269,7 +1269,9 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <InstrItem mark="—">Drop it — it's done. That Core opens up for a new protocol next month.</InstrItem>
                 <InstrItem mark="—">Keep it in the 4x4 — you keep building on it. Since it's continuing, it has to grow — you can't repeat the same habit at the same level and expect a different result.</InstrItem>
 
-                <div style={{ ...INSTR_BODY, marginTop: 8, marginBottom: 0 }}>If the protocol scored Remediate (below 75%), there's no choice to make — it automatically carries into next month as-is, and no new addition can be added to that Core until it's back on track. This isn't a penalty. It's the system keeping your focus where it's needed before letting you take on more.</div>
+                <div style={{ ...INSTR_BODY, marginTop: 8 }}>When you promote a protocol, it no longer counts against your 4x4 time budget. By that point it's simply part of how you live — your routine has already adjusted to it. Your full 30 or 60 minutes resets and becomes available again for genuinely new protocols. This is by design: if adopted protocols kept consuming your budget month after month, you'd eventually have no room left to add anything new. The time budget is there to govern what you're currently building and testing — not to carry the weight of everything you've already made part of your life.</div>
+
+                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>If the protocol scored Remediate (below 75%), there's no choice to make — it automatically carries into next month as-is, and no new addition can be added to that Core until it's back on track. This isn't a penalty. It's the system keeping your focus where it's needed before letting you take on more.</div>
               </div>
             </div>
           </div>
