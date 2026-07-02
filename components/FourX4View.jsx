@@ -101,6 +101,42 @@ function auditBadge(outcome) {
   }
 }
 
+function metricColumns(columns, opts = {}) {
+  const divider = !!opts.divider;
+  return (
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {columns.map((col, idx) => (
+        <div
+          key={col.key}
+          style={{
+            flex: 1,
+            minWidth: 100,
+            textAlign: 'center',
+            padding: '8px 4px',
+            borderRadius: 5,
+            background: col.bg || 'transparent',
+            borderRight: (divider && idx < columns.length - 1)
+              ? '1px solid #d0c8b8'
+              : 'none',
+          }}
+        >
+          <div style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: col.color || '#000',
+            marginBottom: 6,
+          }}>{col.header}</div>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: col.color || '#000',
+          }}>{col.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const AUDIT_LEGEND = {
   unlocked: "You executed at 85% or higher. You've earned the " +
     'ability to add up to 30 more minutes of invested time to ' +
@@ -256,6 +292,40 @@ export default function FourX4View({ onBack, user, onSave }) {
       completion_rate: 0.73, net_time_cost_snapshot: 0,
       period_date_range: '2026-04-01 to 2026-04-30',
       audit_outcome: 'standard',
+    },
+    {
+      id: 'h4', foundation_core: 'mental_spiritual',
+      name: 'Morning Prayer', type: 'activation',
+      time_of_day: 'am', frequency: 'daily',
+      weekly_target: null, time_cost_minutes: 10,
+      month_set: '2026-05', active_from: '2026-05-01',
+      active_until: '2026-05-31', status: 'closed',
+      core_outcome: 'advanced', cycle_id: 'c4', attempt_number: 1,
+      linked_to: null, times_completed: 29, times_expected: 31,
+      completion_rate: 0.94, net_time_cost_snapshot: 10,
+      period_date_range: '2026-05-01 to 2026-05-31',
+      audit_outcome: 'unlocked',
+    },
+  ];
+  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
+
+  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
+  const displayActiveProtocols = [
+    {
+      foundation_core: 'fitness', name: 'Morning Run',
+      time_cost_minutes: 20, timeDNA: false,
+    },
+    {
+      foundation_core: 'nutrition', name: 'No Sugar',
+      time_cost_minutes: -10, timeDNA: false,
+    },
+    {
+      foundation_core: 'sleep', name: 'Bed by 10pm',
+      time_cost_minutes: 0, timeDNA: false,
+    },
+    {
+      foundation_core: 'mental_spiritual', name: 'Morning Prayer',
+      time_cost_minutes: 10, timeDNA: false,
     },
   ];
   // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
@@ -755,15 +825,13 @@ export default function FourX4View({ onBack, user, onSave }) {
       const avg = recs.reduce(
         (sum, r) => sum + (Number(r.completion_rate) || 0), 0
       ) / recs.length;
-      return { label: f.label, value: f.value, avg };
+      return {
+        key: f.value,
+        label: f.label,
+        name: recs[0].name,
+        avg,
+      };
     }).filter(Boolean);
-
-    const outcomeCounts = { unlocked: 0, standard: 0, remediate: 0 };
-    displayHistoryRecords.forEach(r => {
-      if (outcomeCounts[r.audit_outcome] !== undefined) {
-        outcomeCounts[r.audit_outcome] += 1;
-      }
-    });
 
     return (
       <div style={PAGE}>
@@ -790,101 +858,106 @@ export default function FourX4View({ onBack, user, onSave }) {
             marginBottom: 20,
           }}>4x4 Matrix — Metrics</div>
 
-          <div style={GROUP_TITLE}>Current Status</div>
-          <div style={CARD}>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>
-              {tier.cap} min cap
+          <div style={{ maxWidth: 420 }}>
+            <div style={GROUP_TITLE}>Current Status</div>
+            <div style={CARD}>
+              {metricColumns([
+                {
+                  key: 'net',
+                  header: 'Net Daily Time Cost',
+                  value: `${netCost} min`,
+                },
+                {
+                  key: 'cap',
+                  header: 'Allowable Minutes Cap',
+                  value: `${tier.cap} min`,
+                },
+              ], { divider: true })}
             </div>
-            <div style={{
-              fontSize: 13,
-              fontWeight: 600,
-              marginTop: 6,
-            }}>
-              Net daily time cost: {netCost} min
+          </div>
+
+          <div>
+            <div style={GROUP_TITLE}>Time Cost by Activity</div>
+            <div style={CARD}>
+              {metricColumns(FOUNDATIONS.map(f => {
+                const p = displayActiveProtocols.find(
+                  a => a.foundation_core === f.value
+                );
+                return {
+                  key: f.value,
+                  header: p ? p.name : f.label,
+                  value: !p
+                    ? 'Not yet set'
+                    : (p.timeDNA
+                      ? 'DNA'
+                      : (
+                        (p.time_cost_minutes >= 0 ? '+' : '') +
+                        p.time_cost_minutes + ' min'
+                      )),
+                };
+              }), { divider: true })}
             </div>
           </div>
 
           {displayHistoryRecords.length > 0 && (
             <>
-              <div style={GROUP_TITLE}>
-                {displayHistoryRecords.length > 1
-                  ? 'Past Month Stats'
-                  : 'Past Month Stat'}
-              </div>
-
-              <div style={CARD}>
-                <div style={{
-                  fontWeight: 700,
-                  fontSize: 14,
-                  marginBottom: 8,
-                }}>Completion Rate by Foundation Core</div>
-                {coreStats.map(cs => (
-                  <div
-                    key={cs.value}
-                    style={{ fontSize: 13, marginBottom: 4 }}
-                  >
-                    {cs.label}: {pctLabel(cs.avg)}
-                  </div>
-                ))}
-              </div>
-
-              <div style={CARD}>
-                <div style={{
-                  fontWeight: 700,
-                  fontSize: 14,
-                  marginBottom: 8,
-                }}>Audit Outcomes</div>
-                <div style={{
-                  display: 'flex',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                }}>
-                  {['unlocked', 'standard', 'remediate'].map(
-                    key => {
-                      const badge = auditBadge(key);
-                      return (
-                        <span
-                          key={key}
-                          style={{
-                            ...BADGE,
-                            background: badge.bg,
-                            color: badge.color,
-                          }}
-                        >
-                          {badge.label}: {outcomeCounts[key]}
-                        </span>
-                      );
-                    }
-                  )}
+              <div>
+                <div style={GROUP_TITLE}>
+                  {displayHistoryRecords.length > 1
+                    ? 'Past Month Stats'
+                    : 'Past Month Stat'}
                 </div>
+                <div style={CARD}>
+                  {metricColumns(coreStats.map(cs => ({
+                    key: cs.key,
+                    header: `${cs.label} (${cs.name})`,
+                    value: pctLabel(cs.avg),
+                  })), { divider: true })}
+                </div>
+              </div>
 
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 8,
-                  marginTop: 12,
-                }}>
-                  {['unlocked', 'standard', 'remediate'].map(
-                    key => {
-                      const badge = auditBadge(key);
-                      return (
-                        <div
-                          key={key}
-                          style={{
-                            fontSize: 12,
-                            color: '#444',
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          <span style={{
-                            fontWeight: 700,
-                            color: badge.bg,
-                          }}>{badge.label}:</span>{' '}
-                          {AUDIT_LEGEND[key]}
-                        </div>
-                      );
-                    }
-                  )}
+              <div>
+                <div style={GROUP_TITLE}>Audit Outcomes</div>
+                <div style={CARD}>
+                  {metricColumns(displayHistoryRecords.map(r => {
+                    const badge = auditBadge(r.audit_outcome);
+                    return {
+                      key: r.id,
+                      header: r.name,
+                      value: badge.label,
+                      bg: badge.bg,
+                      color: badge.color,
+                    };
+                  }))}
+
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    marginTop: 12,
+                  }}>
+                    {['unlocked', 'standard', 'remediate'].map(
+                      key => {
+                        const badge = auditBadge(key);
+                        return (
+                          <div
+                            key={key}
+                            style={{
+                              fontSize: 12,
+                              color: '#444',
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            <span style={{
+                              fontWeight: 700,
+                              color: badge.bg,
+                            }}>{badge.label}:</span>{' '}
+                            {AUDIT_LEGEND[key]}
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
                 </div>
               </div>
             </>
