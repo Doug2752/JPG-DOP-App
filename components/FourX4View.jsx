@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BG, GOLD, GOLD_LIGHT } from '../utils/constants';
+import { BG, GOLD, GOLD_LIGHT, DARK, MID } from '../utils/constants';
 import { storage } from '../services/storage';
 
 const FOUNDATIONS = [
@@ -183,6 +183,128 @@ const EMPTY_STATE = {
   borderRadius: 5,
   border: '1px solid #d0c8b8',
 };
+
+const INSTR_PANEL = {
+  background: '#E0E0E0',
+  border: `2px solid ${GOLD}`,
+  borderRadius: 8,
+  padding: '18px 20px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+  position: 'relative',
+};
+
+const INSTR_TITLEBAR = {
+  fontWeight: 800,
+  fontSize: 13,
+  color: DARK,
+  textTransform: 'uppercase',
+  letterSpacing: 1.5,
+  marginBottom: 12,
+  paddingBottom: 8,
+  borderBottom: `2px solid ${GOLD}`,
+};
+
+const INSTR_CLOSE_BTN = {
+  position: 'absolute',
+  top: 14,
+  right: 16,
+  background: 'transparent',
+  border: 'none',
+  fontSize: 16,
+  cursor: 'pointer',
+  color: DARK,
+  fontWeight: 700,
+  lineHeight: 1,
+  padding: 0,
+};
+
+const INSTR_TOP_ITEM = {
+  marginBottom: 14,
+  display: 'flex',
+  alignItems: 'flex-start',
+};
+
+const INSTR_DOT = {
+  color: GOLD,
+  fontWeight: 700,
+  minWidth: 14,
+  flexShrink: 0,
+};
+
+const INSTR_TOP_TITLE = {
+  fontSize: 13,
+  fontWeight: 800,
+  color: DARK,
+  marginBottom: 3,
+};
+
+const INSTR_SUBHEAD = {
+  fontSize: 13,
+  fontWeight: 800,
+  color: DARK,
+  marginTop: 8,
+  marginBottom: 3,
+};
+
+const INSTR_BODY = {
+  fontSize: 12,
+  color: MID,
+  lineHeight: 1.7,
+  marginBottom: 8,
+};
+
+const INSTR_QUOTE = {
+  fontSize: 12,
+  color: MID,
+  lineHeight: 1.7,
+  marginBottom: 8,
+  fontStyle: 'italic',
+};
+
+const INSTR_ITEM = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 8,
+  marginBottom: 6,
+};
+
+const INSTR_MARK = {
+  color: GOLD,
+  fontWeight: 700,
+  minWidth: 18,
+  flexShrink: 0,
+};
+
+const INSTR_EXAMPLE_BOX = {
+  background: GOLD_LIGHT,
+  borderRadius: 5,
+  padding: 12,
+  marginTop: 8,
+  marginBottom: 8,
+};
+
+const INSTR_EXAMPLE_TITLE = {
+  fontSize: 12,
+  fontWeight: 800,
+  color: '#000',
+  marginBottom: 6,
+};
+
+const INSTR_EXAMPLE_DETAIL = {
+  fontSize: 12,
+  color: '#000',
+  lineHeight: 1.6,
+  marginBottom: 6,
+};
+
+function InstrItem({ mark, children }) {
+  return (
+    <div style={INSTR_ITEM}>
+      <span style={INSTR_MARK}>{mark}</span>
+      <span style={INSTR_BODY}>{children}</span>
+    </div>
+  );
+}
 
 function emptyDraft(fc) {
   return {
@@ -962,6 +1084,140 @@ export default function FourX4View({ onBack, user, onSave }) {
               </div>
             </>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Instructions screen ─────────────────────────────
+  if (section === 'Instructions') {
+    return (
+      <div style={PAGE}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={INSTR_PANEL}>
+            <div style={INSTR_TITLEBAR}>
+              4x4 Matrix — Set-Up and Instructions
+            </div>
+
+            <button
+              onClick={() => setSection(null)}
+              style={INSTR_CLOSE_BTN}
+              aria-label="Close"
+            >✕</button>
+
+            <div style={INSTR_TOP_ITEM}>
+              <span style={INSTR_DOT}>•</span>
+              <div style={{ flex: 1 }}>
+                <div style={INSTR_TOP_TITLE}>What Is the 4x4 Matrix</div>
+
+                <div style={INSTR_SUBHEAD}>The Four Fundamentals</div>
+                <div style={INSTR_BODY}>Everything in your daily execution is built on four core fundamentals: Fitness, Nutrition, Sleep, and Mental/Spiritual Health. These are your Four Foundation Cores — they're interdependent, and neglecting one drags the others down with it. The 4x4 Matrix is the system that puts real, trackable change into all four, one deliberate step at a time.</div>
+                <div style={INSTR_BODY}>The name, 4x4 Matrix, comes from its structure: 4 Foundation Cores, 4 protocols — one per Core, every month.</div>
+
+                <div style={INSTR_SUBHEAD}>The Theory</div>
+                <div style={INSTR_QUOTE}>"To make lasting improvements in our lives we need to do positive things in small increments, consistently over time."</div>
+                <div style={INSTR_BODY}>Most programs fail for a simple reason: they typically only add tasks. New workouts, new habits, new routines pile onto a day that is already full. Eventually the day runs out of room, motivation runs out with it, and the whole system collapses.</div>
+                <div style={INSTR_BODY}>The 4x4 Matrix works differently. Every addition to your day is paired with an equal commitment to reducing or eliminating something that isn't serving you. You don't just add positive behavior — you make room for it by cutting the negative and non-gainful behavior that's already crowding your time. That trade is the entire foundation of the system.</div>
+
+                <div style={INSTR_SUBHEAD}>How It Works</div>
+                <div style={INSTR_BODY}>Each month, you set exactly 4 protocols — one for each Foundation Core. Every protocol is either an Activation (something you're adding) or a Deactivation (something you're reducing or removing). At least 1 of your 4 protocols must be a Deactivation, every month, without exception.</div>
+                <div style={INSTR_BODY}>In the DOP app, specifically the 4x4 Matrix section, the app itself tracks, calculates, and walks you through both setup and monthly implementation. It may seem complicated at first — that's because of the checks and balances built in to make the system actually work. In short order, you'll become comfortable with it, and the app will keep you aligned and on track.</div>
+                <div style={INSTR_BODY}>It's also worth using the History section within the 4x4 Matrix to look back at your past protocols and results. The numbers guide us on our journey.</div>
+
+                <div style={INSTR_SUBHEAD}>How It Fits Inside DOP (Daily Operational Process)</div>
+                <div style={INSTR_BODY}>Once you set your 4x4 protocols, they appear right in your Today checklist alongside your AM and PM items — same daily habit of checking them off. What sets them apart is how they're measured. Standard DOP items are already locked in as part of your routine. 4x4 protocols are still being proven — each one carries its own weekly and monthly score, tracking whether it's ready to become a permanent part of your day.</div>
+
+                <div style={INSTR_SUBHEAD}>How It Progresses</div>
+                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>At the end of every monthly period, you look at each of your 4 protocols and decide what happens to it next: keep building on it, promote it into a permanent part of your daily standard, or drop it. Protocols that prove out over time graduate out of the 4x4 and into your permanent DOP roadmap — freeing that slot for something new. The 4x4 space always stays reserved for what's currently changing, not for what's already become who you are.</div>
+              </div>
+            </div>
+
+            <div style={INSTR_TOP_ITEM}>
+              <span style={INSTR_DOT}>•</span>
+              <div style={{ flex: 1 }}>
+                <div style={INSTR_TOP_TITLE}>How to Add a Protocol</div>
+
+                <div style={INSTR_BODY}>Every protocol you set is built from a few core parts: Foundation Core, a name, Type (Activation or Deactivation), Time of Day, Frequency, and a Time Value. Here's how to walk through setting one up:</div>
+
+                <InstrItem mark="1.">Choose your Foundation Core. Each of your 4 slots is tied to one Foundation Core — Fitness, Nutrition, Sleep, or Mental/Spiritual Health. Use your best judgment on which Core a protocol belongs to — a walk falls under Fitness, eliminating soda falls under Nutrition, cutting back on scrolling falls under Mental/Spiritual Health, and so on. Each Core can only be used once per month, so once a Core is selected on one card, it won't be available to choose on another.</InstrItem>
+                <InstrItem mark="2.">Name your protocol. Type in a short description of what you're adding or removing (e.g. "Walk after work" or "No phone until PIT is done"). This becomes the label you'll see on your daily checklist.</InstrItem>
+                <InstrItem mark="3.">Choose Activation or Deactivation. Activation means you're adding something new. Deactivation means you're reducing or eliminating something. Every month, at least 1 of your 4 protocols must be a Deactivation.</InstrItem>
+                <InstrItem mark="4.">Choose Time of Day. AM, PM, or Both — whenever this protocol will happen in your day.</InstrItem>
+                <InstrItem mark="5.">Choose Frequency. Daily means it's expected every day. Weekly Target means you choose how many days a week you'll complete it (for example, 4 out of 7).</InstrItem>
+                <InstrItem mark="6.">Enter your Time Value, or select DNA. This is where you tell the system how many minutes this protocol adds to or saves from your day.</InstrItem>
+                <div style={{ paddingLeft: 26 }}>
+                  <InstrItem mark="—">If it has a real time cost or time savings, enter the number of minutes.</InstrItem>
+                  <InstrItem mark="—">If it doesn't have a meaningful time value — something you're simply doing or not doing, with no clock attached — select DNA (Does Not Apply) instead. DNA protocols still count toward your progress and your monthly score. They just don't factor into your Time Budget.</InstrItem>
+                </div>
+                <InstrItem mark="7.">Save. Once all 4 of your Foundation Core slots are filled and at least 1 is a Deactivation, you're set for the month.</InstrItem>
+
+                <div style={INSTR_EXAMPLE_BOX}>
+                  <div style={INSTR_EXAMPLE_TITLE}>Example — Activation with a Time Value</div>
+                  <div style={INSTR_EXAMPLE_DETAIL}>Foundation Core: Fitness | Protocol: "Walk after work" | Type: Activation | Time of Day: PM | Frequency: Daily | Time Value: 20 minutes</div>
+                  <div style={{ ...INSTR_EXAMPLE_DETAIL, marginBottom: 0 }}>This adds 20 minutes to your day, every day you complete it, and counts against your monthly Time Budget.</div>
+                </div>
+
+                <div style={{ ...INSTR_EXAMPLE_BOX, marginBottom: 0 }}>
+                  <div style={INSTR_EXAMPLE_TITLE}>Example — Deactivation with DNA</div>
+                  <div style={INSTR_EXAMPLE_DETAIL}>Foundation Core: Mental/Spiritual Health | Protocol: "No phone until morning PIT is done" | Type: Deactivation | Time of Day: AM | Frequency: Daily | Time Value: DNA</div>
+                  <div style={{ ...INSTR_EXAMPLE_DETAIL, marginBottom: 0 }}>This protocol has no time value to track — you either do it or you don't. It still counts toward your monthly score for Mental/Spiritual Health, but it doesn't offset or add to your Time Budget.</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={INSTR_TOP_ITEM}>
+              <span style={INSTR_DOT}>•</span>
+              <div style={{ flex: 1 }}>
+                <div style={INSTR_TOP_TITLE}>How Your Progress Is Measured</div>
+
+                <div style={INSTR_BODY}>Your progress is tracked two ways — weekly and monthly.</div>
+                <div style={INSTR_BODY}>Weekly: For protocols with a weekly target, you're on track for the week as long as you complete it on more days than you miss it. Missing a day here and there is expected — the standard is majority, not perfection.</div>
+                <div style={INSTR_BODY}>But don't let a miss become a pattern. This is where NEVER TWICE applies — life happens, and the first miss is human. The second miss is a choice.</div>
+                <div style={INSTR_BODY}>Monthly: At the end of each period, each of your 4 Foundation Cores is scored on its own consistency for the month:</div>
+
+                <InstrItem mark="—">85% or higher — Unlocked. You've earned the ability to add more time to next month's protocols.</InstrItem>
+                <InstrItem mark="—">75–84% — Standard. You move forward at your current time budget.</InstrItem>
+                <div style={{ marginBottom: 0 }}>
+                  <InstrItem mark="—">Below 75% — Remediate. That protocol carries into next month, and no new addition is allowed for that Core until it's back on track.</InstrItem>
+                </div>
+              </div>
+            </div>
+
+            <div style={INSTR_TOP_ITEM}>
+              <span style={INSTR_DOT}>•</span>
+              <div style={{ flex: 1 }}>
+                <div style={INSTR_TOP_TITLE}>Your Overall Time Budget</div>
+
+                <div style={INSTR_BODY}>Your daily time budget isn't set Core-by-Core — it's set by looking at your whole month together.</div>
+
+                <div style={INSTR_SUBHEAD}>What the 30-Minute Cap Means</div>
+                <div style={INSTR_BODY}>Every client starts with a 30-minute daily time budget. This is the total amount of added time you can build into your day across all 4 new protocols combined — spread however you want.</div>
+                <div style={INSTR_BODY}>That 30 minutes isn't just a spending limit — it's offset by your deactivations. Every minute you save by reducing or eliminating a negative behavior gives you room to spend elsewhere.</div>
+                <div style={INSTR_BODY}>Example: You add a 20-minute walk after work, 4 times a week. You also reduce your TV time by 15 minutes a day. That 15-minute reduction offsets your budget, leaving you 25 minutes remaining to spend across your other 2 protocols.</div>
+
+                <div style={INSTR_SUBHEAD}>Earning the 60-Minute Budget</div>
+                <div style={INSTR_BODY}>Your budget grows from 30 to 60 minutes when at least 2 of your 4 Foundation Cores hit 85% or higher for the month, and your other 2 Cores are each still holding at 50% or better.</div>
+                <div style={INSTR_BODY}>Example: Fitness and Nutrition both hit 90% for the month. Sleep lands at 60%, Mental/Spiritual Health at 55%. Your budget still grows to 60 minutes — Fitness and Nutrition earned it, and Sleep and Mental/Spiritual Health are both still above the 50% floor, even though neither hit 85%.</div>
+                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>What this means: one Core struggling doesn't shut down your progress everywhere else. If your strong areas are strong and your weaker areas haven't fallen apart, your capacity to invest more time keeps growing — even while a specific protocol works through a Remediate carry-forward (see below). Progress where you're winning isn't held hostage by a struggle somewhere else.</div>
+              </div>
+            </div>
+
+            <div style={{ ...INSTR_TOP_ITEM, marginBottom: 0 }}>
+              <span style={INSTR_DOT}>•</span>
+              <div style={{ flex: 1 }}>
+                <div style={INSTR_TOP_TITLE}>Closing Out the Month</div>
+
+                <div style={INSTR_BODY}>At the end of every period, what happens to a protocol depends on how it scored.</div>
+                <div style={INSTR_BODY}>If the protocol scored Standard or Unlocked (75% or higher), you choose:</div>
+
+                <InstrItem mark="—">Promote it — it becomes a permanent part of your daily roadmap, and that Foundation Core opens up for something new.</InstrItem>
+                <InstrItem mark="—">Drop it — it's done. That Core opens up for a new protocol next month.</InstrItem>
+                <InstrItem mark="—">Keep it in the 4x4 — you keep building on it. Since it's continuing, it has to grow — you can't repeat the same habit at the same level and expect a different result.</InstrItem>
+
+                <div style={{ ...INSTR_BODY, marginTop: 8, marginBottom: 0 }}>If the protocol scored Remediate (below 75%), there's no choice to make — it automatically carries into next month as-is, and no new addition can be added to that Core until it's back on track. This isn't a penalty. It's the system keeping your focus where it's needed before letting you take on more.</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
