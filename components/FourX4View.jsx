@@ -306,9 +306,9 @@ function InstrItem({ mark, children }) {
   );
 }
 
-function emptyDraft(fc) {
+function emptyDraft() {
   return {
-    foundation_core: fc,
+    foundation_core: null,
     name: '',
     type: null,
     time_of_day: null,
@@ -322,7 +322,7 @@ function emptyDraft(fc) {
 export default function FourX4View({ onBack, user, onSave }) {
   const [section, setSection] = useState(null);
   const [drafts, setDrafts] = useState(
-    FOUNDATIONS.map(f => emptyDraft(f.value))
+    Array.from({ length: 4 }, () => emptyDraft())
   );
   const [tier, setTier] = useState({ tier: 1, cap: 30 });
   const [saveError, setSaveError] = useState(null);
@@ -341,17 +341,15 @@ export default function FourX4View({ onBack, user, onSave }) {
       }
       if (pv && pv.value) {
         const loaded = JSON.parse(pv.value);
-        setDrafts(FOUNDATIONS.map(f => {
-          const ex = loaded.find(
-            p => p.foundation_core === f.value
-          );
-          if (!ex) return emptyDraft(f.value);
+        setDrafts(Array.from({ length: 4 }, (_, i) => {
+          const ex = loaded[i];
+          if (!ex) return emptyDraft();
           return {
-            foundation_core: f.value,
+            foundation_core: ex.foundation_core || null,
             name: ex.name || '',
-            type: ex.type || 'activation',
-            time_of_day: ex.time_of_day || 'am',
-            frequency: ex.frequency || 'daily',
+            type: ex.type || null,
+            time_of_day: ex.time_of_day || null,
+            frequency: ex.frequency || null,
             weekly_target: ex.weekly_target ?? null,
             time_cost_minutes: ex.time_cost_minutes,
             timeDNA: ex.time_cost_minutes === null,
@@ -474,6 +472,18 @@ export default function FourX4View({ onBack, user, onSave }) {
   async function handleSave() {
     setSaveError(null);
     setSaved(false);
+    if (!drafts.every(d => d.foundation_core)) {
+      setSaveError(
+        'All 4 activities must have a Foundation Core selected.'
+      );
+      return;
+    }
+    if (new Set(drafts.map(d => d.foundation_core)).size < 4) {
+      setSaveError(
+        'Each Foundation Core can only be used once.'
+      );
+      return;
+    }
     if (!drafts.every(d => d.name.trim())) {
       setSaveError('All 4 activities must have a name.');
       return;
@@ -595,18 +605,63 @@ export default function FourX4View({ onBack, user, onSave }) {
             fontStyle: 'italic',
           }}>Black = selected</div>
 
-          {FOUNDATIONS.map((f, i) => {
-            const d = drafts[i];
+          {drafts.map((d, i) => {
             const isDeact = d.type === 'deactivation';
+            const coreLabel = d.foundation_core
+              ? (FOUNDATIONS.find(
+                  fc => fc.value === d.foundation_core
+                ) || {}).label
+              : `Protocol ${i + 1}`;
             return (
-              <div key={f.value} style={CARD}>
+              <div key={i} style={CARD}>
 
                 <div style={{
                   color: '#B8860B',
                   fontSize: 15,
                   fontWeight: 700,
                   marginBottom: 10,
-                }}>{f.label}</div>
+                }}>{coreLabel}</div>
+
+                {/* Foundation Core */}
+                <div style={{ marginBottom: 8 }}>
+                  <div style={LBL}>Foundation Core</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {FOUNDATIONS.map(f => {
+                      const takenByOther = drafts.some(
+                        (other, oi) =>
+                          oi !== i &&
+                          other.foundation_core === f.value
+                      );
+                      const baseStyle = takenByOther
+                        ? {
+                            ...selBtn(false),
+                            opacity: 0.4,
+                            cursor: 'not-allowed',
+                            background: '#ccc',
+                            color: '#888',
+                            border: '1.5px solid #bbb',
+                          }
+                        : selBtn(
+                            d.foundation_core === f.value
+                          );
+                      return (
+                        <button
+                          key={f.value}
+                          disabled={takenByOther}
+                          style={baseStyle}
+                          onClick={() => {
+                            if (takenByOther) return;
+                            updateDraft(
+                              i,
+                              'foundation_core',
+                              f.value
+                            );
+                          }}
+                        >{f.label}</button>
+                      );
+                    })}
+                  </div>
+                </div>
 
                 <input
                   type="text"
