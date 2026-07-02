@@ -462,6 +462,14 @@ export default function FourX4View({ onBack, user, onSave }) {
     });
   }
 
+  function selectFoundationCore(i, value) {
+    setDrafts(prev => prev.map((d, idx) => {
+      if (idx === i) return { ...d, foundation_core: value };
+      if (d.foundation_core === value) return { ...d, foundation_core: null };
+      return d;
+    }));
+  }
+
   const netCost = drafts.reduce((sum, d) => {
     if (d.timeDNA || d.time_cost_minutes === null) {
       return sum;
@@ -607,11 +615,7 @@ export default function FourX4View({ onBack, user, onSave }) {
 
           {drafts.map((d, i) => {
             const isDeact = d.type === 'deactivation';
-            const coreLabel = d.foundation_core
-              ? (FOUNDATIONS.find(
-                  fc => fc.value === d.foundation_core
-                ) || {}).label
-              : `Protocol ${i + 1}`;
+            const coreLabel = `Protocol #${i + 1}`;
             return (
               <div key={i} style={CARD}>
 
@@ -621,47 +625,6 @@ export default function FourX4View({ onBack, user, onSave }) {
                   fontWeight: 700,
                   marginBottom: 10,
                 }}>{coreLabel}</div>
-
-                {/* Foundation Core */}
-                <div style={{ marginBottom: 8 }}>
-                  <div style={LBL}>Foundation Core</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {FOUNDATIONS.map(f => {
-                      const takenByOther = drafts.some(
-                        (other, oi) =>
-                          oi !== i &&
-                          other.foundation_core === f.value
-                      );
-                      const baseStyle = takenByOther
-                        ? {
-                            ...selBtn(false),
-                            opacity: 0.4,
-                            cursor: 'not-allowed',
-                            background: '#ccc',
-                            color: '#888',
-                            border: '1.5px solid #bbb',
-                          }
-                        : selBtn(
-                            d.foundation_core === f.value
-                          );
-                      return (
-                        <button
-                          key={f.value}
-                          disabled={takenByOther}
-                          style={baseStyle}
-                          onClick={() => {
-                            if (takenByOther) return;
-                            updateDraft(
-                              i,
-                              'foundation_core',
-                              f.value
-                            );
-                          }}
-                        >{f.label}</button>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 <input
                   type="text"
@@ -685,6 +648,20 @@ export default function FourX4View({ onBack, user, onSave }) {
                     )
                   }
                 />
+
+                {/* Foundation Core */}
+                <div style={{ marginBottom: 8 }}>
+                  <div style={LBL}>Foundation Core</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {FOUNDATIONS.map(f => (
+                      <button
+                        key={f.value}
+                        style={selBtn(d.foundation_core === f.value)}
+                        onClick={() => selectFoundationCore(i, f.value)}
+                      >{f.label}</button>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Type */}
                 <div style={{ marginBottom: 8 }}>
