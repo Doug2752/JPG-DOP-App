@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BG, GOLD, GOLD_LIGHT, DARK, MID } from '../utils/constants';
 import { storage } from '../services/storage';
 import { todayStr } from '../utils/date';
@@ -340,6 +340,9 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [pendingGrad, setPendingGrad] = useState([]);
   const [gradBusy, setGradBusy] = useState(null);
   const [gradSummary, setGradSummary] = useState([]);
+  const [showMidPeriodWarning, setShowMidPeriodWarning] = useState(false);
+  const originalDraftsRef = useRef(null);
+  const hasActivePeriodRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -394,6 +397,8 @@ export default function FourX4View({ onBack, user, onSave }) {
         };
       });
 
+      hasActivePeriodRef.current = loaded.length > 0;
+      originalDraftsRef.current = nextDrafts;
       setDrafts(nextDrafts);
     })();
   }, [user]);
@@ -445,6 +450,10 @@ export default function FourX4View({ onBack, user, onSave }) {
     }));
   }
 
+  function draftsChanged() {
+    return JSON.stringify(drafts) !== JSON.stringify(originalDraftsRef.current);
+  }
+
   const netCost = drafts.reduce((sum, d) => {
     if (d.timeDNA || d.time_cost_minutes === null) {
       return sum;
@@ -452,7 +461,15 @@ export default function FourX4View({ onBack, user, onSave }) {
     return sum + (Number(d.time_cost_minutes) || 0);
   }, 0);
 
-  async function handleSave() {
+  function handleSave() {
+    if (hasActivePeriodRef.current && draftsChanged()) {
+      setShowMidPeriodWarning(true);
+      return;
+    }
+    runSave();
+  }
+
+  async function runSave() {
     setSaveError(null);
     setSaved(false);
 
@@ -858,6 +875,27 @@ export default function FourX4View({ onBack, user, onSave }) {
 
   // ── Set Up / Edit screen ────────────────────────────
   if (section === 'Set Up / Edit') {
+    if (showMidPeriodWarning) {
+      return (
+        <div style={PAGE}>
+          <div style={{ maxWidth: 500, margin: '80px auto', textAlign: 'center' }}>
+            <div style={{ color: DARK, fontSize: 16, fontWeight: 600, marginBottom: 24, lineHeight: 1.5 }}>
+              Your current progress is saved. Changes apply from today forward. Continue?
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                style={{ padding: '12px 28px', borderRadius: 5, border: 'none', background: '#ddd', color: DARK, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+                onClick={() => setShowMidPeriodWarning(false)}
+              >CANCEL</button>
+              <button
+                style={{ padding: '12px 28px', borderRadius: 5, border: 'none', background: GOLD, color: 'black', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+                onClick={() => { setShowMidPeriodWarning(false); runSave(); }}
+              >CONFIRM</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
