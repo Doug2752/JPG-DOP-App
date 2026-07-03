@@ -171,6 +171,7 @@ export async function getPendingGraduationDecisions(user) {
     r.status !== 'active'
     && r.core_outcome !== 'advanced'
     && r.core_outcome !== 'retry'
+    && !r.is_keepin4x4
   ));
   if (pending.length === 0) return [];
 
@@ -242,6 +243,84 @@ export async function dropProtocol(user, protocolId) {
   all[idx] = { ...all[idx], core_outcome: 'retry' };
   await storage.set('4x4_protocols_' + user, JSON.stringify(all));
   return all[idx];
+}
+
+/**
+ * Keep-in-4x4 outcome: the graduation decision is deferred. The closed
+ * record itself just gets flagged is_keepin4x4:true / core_outcome:null —
+ * it still carries its own original lineage fields unchanged. The actual
+ * continuation (a new active record carrying linked_to/attempt_number/
+ * cycle_id/prior_frequency/prior_time_cost forward from this record) is
+ * created later, when the client saves the next Set Up/Edit period.
+ */
+export async function keepIn4x4Protocol(user, protocolId) {
+  const pv = await storage.get('4x4_protocols_' + user);
+  const all = pv && pv.value ? JSON.parse(pv.value) : [];
+  const idx = all.findIndex(r => r.id === protocolId);
+  if (idx === -1) return null;
+
+  all[idx] = { ...all[idx], is_keepin4x4: true, core_outcome: null };
+  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  return all[idx];
+}
+
+/**
+ * Returns closed protocols marked is_keepin4x4 that have not yet been
+ * carried into a new active record (i.e. no other record's linked_to
+ * points at them). These are pre-fill candidates for the next Set Up/
+ * Edit screen. Each is annotated with audit_outcome from its matching
+ * History snapshot, so the Set Up screen can flag Remediate carryovers.
+ */
+export async function getKeepIn4x4Carryovers(user) {
+  const pv = await storage.get('4x4_protocols_' + user);
+  const all = pv && pv.value ? JSON.parse(pv.value) : [];
+  const carryovers = all.filter(r => (
+    r.is_keepin4x4 && !all.some(o => o.linked_to === r.id)
+  ));
+  if (carryovers.length === 0) return [];
+
+  const hv = await storage.get('4x4_history_' + user);
+  const history = hv && hv.value ? JSON.parse(hv.value) : [];
+
+  return carryovers.map(p => {
+    const h = history.find(r => r.id === p.id);
+    return { ...p, audit_outcome: h ? h.audit_outcome : null };
+  });
+}
+
+/**
+ * Combined-growth percentage for a Keep-in-4x4 protocol being saved into a
+ * new period:
+ *   freq_delta = ((new_weekly_target - prior_frequency) / prior_frequency) * 100
+ *   duration_delta = ((new_time_cost_minutes - prior_time_cost) / prior_time_cost) * 100
+ *   combined = freq_delta + duration_delta
+ * Daily frequency (no weekly_target) is treated as 0 on either side of
+ * freq_delta. If the prior protocol was DNA (prior_time_cost null), only
+ * freq_delta counts and the full 25% must come from frequency alone. A
+ * zero prior value on either dimension contributes 0 to that dimension's
+ * delta (skips the division) rather than passing/failing the whole check.
+ * Caller compares the returned percentage against the 25% threshold.
+ */
+export function keepIn4x4GrowthPercent(draft, carryover) {
+  const priorFreq = Number(carryover.priorFrequency) || 0;
+  const newFreq = draft.frequency === 'weekly_target'
+    ? (Number(draft.weekly_target) || 0)
+    : 0;
+  const freqDelta = priorFreq !== 0
+    ? ((newFreq - priorFreq) / priorFreq) * 100
+    : 0;
+
+  const priorWasDNA = carryover.priorTimeCost === null
+    || carryover.priorTimeCost === undefined;
+  if (priorWasDNA) return freqDelta;
+
+  const priorTime = Number(carryover.priorTimeCost) || 0;
+  const newTime = draft.timeDNA ? 0 : (Number(draft.time_cost_minutes) || 0);
+  const durationDelta = priorTime !== 0
+    ? ((newTime - priorTime) / priorTime) * 100
+    : 0;
+
+  return freqDelta + durationDelta;
 }
 
 /**

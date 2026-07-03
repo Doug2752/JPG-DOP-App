@@ -6,6 +6,7 @@ import {
   canClose, closeActivePeriod, describeCloseWindow,
   runAutoCloseCheck, graceDeadlineDate,
   getPendingGraduationDecisions, promoteProtocol, dropProtocol,
+  keepIn4x4Protocol, getKeepIn4x4Carryovers, keepIn4x4GrowthPercent,
 } from '../utils/fourX4Period';
 
 const FOUNDATIONS = [
@@ -322,6 +323,7 @@ function emptyDraft() {
     weekly_target: null,
     time_cost_minutes: null,
     timeDNA: false,
+    carryover: null,
   };
 }
 
@@ -343,30 +345,56 @@ export default function FourX4View({ onBack, user, onSave }) {
     if (!user) return;
     (async () => {
       const tv = await storage.get('4x4_tier_' + user);
-      const pv = await storage.get(
-        '4x4_protocols_' + user
-      );
       if (tv && tv.value) {
         setTier(JSON.parse(tv.value));
       }
-      if (pv && pv.value) {
-        const loaded = JSON.parse(pv.value)
-          .filter(p => p.status === 'active');
-        setDrafts(Array.from({ length: 4 }, (_, i) => {
-          const ex = loaded[i];
-          if (!ex) return emptyDraft();
-          return {
-            foundation_core: ex.foundation_core || null,
-            name: ex.name || '',
-            type: ex.type || null,
-            time_of_day: ex.time_of_day || null,
-            frequency: ex.frequency || null,
-            weekly_target: ex.weekly_target ?? null,
-            time_cost_minutes: ex.time_cost_minutes,
-            timeDNA: ex.time_cost_minutes === null,
-          };
-        }));
-      }
+
+      const pv = await storage.get('4x4_protocols_' + user);
+      const loaded = pv && pv.value
+        ? JSON.parse(pv.value).filter(p => p.status === 'active')
+        : [];
+      const carryovers = await getKeepIn4x4Carryovers(user);
+
+      const nextDrafts = Array.from({ length: 4 }, (_, i) => {
+        const ex = loaded[i];
+        if (!ex) return emptyDraft();
+        return {
+          foundation_core: ex.foundation_core || null,
+          name: ex.name || '',
+          type: ex.type || null,
+          time_of_day: ex.time_of_day || null,
+          frequency: ex.frequency || null,
+          weekly_target: ex.weekly_target ?? null,
+          time_cost_minutes: ex.time_cost_minutes,
+          timeDNA: ex.time_cost_minutes === null,
+          carryover: null,
+        };
+      });
+
+      carryovers.forEach(co => {
+        const slotIdx = nextDrafts.findIndex(d => !d.foundation_core);
+        if (slotIdx === -1) return;
+        nextDrafts[slotIdx] = {
+          foundation_core: co.foundation_core,
+          name: co.name,
+          type: co.type,
+          time_of_day: co.time_of_day,
+          frequency: co.frequency,
+          weekly_target: co.weekly_target,
+          time_cost_minutes: co.time_cost_minutes,
+          timeDNA: co.time_cost_minutes === null,
+          carryover: {
+            id: co.id,
+            priorFrequency: co.weekly_target,
+            priorTimeCost: co.time_cost_minutes,
+            attemptNumber: co.attempt_number,
+            cycleId: co.cycle_id,
+            wasRemediate: co.audit_outcome === 'remediate',
+          },
+        };
+      });
+
+      setDrafts(nextDrafts);
     })();
   }, [user]);
 
@@ -489,6 +517,25 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
+    const stalledKeepIn = drafts
+      .filter(d => d.carryover)
+      .map(d => ({
+        draft: d,
+        combined: keepIn4x4GrowthPercent(d, d.carryover),
+      }))
+      .find(x => x.combined < 25);
+    if (stalledKeepIn) {
+      const combined = stalledKeepIn.combined;
+      const gap = 25 - combined;
+      setSaveError(
+        `"${stalledKeepIn.draft.name}" is continuing from Keep ` +
+        `in 4x4 and must grow by at least 25% combined ` +
+        `(frequency + time) versus last period. Current ` +
+        `combined growth: ${combined.toFixed(1)}% — needs ` +
+        `${gap.toFixed(1)}% more.`
+      );
+      return;
+    }
     if (netCost > tier.cap) {
       setSaveError(
         `Net time (${netCost} min) exceeds ` +
@@ -503,36 +550,41 @@ export default function FourX4View({ onBack, user, onSave }) {
     const monthSet = `${yyyy}-${mm}`;
     const activeFrom = `${yyyy}-${mm}-01`;
     const ts = Date.now();
-    const records = drafts.map(d => ({
-      id: '4x4_' + ts + '_' + d.foundation_core,
-      foundation_core: d.foundation_core,
-      name: d.name.trim(),
-      type: d.type,
-      time_of_day: d.time_of_day,
-      frequency: d.frequency,
-      weekly_target:
-        d.frequency === 'weekly_target'
-          ? (d.weekly_target ?? null)
-          : null,
-      time_cost_minutes: d.timeDNA
-        ? null
-        : (d.time_cost_minutes ?? null),
-      month_set: monthSet,
-      active_from: activeFrom,
-      active_until: null,
-      status: 'active',
-      core_outcome: null,
-      cycle_id: '4x4_' + ts + '_' + d.foundation_core,
-      attempt_number: 1,
-      linked_to: null,
-      coach_overridden: false,
-      coach_override_min_frequency: false,
-      is_keepin4x4: false,
-      prior_frequency: null,
-      prior_time_cost: null,
-      graduated_to_dop: false,
-      dop_item_id: null,
-    }));
+    const records = drafts.map(d => {
+      const co = d.carryover;
+      return {
+        id: '4x4_' + ts + '_' + d.foundation_core,
+        foundation_core: d.foundation_core,
+        name: d.name.trim(),
+        type: d.type,
+        time_of_day: d.time_of_day,
+        frequency: d.frequency,
+        weekly_target:
+          d.frequency === 'weekly_target'
+            ? (d.weekly_target ?? null)
+            : null,
+        time_cost_minutes: d.timeDNA
+          ? null
+          : (d.time_cost_minutes ?? null),
+        month_set: monthSet,
+        active_from: activeFrom,
+        active_until: null,
+        status: 'active',
+        core_outcome: null,
+        cycle_id: co
+          ? co.cycleId
+          : ('4x4_' + ts + '_' + d.foundation_core),
+        attempt_number: co ? (co.attemptNumber || 1) + 1 : 1,
+        linked_to: co ? co.id : null,
+        coach_overridden: false,
+        coach_override_min_frequency: false,
+        is_keepin4x4: false,
+        prior_frequency: co ? co.priorFrequency : null,
+        prior_time_cost: co ? co.priorTimeCost : null,
+        graduated_to_dop: false,
+        dop_item_id: null,
+      };
+    });
 
     if (existingActive.length > 0) {
       await closeActivePeriod(user, todayISO, { status: 'history' });
@@ -569,6 +621,12 @@ export default function FourX4View({ onBack, user, onSave }) {
     setGradBusy(record.id);
     await dropProtocol(user, record.id);
     recordGradChoice(record, 'drop');
+  }
+
+  async function handleKeepIn4x4(record) {
+    setGradBusy(record.id);
+    await keepIn4x4Protocol(user, record.id);
+    recordGradChoice(record, 'keepin');
   }
 
   async function finishGraduationFlow() {
@@ -691,6 +749,22 @@ export default function FourX4View({ onBack, user, onSave }) {
                       opacity: busy ? 0.6 : 1,
                     }}
                   >DROP</button>
+                  <button
+                    disabled={busy}
+                    onClick={() => handleKeepIn4x4(rec)}
+                    style={{
+                      flex: 1,
+                      background: GOLD_LIGHT,
+                      color: '#000',
+                      fontWeight: 700,
+                      fontSize: 14,
+                      borderRadius: 5,
+                      padding: '12px 0',
+                      border: '1.5px solid ' + GOLD,
+                      cursor: busy ? 'default' : 'pointer',
+                      opacity: busy ? 0.6 : 1,
+                    }}
+                  >KEEP IN 4x4</button>
                 </div>
               </div>
             );
@@ -704,6 +778,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   if (gradSummary.length > 0) {
     const promoted = gradSummary.filter(g => g.choice === 'promote');
     const dropped = gradSummary.filter(g => g.choice === 'drop');
+    const keptIn = gradSummary.filter(g => g.choice === 'keepin');
     return (
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -737,6 +812,21 @@ export default function FourX4View({ onBack, user, onSave }) {
               </div>
             )}
             {dropped.map(g => (
+              <div key={g.id} style={{
+                fontSize: 14,
+                marginBottom: 6,
+              }}>{g.name}</div>
+            ))}
+          </div>
+
+          <div style={CARD}>
+            <div style={GROUP_TITLE}>Continuing in 4x4</div>
+            {keptIn.length === 0 && (
+              <div style={{ fontSize: 13, color: '#666' }}>
+                None
+              </div>
+            )}
+            {keptIn.map(g => (
               <div key={g.id} style={{
                 fontSize: 14,
                 marginBottom: 6,
@@ -896,6 +986,18 @@ export default function FourX4View({ onBack, user, onSave }) {
                   marginBottom: 10,
                 }}>{coreLabel}</div>
 
+                {d.carryover && d.carryover.wasRemediate && (
+                  <div style={{
+                    fontSize: 11,
+                    color: '#8a7550',
+                    fontStyle: 'italic',
+                    marginBottom: 8,
+                  }}>
+                    Carried from a Remediate outcome — review
+                    before continuing.
+                  </div>
+                )}
+
                 <input
                   type="text"
                   style={{
@@ -907,6 +1009,9 @@ export default function FourX4View({ onBack, user, onSave }) {
                     fontSize: 14,
                     marginBottom: 10,
                     boxSizing: 'border-box',
+                    fontStyle: d.carryover && d.carryover.wasRemediate
+                      ? 'italic'
+                      : 'normal',
                   }}
                   placeholder="Describe your protocol..."
                   value={d.name}
