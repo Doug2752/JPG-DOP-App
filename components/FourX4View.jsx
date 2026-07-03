@@ -588,6 +588,8 @@ export default function FourX4View({ onBack, user, onSave }) {
 
     if (existingActive.length > 0) {
       await closeActivePeriod(user, todayISO, { status: 'history' });
+      const tv = await storage.get('4x4_tier_' + user);
+      if (tv && tv.value) setTier(JSON.parse(tv.value));
     }
     const pv2 = await storage.get('4x4_protocols_' + user);
     const base = pv2 && pv2.value ? JSON.parse(pv2.value) : [];

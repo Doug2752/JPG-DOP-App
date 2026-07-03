@@ -150,11 +150,30 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     JSON.stringify(existingHistory.concat(historyRecords))
   );
 
+  await evaluateAndWriteTierCap(user, storage, historyRecords);
+
   const rest = all.filter(r => r.status !== 'active');
   const merged = rest.concat(closedProtocols);
   await storage.set('4x4_protocols_' + user, JSON.stringify(merged));
 
   return { closed: true, protocols: merged };
+}
+
+/**
+ * Tier cap unlock rule, re-evaluated every period close (never
+ * permanent): cap upgrades 30 -> 60 when at least 2 of the 4
+ * Foundation Cores hit a 0.85+ completion rate for the period AND
+ * every remaining Core is still at 0.50+. Otherwise the cap holds
+ * (or reverts) to 30.
+ */
+export async function evaluateAndWriteTierCap(user, storage, historyRecords) {
+  const rates = historyRecords.map(r => r.completion_rate);
+  const highCount = rates.filter(r => r >= 0.85).length;
+  const remaining = rates.filter(r => r < 0.85);
+  const unlocked = highCount >= 2 && remaining.every(r => r >= 0.50);
+  const tierData = unlocked ? { tier: 2, cap: 60 } : { tier: 1, cap: 30 };
+  await storage.set('4x4_tier_' + user, JSON.stringify(tierData));
+  return tierData;
 }
 
 /**
