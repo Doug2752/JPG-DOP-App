@@ -118,8 +118,8 @@ export const AM_COMMON = [
 export const AM_CUSTOM_IDS = ['am_c1', 'am_c2', 'am_c3', 'am_c4', 'am_c5'];
 
 export const PM_STANDARD = [
+  { id: 'pm_eval', label: 'Evening Evaluation', desc: '1–10 score for today', defaultOn: true, locked: true },
   { id: 'pm_pit', label: 'PM PIT', desc: 'Evening Personal Investment Time — log your day', defaultOn: true, locked: true },
-  { id: 'pm_eval', label: 'Day Evaluation', desc: '1–10 score for today', defaultOn: true, locked: true, sub: true, parentId: 'pm_pit' },
   { id: 'pm_good', label: 'What Went Well', desc: 'Write in — wins, progress, positives', defaultOn: true, locked: true, sub: true, parentId: 'pm_pit' },
   { id: 'pm_bad', label: 'What to Improve', desc: 'Write in — honest assessment of the day', defaultOn: true, locked: true, sub: true, parentId: 'pm_pit' },
 ];
