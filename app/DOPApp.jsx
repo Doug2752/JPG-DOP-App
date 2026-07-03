@@ -9,6 +9,7 @@ import { todayStr, fmtDate } from '../utils/date';
 import { emptyForm, defaultSetup, isDayComplete, getDailyQuote, migrateSetup } from '../utils/form';
 import { storage } from '../services/storage';
 import { fetchDailyQuote } from '../services/ai';
+import { runAutoCloseCheck } from '../utils/fourX4Period';
 
 import LoginScreen, { VALID_CREDENTIALS } from '../components/LoginScreen';
 import SetupScreen from '../components/SetupScreen';
@@ -67,16 +68,11 @@ export default function DOPApp() {
         if (ad && ad.value) setArchiveDates(JSON.parse(ad.value));
         const st = await storage.get(sk + 'streak');
         if (st && st.value) setStreak(parseInt(st.value) || 0);
-        const px = await storage.get(
-          '4x4_protocols_' + user
+        const allProtocols = await runAutoCloseCheck(user);
+        const active = allProtocols.filter(
+          p => p.status === 'active'
         );
-        if (px && px.value) {
-          const all = JSON.parse(px.value);
-          const active = all.filter(
-            p => p.status === 'active'
-          );
-          setFourX4Protocols(active);
-        }
+        setFourX4Protocols(active);
       } catch (e) {
         console.error('[DOP] setup-load failed:', e);
       }

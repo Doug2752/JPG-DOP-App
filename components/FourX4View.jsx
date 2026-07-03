@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BG, GOLD, GOLD_LIGHT, DARK, MID } from '../utils/constants';
 import { storage } from '../services/storage';
+import { todayStr } from '../utils/date';
+import {
+  canClose, closeActivePeriod, describeCloseWindow,
+  runAutoCloseCheck, graceDeadlineDate,
+} from '../utils/fourX4Period';
 
 const FOUNDATIONS = [
   { label: 'Fitness',               value: 'fitness' },
@@ -341,7 +346,8 @@ export default function FourX4View({ onBack, user, onSave }) {
         setTier(JSON.parse(tv.value));
       }
       if (pv && pv.value) {
-        const loaded = JSON.parse(pv.value);
+        const loaded = JSON.parse(pv.value)
+          .filter(p => p.status === 'active');
         setDrafts(Array.from({ length: 4 }, (_, i) => {
           const ex = loaded[i];
           if (!ex) return emptyDraft();
@@ -361,7 +367,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   }, [user]);
 
   useEffect(() => {
-    if (!user || section !== 'History') return;
+    if (!user || (section !== 'History' && section !== 'Metrics')) return;
     (async () => {
       const hv = await storage.get('4x4_history_' + user);
       if (hv && hv.value) {
@@ -376,80 +382,8 @@ export default function FourX4View({ onBack, user, onSave }) {
     })();
   }, [user, section]);
 
-  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
-  const displayHistoryRecords = [
-    {
-      id: 'h1', foundation_core: 'fitness', name: 'Morning Run',
-      type: 'activation', time_of_day: 'am', frequency: 'daily',
-      weekly_target: null, time_cost_minutes: 20,
-      month_set: '2026-05', active_from: '2026-05-01',
-      active_until: '2026-05-31', status: 'closed',
-      core_outcome: 'advanced', cycle_id: 'c1', attempt_number: 1,
-      linked_to: null, times_completed: 28, times_expected: 31,
-      completion_rate: 0.90, net_time_cost_snapshot: 20,
-      period_date_range: '2026-05-01 to 2026-05-31',
-      audit_outcome: 'unlocked',
-    },
-    {
-      id: 'h2', foundation_core: 'nutrition', name: 'No Sugar',
-      type: 'deactivation', time_of_day: 'both', frequency: 'daily',
-      weekly_target: null, time_cost_minutes: -10,
-      month_set: '2026-05', active_from: '2026-05-01',
-      active_until: '2026-05-31', status: 'incomplete',
-      core_outcome: 'retry', cycle_id: 'c2', attempt_number: 1,
-      linked_to: null, times_completed: 14, times_expected: 31,
-      completion_rate: 0.45, net_time_cost_snapshot: -10,
-      period_date_range: '2026-05-01 to 2026-05-31',
-      audit_outcome: 'remediate',
-    },
-    {
-      id: 'h3', foundation_core: 'sleep', name: 'Bed by 10pm',
-      type: 'activation', time_of_day: 'pm', frequency: 'daily',
-      weekly_target: null, time_cost_minutes: 0,
-      month_set: '2026-04', active_from: '2026-04-01',
-      active_until: '2026-04-30', status: 'closed',
-      core_outcome: 'retry', cycle_id: 'c3', attempt_number: 2,
-      linked_to: 'h0-prev', times_completed: 22, times_expected: 30,
-      completion_rate: 0.73, net_time_cost_snapshot: 0,
-      period_date_range: '2026-04-01 to 2026-04-30',
-      audit_outcome: 'standard',
-    },
-    {
-      id: 'h4', foundation_core: 'mental_spiritual',
-      name: 'Morning Prayer', type: 'activation',
-      time_of_day: 'am', frequency: 'daily',
-      weekly_target: null, time_cost_minutes: 10,
-      month_set: '2026-05', active_from: '2026-05-01',
-      active_until: '2026-05-31', status: 'closed',
-      core_outcome: 'advanced', cycle_id: 'c4', attempt_number: 1,
-      linked_to: null, times_completed: 29, times_expected: 31,
-      completion_rate: 0.94, net_time_cost_snapshot: 10,
-      period_date_range: '2026-05-01 to 2026-05-31',
-      audit_outcome: 'unlocked',
-    },
-  ];
-  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
-
-  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
-  const displayActiveProtocols = [
-    {
-      foundation_core: 'fitness', name: 'Morning Run',
-      time_cost_minutes: 20, timeDNA: false,
-    },
-    {
-      foundation_core: 'nutrition', name: 'No Sugar',
-      time_cost_minutes: -10, timeDNA: false,
-    },
-    {
-      foundation_core: 'sleep', name: 'Bed by 10pm',
-      time_cost_minutes: 0, timeDNA: false,
-    },
-    {
-      foundation_core: 'mental_spiritual', name: 'Morning Prayer',
-      time_cost_minutes: 10, timeDNA: false,
-    },
-  ];
-  // TEMP TEST DATA - REMOVE AFTER VISUAL VERIFICATION
+  const displayHistoryRecords = historyRecords;
+  const displayActiveProtocols = drafts.filter(d => d.foundation_core);
 
   function updateDraft(i, field, val) {
     setDrafts(prev => {
@@ -481,6 +415,22 @@ export default function FourX4View({ onBack, user, onSave }) {
   async function handleSave() {
     setSaveError(null);
     setSaved(false);
+
+    const todayISO = todayStr();
+    const pv = await storage.get('4x4_protocols_' + user);
+    const existingAll = pv && pv.value ? JSON.parse(pv.value) : [];
+    const existingActive = existingAll.filter(r => r.status === 'active');
+    if (existingActive.length > 0) {
+      const monthSet = existingActive[0].month_set;
+      if (!canClose(monthSet, todayISO)) {
+        setSaveError(
+          `Current period can't close yet. It can be closed ` +
+          `${describeCloseWindow(monthSet)}.`
+        );
+        return;
+      }
+    }
+
     if (!drafts.every(d => d.foundation_core)) {
       setSaveError(
         'All 4 protocols must have a Foundation Core selected.'
@@ -571,9 +521,15 @@ export default function FourX4View({ onBack, user, onSave }) {
       graduated_to_dop: false,
       dop_item_id: null,
     }));
+
+    if (existingActive.length > 0) {
+      await closeActivePeriod(user, todayISO, { status: 'history' });
+    }
+    const pv2 = await storage.get('4x4_protocols_' + user);
+    const base = pv2 && pv2.value ? JSON.parse(pv2.value) : [];
     await storage.set(
       '4x4_protocols_' + user,
-      JSON.stringify(records)
+      JSON.stringify(base.concat(records))
     );
     if (onSave) await onSave();
     setSaved(true);
@@ -884,6 +840,12 @@ export default function FourX4View({ onBack, user, onSave }) {
                         )
                       }
                     >DNA</button>
+                    <span style={{
+                      fontSize: 12,
+                      color: '#666',
+                    }}>
+                      Select if there is no time addition or reduction
+                    </span>
                   </div>
                 </div>
 
