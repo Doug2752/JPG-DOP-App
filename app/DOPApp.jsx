@@ -358,6 +358,7 @@ export default function DOPApp() {
                 protocols={fourX4Protocols}
                 form={form}
                 saveForm={saveForm}
+                user={user}
               />
             )}
             <PMBlock
