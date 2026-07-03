@@ -168,6 +168,8 @@ export default function DOPApp() {
         );
         setFourX4Protocols(active);
       }
+      const sv = await storage.get(sk + 'setup');
+      if (sv && sv.value) setSetup(migrateSetup(JSON.parse(sv.value)));
     } catch(e) {
       console.error('[DOP] 4x4 reload failed:', e);
     }
