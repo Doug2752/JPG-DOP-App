@@ -158,6 +158,93 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
 }
 
 /**
+ * Returns closed protocol records (status !== 'active') that have not yet
+ * been through a Promote/Drop graduation decision — i.e. core_outcome is
+ * still null (manual close) or 'incomplete' (auto-close), not yet
+ * 'advanced' or 'retry'. Each record is annotated with audit_outcome
+ * pulled from its matching History snapshot (same id).
+ */
+export async function getPendingGraduationDecisions(user) {
+  const pv = await storage.get('4x4_protocols_' + user);
+  const all = pv && pv.value ? JSON.parse(pv.value) : [];
+  const pending = all.filter(r => (
+    r.status !== 'active'
+    && r.core_outcome !== 'advanced'
+    && r.core_outcome !== 'retry'
+  ));
+  if (pending.length === 0) return [];
+
+  const hv = await storage.get('4x4_history_' + user);
+  const history = hv && hv.value ? JSON.parse(hv.value) : [];
+
+  return pending.map(p => {
+    const h = history.find(r => r.id === p.id);
+    return { ...p, audit_outcome: h ? h.audit_outcome : null };
+  });
+}
+
+/**
+ * Promote outcome: marks the protocol advanced/graduated and writes a new
+ * custom AM and/or PM item (per time_of_day) into the client's DOP setup
+ * so it appears on the daily checklist, carrying a "Graduated from 4x4"
+ * marker in its label. That protocol's time_cost_minutes stops counting
+ * toward the 4x4 Time Governor budget automatically, since only
+ * status:'active' records feed the Set Up / Edit net-cost calculation.
+ */
+export async function promoteProtocol(user, protocolId) {
+  const sk = (user || 'guest') + '_dop7_';
+
+  const pv = await storage.get('4x4_protocols_' + user);
+  const all = pv && pv.value ? JSON.parse(pv.value) : [];
+  const idx = all.findIndex(r => r.id === protocolId);
+  if (idx === -1) return null;
+  const protocol = all[idx];
+
+  const dopItemId = 'grad_' + Date.now() + '_' + protocol.foundation_core;
+  const label = protocol.name + ' (Graduated from 4x4)';
+
+  const sv = await storage.get(sk + 'setup');
+  const setup = sv && sv.value ? JSON.parse(sv.value) : null;
+  if (setup) {
+    if (protocol.time_of_day === 'am' || protocol.time_of_day === 'both') {
+      const id = 'am_custom_' + dopItemId;
+      setup.amCustomItems = [...(setup.amCustomItems || []), { id, label }];
+      setup.amOrder = [...(setup.amOrder || []), id];
+    }
+    if (protocol.time_of_day === 'pm' || protocol.time_of_day === 'both') {
+      const id = 'pm_custom_' + dopItemId;
+      setup.pmCustomItems = [...(setup.pmCustomItems || []), { id, label }];
+      setup.pmOrder = [...(setup.pmOrder || []), id];
+    }
+    await storage.set(sk + 'setup', JSON.stringify(setup));
+  }
+
+  all[idx] = {
+    ...protocol,
+    graduated_to_dop: true,
+    core_outcome: 'advanced',
+    dop_item_id: dopItemId,
+  };
+  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  return all[idx];
+}
+
+/**
+ * Drop outcome: marks the protocol retry. The already-written History
+ * snapshot stands as-is; nothing else continues, no DOP item is created.
+ */
+export async function dropProtocol(user, protocolId) {
+  const pv = await storage.get('4x4_protocols_' + user);
+  const all = pv && pv.value ? JSON.parse(pv.value) : [];
+  const idx = all.findIndex(r => r.id === protocolId);
+  if (idx === -1) return null;
+
+  all[idx] = { ...all[idx], core_outcome: 'retry' };
+  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  return all[idx];
+}
+
+/**
  * Called on app load, before the Today view renders. If the active period's
  * grace window (5 days past month-end) has expired, auto-closes it with
  * status/core_outcome "incomplete" using whatever partial data exists.

@@ -5,6 +5,7 @@ import { todayStr } from '../utils/date';
 import {
   canClose, closeActivePeriod, describeCloseWindow,
   runAutoCloseCheck, graceDeadlineDate,
+  getPendingGraduationDecisions, promoteProtocol, dropProtocol,
 } from '../utils/fourX4Period';
 
 const FOUNDATIONS = [
@@ -334,6 +335,9 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [saved, setSaved] = useState(false);
   const [showExamples, setShowExamples] = useState(false);
   const [historyRecords, setHistoryRecords] = useState([]);
+  const [pendingGrad, setPendingGrad] = useState([]);
+  const [gradBusy, setGradBusy] = useState(null);
+  const [gradSummary, setGradSummary] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -363,6 +367,14 @@ export default function FourX4View({ onBack, user, onSave }) {
           };
         }));
       }
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const pending = await getPendingGraduationDecisions(user);
+      setPendingGrad(pending);
     })();
   }, [user]);
 
@@ -534,6 +546,222 @@ export default function FourX4View({ onBack, user, onSave }) {
     if (onSave) await onSave();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  }
+
+  function recordGradChoice(record, choice) {
+    setGradSummary(prev => [...prev, {
+      id: record.id,
+      name: record.name,
+      foundation_core: record.foundation_core,
+      choice,
+    }]);
+    setPendingGrad(prev => prev.filter(p => p.id !== record.id));
+    setGradBusy(null);
+  }
+
+  async function handlePromote(record) {
+    setGradBusy(record.id);
+    await promoteProtocol(user, record.id);
+    recordGradChoice(record, 'promote');
+  }
+
+  async function handleDrop(record) {
+    setGradBusy(record.id);
+    await dropProtocol(user, record.id);
+    recordGradChoice(record, 'drop');
+  }
+
+  async function finishGraduationFlow() {
+    setGradSummary([]);
+    if (onSave) await onSave();
+    if (onBack) onBack();
+  }
+
+  // ── Graduation decision screen ──────────────────────
+  if (pendingGrad.length > 0) {
+    return (
+      <div style={PAGE}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{
+            color: '#B8860B',
+            fontSize: 22,
+            fontWeight: 700,
+            marginBottom: 6,
+          }}>Period Closed — Decide Each Protocol</div>
+          <div style={{
+            fontSize: 13,
+            color: '#666',
+            marginBottom: 20,
+          }}>
+            Choose Promote or Drop for all 4 protocols before
+            continuing.
+          </div>
+
+          {FOUNDATIONS.map(f => {
+            const rec = pendingGrad.find(
+              p => p.foundation_core === f.value
+            );
+            if (!rec) return null;
+            const isRemediate = rec.audit_outcome === 'remediate';
+            const badge = auditBadge(rec.audit_outcome);
+            const busy = gradBusy === rec.id;
+            return (
+              <div
+                key={rec.id}
+                style={isRemediate
+                  ? {
+                    ...CARD,
+                    background: '#f3ead2',
+                    border: '1px dashed ' + GOLD,
+                  }
+                  : CARD}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}>
+                  <div>
+                    <div style={{
+                      fontSize: 12,
+                      color: '#B8860B',
+                      fontWeight: 700,
+                      marginBottom: 2,
+                    }}>{f.label}</div>
+                    <div style={{
+                      fontWeight: 700,
+                      fontSize: 15,
+                    }}>{rec.name}</div>
+                  </div>
+                  <div style={{
+                    ...BADGE,
+                    background: isRemediate ? '#e8dcc0' : badge.bg,
+                    color: isRemediate ? DARK : badge.color,
+                  }}>
+                    {isRemediate ? 'Remediate' : badge.label}
+                  </div>
+                </div>
+
+                {isRemediate && (
+                  <div style={{
+                    fontSize: 12,
+                    color: '#8a7550',
+                    marginTop: 8,
+                    fontStyle: 'italic',
+                  }}>
+                    This protocol fell below the consistency
+                    threshold this period.
+                  </div>
+                )}
+
+                <div style={{
+                  display: 'flex',
+                  gap: 10,
+                  marginTop: 14,
+                }}>
+                  <button
+                    disabled={busy}
+                    onClick={() => handlePromote(rec)}
+                    style={{
+                      flex: 1,
+                      background: GOLD,
+                      color: '#000',
+                      fontWeight: 700,
+                      fontSize: 14,
+                      borderRadius: 5,
+                      padding: '12px 0',
+                      border: 'none',
+                      cursor: busy ? 'default' : 'pointer',
+                      opacity: busy ? 0.6 : 1,
+                    }}
+                  >PROMOTE</button>
+                  <button
+                    disabled={busy}
+                    onClick={() => handleDrop(rec)}
+                    style={{
+                      flex: 1,
+                      background: '#1a1a1a',
+                      color: GOLD,
+                      fontWeight: 700,
+                      fontSize: 14,
+                      borderRadius: 5,
+                      padding: '12px 0',
+                      border: '1.5px solid ' + GOLD,
+                      cursor: busy ? 'default' : 'pointer',
+                      opacity: busy ? 0.6 : 1,
+                    }}
+                  >DROP</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Graduation confirmation summary ─────────────────
+  if (gradSummary.length > 0) {
+    const promoted = gradSummary.filter(g => g.choice === 'promote');
+    const dropped = gradSummary.filter(g => g.choice === 'drop');
+    return (
+      <div style={PAGE}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{
+            color: '#B8860B',
+            fontSize: 22,
+            fontWeight: 700,
+            marginBottom: 20,
+          }}>Period Closed — Summary</div>
+
+          <div style={CARD}>
+            <div style={GROUP_TITLE}>Promoted</div>
+            {promoted.length === 0 && (
+              <div style={{ fontSize: 13, color: '#666' }}>
+                None
+              </div>
+            )}
+            {promoted.map(g => (
+              <div key={g.id} style={{
+                fontSize: 14,
+                marginBottom: 6,
+              }}>{g.name}</div>
+            ))}
+          </div>
+
+          <div style={CARD}>
+            <div style={GROUP_TITLE}>Dropped</div>
+            {dropped.length === 0 && (
+              <div style={{ fontSize: 13, color: '#666' }}>
+                None
+              </div>
+            )}
+            {dropped.map(g => (
+              <div key={g.id} style={{
+                fontSize: 14,
+                marginBottom: 6,
+              }}>{g.name}</div>
+            ))}
+          </div>
+
+          <button
+            style={{
+              width: '100%',
+              background: GOLD,
+              color: 'black',
+              fontWeight: 700,
+              fontSize: 15,
+              borderRadius: 5,
+              padding: 14,
+              border: 'none',
+              cursor: 'pointer',
+              marginTop: 8,
+            }}
+            onClick={finishGraduationFlow}
+          >DONE</button>
+        </div>
+      </div>
+    );
   }
 
   // ── Set Up / Edit screen ────────────────────────────
