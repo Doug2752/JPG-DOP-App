@@ -7,6 +7,7 @@ import {
   runAutoCloseCheck, graceDeadlineDate,
   getPendingGraduationDecisions, promoteProtocol, dropProtocol,
   keepIn4x4Protocol, getKeepIn4x4Carryovers, keepIn4x4GrowthPercent,
+  countCompletions,
 } from '../utils/fourX4Period';
 
 const FOUNDATIONS = [
@@ -324,6 +325,7 @@ function emptyDraft() {
     time_cost_minutes: null,
     timeDNA: false,
     carryover: null,
+    is_remediate_carry: false,
   };
 }
 
@@ -343,6 +345,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [showMidPeriodWarning, setShowMidPeriodWarning] = useState(false);
   const originalDraftsRef = useRef(null);
   const hasActivePeriodRef = useRef(false);
+  const hasProgressRef = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -371,8 +374,18 @@ export default function FourX4View({ onBack, user, onSave }) {
           time_cost_minutes: ex.time_cost_minutes,
           timeDNA: ex.time_cost_minutes === null,
           carryover: null,
+          is_remediate_carry: ex.is_remediate_carry === true,
         };
       });
+
+      let anyProgress = false;
+      for (const ex of loaded) {
+        const c = await countCompletions(
+          user, ex.id, ex.active_from, todayStr()
+        );
+        if (c > 0) { anyProgress = true; break; }
+      }
+      hasProgressRef.current = anyProgress;
 
       carryovers.forEach(co => {
         const slotIdx = nextDrafts.findIndex(d => !d.foundation_core);
@@ -394,6 +407,7 @@ export default function FourX4View({ onBack, user, onSave }) {
             cycleId: co.cycle_id,
             wasRemediate: co.audit_outcome === 'remediate',
           },
+          is_remediate_carry: false,
         };
       });
 
@@ -415,13 +429,23 @@ export default function FourX4View({ onBack, user, onSave }) {
     if (!user || (section !== 'History' && section !== 'Metrics')) return;
     (async () => {
       const hv = await storage.get('4x4_history_' + user);
-      if (hv && hv.value) {
-        try {
-          setHistoryRecords(JSON.parse(hv.value));
-        } catch (_) {
-          setHistoryRecords([]);
-        }
-      } else {
+      if (!hv || !hv.value) {
+        setHistoryRecords([]);
+        return;
+      }
+      try {
+        const records = JSON.parse(hv.value);
+        const pv = await storage.get('4x4_protocols_' + user);
+        const protocols = pv && pv.value ? JSON.parse(pv.value) : [];
+        const byId = {};
+        protocols.forEach(p => { byId[p.id] = p; });
+        setHistoryRecords(records.map(r => ({
+          ...r,
+          is_keepin4x4: byId[r.id]
+            ? !!byId[r.id].is_keepin4x4
+            : !!r.is_keepin4x4,
+        })));
+      } catch (_) {
         setHistoryRecords([]);
       }
     })();
@@ -462,7 +486,11 @@ export default function FourX4View({ onBack, user, onSave }) {
   }, 0);
 
   function handleSave() {
-    if (hasActivePeriodRef.current && draftsChanged()) {
+    if (
+      hasActivePeriodRef.current
+      && hasProgressRef.current
+      && draftsChanged()
+    ) {
       setShowMidPeriodWarning(true);
       return;
     }
@@ -535,7 +563,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       return;
     }
     const stalledKeepIn = drafts
-      .filter(d => d.carryover)
+      .filter(d => d.carryover && !d.is_remediate_carry)
       .map(d => ({
         draft: d,
         combined: keepIn4x4GrowthPercent(d, d.carryover),
@@ -596,6 +624,7 @@ export default function FourX4View({ onBack, user, onSave }) {
         coach_overridden: false,
         coach_override_min_frequency: false,
         is_keepin4x4: false,
+        is_remediate_carry: false,
         prior_frequency: co ? co.priorFrequency : null,
         prior_time_cost: co ? co.priorTimeCost : null,
         graduated_to_dop: false,
@@ -1016,6 +1045,7 @@ export default function FourX4View({ onBack, user, onSave }) {
           {drafts.map((d, i) => {
             const isDeact = d.type === 'deactivation';
             const coreLabel = `Protocol #${i + 1}`;
+            const isRemediateCarry = d.is_remediate_carry === true;
             return (
               <div key={i} style={CARD}>
 
@@ -1071,11 +1101,33 @@ export default function FourX4View({ onBack, user, onSave }) {
                     {FOUNDATIONS.map(f => (
                       <button
                         key={f.value}
-                        style={selBtn(d.foundation_core === f.value)}
-                        onClick={() => selectFoundationCore(i, f.value)}
+                        disabled={isRemediateCarry}
+                        style={isRemediateCarry
+                          ? {
+                            ...selBtn(d.foundation_core === f.value),
+                            background: '#ddd',
+                            color: '#888',
+                            border: '1.5px solid #ccc',
+                            cursor: 'default',
+                            opacity: 0.7,
+                          }
+                          : selBtn(d.foundation_core === f.value)}
+                        onClick={() => {
+                          if (!isRemediateCarry) {
+                            selectFoundationCore(i, f.value);
+                          }
+                        }}
                       >{f.label}</button>
                     ))}
                   </div>
+                  {isRemediateCarry && (
+                    <div style={{
+                      fontSize: 11,
+                      color: '#999',
+                      fontStyle: 'italic',
+                      marginTop: 4,
+                    }}>Auto-carried — Remediate</div>
+                  )}
                 </div>
 
                 {/* Type */}
@@ -1331,6 +1383,14 @@ export default function FourX4View({ onBack, user, onSave }) {
                   (r.attempt_number && r.attempt_number > 1)
                   || r.linked_to
                 );
+                let carryLabel = null;
+                if (r.attempt_number > 1) {
+                  if (r.is_remediate_carry) {
+                    carryLabel = `Attempt ${r.attempt_number}`;
+                  } else if (r.is_keepin4x4) {
+                    carryLabel = `Month ${r.attempt_number}`;
+                  }
+                }
                 return (
                   <div key={r.id} style={CARD}>
                     <div style={{
@@ -1348,6 +1408,14 @@ export default function FourX4View({ onBack, user, onSave }) {
                           color: '#666',
                           marginTop: 2,
                         }}>{r.period_date_range}</div>
+                        {carryLabel && (
+                          <div style={{
+                            fontSize: 11,
+                            color: '#999',
+                            fontStyle: 'italic',
+                            marginTop: 2,
+                          }}>{carryLabel}</div>
+                        )}
                       </div>
                       <div style={{
                         ...BADGE,

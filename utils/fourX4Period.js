@@ -48,6 +48,14 @@ export function periodDateRange(fromISO, untilISO) {
   return `${fmtMonthDay(fromISO)} - ${fmtMonthDay(untilISO)} (${days} days)`;
 }
 
+function nextMonthOf(monthSet) {
+  const [y, m] = monthSet.split('-').map(Number);
+  const d = new Date(Date.UTC(y, m, 1));
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  return { monthSet: `${yyyy}-${mm}`, firstDay: `${yyyy}-${mm}-01` };
+}
+
 export function computeTimesExpected(protocol, fromISO, untilISO) {
   const days = daysBetweenInclusive(fromISO, untilISO);
   if (protocol.frequency === 'weekly_target') {
@@ -152,8 +160,34 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
 
   await evaluateAndWriteTierCap(user, storage, historyRecords);
 
+  const ts = Date.now();
+  const remediateCarries = [];
+  historyRecords.forEach((hr, idx) => {
+    if (hr.audit_outcome !== 'remediate') return;
+    const closedRecord = closedProtocols[idx];
+    const { monthSet: nextMonthSet, firstDay } =
+      nextMonthOf(closedRecord.month_set);
+    remediateCarries.push({
+      ...closedRecord,
+      id: '4x4_' + ts + '_' + closedRecord.foundation_core,
+      status: 'active',
+      core_outcome: null,
+      month_set: nextMonthSet,
+      active_from: firstDay,
+      active_until: null,
+      times_completed: 0,
+      times_expected: 0,
+      completion_rate: 0,
+      is_keepin4x4: false,
+      linked_to: closedRecord.id,
+      cycle_id: closedRecord.cycle_id,
+      attempt_number: (closedRecord.attempt_number || 1) + 1,
+      is_remediate_carry: true,
+    });
+  });
+
   const rest = all.filter(r => r.status !== 'active');
-  const merged = rest.concat(closedProtocols);
+  const merged = rest.concat(closedProtocols).concat(remediateCarries);
   await storage.set('4x4_protocols_' + user, JSON.stringify(merged));
 
   return { closed: true, protocols: merged };
@@ -197,10 +231,12 @@ export async function getPendingGraduationDecisions(user) {
   const hv = await storage.get('4x4_history_' + user);
   const history = hv && hv.value ? JSON.parse(hv.value) : [];
 
-  return pending.map(p => {
-    const h = history.find(r => r.id === p.id);
-    return { ...p, audit_outcome: h ? h.audit_outcome : null };
-  });
+  return pending
+    .map(p => {
+      const h = history.find(r => r.id === p.id);
+      return { ...p, audit_outcome: h ? h.audit_outcome : null };
+    })
+    .filter(p => p.audit_outcome !== 'remediate');
 }
 
 /**
