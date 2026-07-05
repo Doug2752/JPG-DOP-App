@@ -708,19 +708,12 @@ export default function FourX4View({ onBack, user, onSave }) {
               p => p.foundation_core === f.value
             );
             if (!rec) return null;
-            const isRemediate = rec.audit_outcome === 'remediate';
             const badge = auditBadge(rec.audit_outcome);
             const busy = gradBusy === rec.id;
             return (
               <div
                 key={rec.id}
-                style={isRemediate
-                  ? {
-                    ...CARD,
-                    background: '#f3ead2',
-                    border: '1px dashed ' + GOLD,
-                  }
-                  : CARD}
+                style={CARD}
               >
                 <div style={{
                   display: 'flex',
@@ -741,24 +734,12 @@ export default function FourX4View({ onBack, user, onSave }) {
                   </div>
                   <div style={{
                     ...BADGE,
-                    background: isRemediate ? '#e8dcc0' : badge.bg,
-                    color: isRemediate ? DARK : badge.color,
+                    background: badge.bg,
+                    color: badge.color,
                   }}>
-                    {isRemediate ? 'Remediate' : badge.label}
+                    {badge.label}
                   </div>
                 </div>
-
-                {isRemediate && (
-                  <div style={{
-                    fontSize: 12,
-                    color: '#8a7550',
-                    marginTop: 8,
-                    fontStyle: 'italic',
-                  }}>
-                    This protocol fell below the consistency
-                    threshold this period.
-                  </div>
-                )}
 
                 <div style={{
                   display: 'flex',
