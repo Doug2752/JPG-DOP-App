@@ -162,10 +162,10 @@ export default function PMBlock({
 
       {/* Footer */}
       <div style={{ borderTop: `1px solid ${BORDER}`, padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
-        <span style={{ fontSize: 10, color: '#bbb' }}>JPG-DOP-001-v13</span>
+        <span style={{ fontSize: 10, color: '#bbb' }}>JPG-PROJ-APP-DOP-BUILD-v13</span>
         <span style={{ fontSize: 10, color: '#bbb' }}>Jones Performance Group LLC</span>
         <span style={{ fontSize: 10, color: '#bbb' }}>Daily Operational Process</span>
-        <span style={{ fontSize: 10, color: '#bbb', fontWeight: 700 }}>CONFIDENTIAL</span>
+        <span style={{ fontSize: 10, color: GOLD, fontWeight: 700 }}>CONFIDENTIAL</span>
       </div>
     </div>
   );
