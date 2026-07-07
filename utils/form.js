@@ -15,8 +15,8 @@ export function defaultDurations() {
 export function defaultSetup() {
   return {
     amSelected: AM_STANDARD.map(i => i.id),
-    amCommonSelected: AM_DEFAULT_RECOMMENDED.slice(),
-    amOrder: ['pit', ...AM_DEFAULT_RECOMMENDED],
+    amCommonSelected: ['make_bed', 'am_fitness', 'personal_prep', 'breakfast'],
+    amOrder: ['pit', 'make_bed', 'am_fitness', 'personal_prep', 'breakfast'],
     pmSelected: PM_STANDARD.map(i => i.id),
     pmCommonSelected: PM_DEFAULT_COMMON.slice(),
     pmOrder: [...PM_DEFAULT_TOP, ...PM_DEFAULT_COMMON],

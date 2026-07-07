@@ -88,13 +88,12 @@ export const AM_STANDARD = [
 export const AM_SUB_IDS = ['thankful_for', 'to_accomplish', 'nit', 'dd', 'dbs'];
 
 export const AM_COMMON = [
+  { id: 'make_bed', label: 'Make Bed (if able)', desc: 'Start the day with one thing done', recommended: true },
   { id: 'am_fitness', label: 'AM Fitness', desc: 'Morning workout — gym, run, training session', recommended: true },
   { id: 'personal_prep', label: 'Personal Prep', desc: 'Shower / Dress', recommended: true },
   { id: 'breakfast', label: 'Breakfast', desc: 'Fuel your body — whole foods, protein, minimal processed foods', recommended: true },
-  { id: 'make_bed', label: 'Make Bed (if able)', desc: 'Start the day with one thing done', recommended: true },
   { id: 'meditation', label: 'Meditation', desc: 'Quiet focus, breathwork, mindfulness practice' },
   { id: 'review_email', label: 'Review Email', desc: 'Quick scan only — can run alongside breakfast. Do not get bogged down' },
-  { id: 'am_routine_complete', label: 'AM Routine Complete', desc: 'Final wrap-up — confirm you have everything needed for the day. Out the door, commute, move on' },
   { id: 'children_meals', label: "Prepare Children's Meals", desc: 'Lunches, snacks, school items' },
   { id: 'school_run', label: 'Take Child to School', desc: 'Drop-off / transport' },
   { id: 'child_activities', label: 'Child Activity Prep', desc: 'Sports gear, instruments, after-school needs' },
@@ -113,6 +112,7 @@ export const AM_COMMON = [
   { id: 'outdoor_time', label: 'Outdoor Time', desc: 'Fresh air, brief walk, nature exposure before heading out' },
   { id: 'vehicle_gear_prep', label: 'Vehicle / Gear Prep', desc: 'Vehicle check, equipment ready' },
   { id: 'errand_planning', label: 'Errand Planning', desc: 'Batch and plan errands — grocery, post office, etc.' },
+  { id: 'am_routine_complete', label: 'AM Routine Complete', desc: 'Final wrap-up — confirm you have everything needed for the day. Out the door, commute, move on' },
 ];
 
 export const AM_CUSTOM_IDS = ['am_c1', 'am_c2', 'am_c3', 'am_c4', 'am_c5'];
