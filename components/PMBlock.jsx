@@ -12,7 +12,7 @@ export default function PMBlock({
       {/* PM Block header */}
       <div style={{ background: STEEL, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ color: '#fff', fontWeight: 900, fontSize: 15, letterSpacing: 2, textTransform: 'uppercase' }}>PM Block</span>
-        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 }}>{pmDone} / {allPMRows.length} done</span>
+        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 }}>{pmDone} / {allPMRows.filter(i => i.id !== 'pm_eval').length} done</span>
       </div>
 
       {/* Evening Evaluation */}
