@@ -70,13 +70,13 @@ export default function PMBlock({
       })}
 
       {/* Tomorrow's Priorities */}
-      <div style={{ borderRadius: 5, overflow: 'hidden', marginBottom: 14 }}>
+      <div style={{ borderRadius: 0, overflow: 'hidden', marginBottom: 14 }}>
         <div style={{ background: '#1a1a1a', padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
           <div style={{ color: RED, fontWeight: 900, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }}>
             Tomorrow's Priorities
           </div>
         </div>
-        <div style={{ padding: '14px 16px', background: RED_LIGHT, borderBottom: `2px solid ${RED}`, borderBottomLeftRadius: 5, borderBottomRightRadius: 5 }}>
+        <div style={{ padding: '14px 16px', background: RED_LIGHT, borderBottom: `2px solid ${RED}`, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, overflow: 'hidden' }}>
           <label style={{ ...lbl, color: RED, marginBottom: 6 }}>Tomorrow's One Thing</label>
           <input
             type="text"
