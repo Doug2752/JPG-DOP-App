@@ -90,11 +90,11 @@ export function PITButton() {
       rel="noreferrer"
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#111', border: `1.5px solid ${GOLD}`, borderRadius: 5,
-        padding: '14px 20px', textDecoration: 'none', marginBottom: 14, cursor: 'pointer',
+        background: GOLD_LIGHT, border: '1.5px solid #000', borderRadius: 5,
+        padding: '5px 14px', width: '100%', textDecoration: 'none', marginBottom: 14, cursor: 'pointer',
       }}
     >
-      <span style={{ color: GOLD, fontWeight: 700, fontSize: 14, letterSpacing: 0.5 }}>
+      <span style={{ color: '#000', fontWeight: 900, fontSize: 15, letterSpacing: 1 }}>
         Open Personal Investment Time (PIT)
       </span>
     </a>
