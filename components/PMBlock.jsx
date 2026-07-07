@@ -2,11 +2,26 @@ import React from 'react';
 import { GOLD, GOLD_LIGHT, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, TapScore } from './Shared';
+import { todayStr } from '../utils/date';
+import { canClose, isGraceExpired, graceDeadlineDate } from '../utils/fourX4Period';
 
 export default function PMBlock({
   form, setup, allPMRows, pmDone,
   togglePM, upd, saveForm, complete, saved,
+  fourX4Protocols = [],
 }) {
+  const monthSet = fourX4Protocols[0]?.month_set;
+  const today = todayStr();
+  const showGraceBanner = !!monthSet && canClose(monthSet, today) && !isGraceExpired(monthSet, today);
+  let graceBannerText = '';
+  if (showGraceBanner) {
+    const [y, m] = monthSet.split('-').map(Number);
+    const monthName = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+    const daysLeft = Math.round((graceDeadlineDate(monthSet) - new Date(today + 'T00:00:00Z')) / 86400000);
+    graceBannerText = daysLeft > 0
+      ? `Your ${monthName} period is ready to close — You have ${daysLeft} days left before it auto-closes.`
+      : `Your ${monthName} period is ready to close — 0 days left, closing today.`;
+  }
   return (
     <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, marginBottom: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
       {/* PM Block header */}
@@ -120,6 +135,16 @@ export default function PMBlock({
           placeholder="Note anything abnormal or items not completed this evening..."
         />
       </div>
+
+      {showGraceBanner && (
+        <div style={{
+          margin: '0 16px 14px', padding: '10px 16px',
+          background: GOLD, border: '1.5px solid #000', borderRadius: 5,
+          color: '#000', fontWeight: 700, fontSize: 13, textAlign: 'center',
+        }}>
+          {graceBannerText}
+        </div>
+      )}
 
       {/* PM Lock */}
       <div style={{
