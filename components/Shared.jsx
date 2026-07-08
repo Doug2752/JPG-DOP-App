@@ -61,6 +61,15 @@ export function CheckRow({ item, checked, onToggle, duration, blockColor }) {
             Required
           </span>
         ) : null}
+        {item.graduated_from_4x4 ? (
+          <span style={{
+            fontSize: 10, fontWeight: 700, color: '#000', background: GOLD,
+            border: '1.5px solid #000', borderRadius: 5, padding: '2px 8px',
+            marginLeft: 8, letterSpacing: 0.5, textTransform: 'uppercase',
+          }}>
+            4x4 Graduate
+          </span>
+        ) : null}
       </div>
       {duration ? (
         <span style={{ fontSize: 11, color: checked ? '#7a5c00' : '#aaa', whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' }}>

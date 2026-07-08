@@ -257,19 +257,19 @@ export async function promoteProtocol(user, protocolId) {
   const protocol = all[idx];
 
   const dopItemId = 'grad_' + Date.now() + '_' + protocol.foundation_core;
-  const label = protocol.name + ' (Graduated from 4x4)';
+  const label = protocol.name;
 
   const sv = await storage.get(sk + 'setup');
   const setup = sv && sv.value ? JSON.parse(sv.value) : null;
   if (setup) {
     if (protocol.time_of_day === 'am' || protocol.time_of_day === 'both') {
       const id = 'am_custom_' + dopItemId;
-      setup.amCustomItems = [...(setup.amCustomItems || []), { id, label }];
+      setup.amCustomItems = [...(setup.amCustomItems || []), { id, label, graduated_from_4x4: true }];
       setup.amOrder = [...(setup.amOrder || []), id];
     }
     if (protocol.time_of_day === 'pm' || protocol.time_of_day === 'both') {
       const id = 'pm_custom_' + dopItemId;
-      setup.pmCustomItems = [...(setup.pmCustomItems || []), { id, label }];
+      setup.pmCustomItems = [...(setup.pmCustomItems || []), { id, label, graduated_from_4x4: true }];
       setup.pmOrder = [...(setup.pmOrder || []), id];
     }
     await storage.set(sk + 'setup', JSON.stringify(setup));
