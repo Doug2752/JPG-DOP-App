@@ -215,7 +215,7 @@ export default function DOPApp() {
     }
     const item = findAMItem(id);
     if (!item) {
-      const ci = (setup.amCustomItems || []).find(i => i.id === id);
+      const ci = (setup.amCustomItems || []).find(i => i && i.id === id);
       const label = ci ? ci.label : null;
       if (label && label.trim()) allAMRows.push({ id, label, sub: false });
       return;
