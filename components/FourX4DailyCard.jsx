@@ -49,7 +49,7 @@ export default function FourX4DailyCard({
       if (!cancelled) setWeeklyCounts(results);
     })();
     return () => { cancelled = true; };
-  }, [user, protocols, checks]);
+  }, [user, protocols]);
   function toggle(id) {
     const next = { ...checks, [id]: !checks[id] };
     saveForm({ ...form, fourX4Checks: next });
