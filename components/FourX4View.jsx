@@ -366,22 +366,40 @@ export default function FourX4View({ onBack, user, onSave }) {
         : [];
       const carryovers = await getKeepIn4x4Carryovers(user);
 
-      const nextDrafts = Array.from({ length: 4 }, (_, i) => {
+      const nextDrafts = [];
+      for (let i = 0; i < 4; i++) {
         const ex = loaded[i];
-        if (!ex) return emptyDraft();
-        return {
-          foundation_core: ex.foundation_core || null,
-          name: ex.name || '',
-          type: ex.type || null,
-          time_of_day: ex.time_of_day || null,
-          frequency: ex.frequency || null,
-          weekly_target: ex.weekly_target ?? null,
-          time_cost_minutes: ex.time_cost_minutes,
-          timeDNA: ex.time_cost_minutes === null,
-          carryover: null,
-          is_remediate_carry: ex.is_remediate_carry === true,
-        };
-      });
+        if (ex) {
+          nextDrafts.push({
+            foundation_core: ex.foundation_core || null,
+            name: ex.name || '',
+            type: ex.type || null,
+            time_of_day: ex.time_of_day || null,
+            frequency: ex.frequency || null,
+            weekly_target: ex.weekly_target ?? null,
+            time_cost_minutes: ex.time_cost_minutes,
+            timeDNA: ex.time_cost_minutes === null,
+            measurable_value: ex.measurable_value ?? null,
+            measurable_unit: ex.measurable_unit || '',
+            deact_declaration: ex.deact_declaration || '',
+            deact_frequency: ex.deact_frequency ?? null,
+            deact_uses_weekly_target: ex.deact_uses_weekly_target === true,
+            carryover: null,
+            is_remediate_carry: ex.is_remediate_carry === true,
+          });
+        } else {
+          let draft = emptyDraft();
+          const dv = await storage.get(`dop_4x4_draft_${user}_${i}`);
+          if (dv && dv.value) {
+            try {
+              draft = JSON.parse(dv.value);
+            } catch (_) {
+              draft = emptyDraft();
+            }
+          }
+          nextDrafts.push(draft);
+        }
+      }
 
       let anyProgress = false;
       for (const ex of loaded) {
@@ -460,6 +478,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const displayActiveProtocols = drafts.filter(d => d.foundation_core);
 
   function updateDraft(i, field, val) {
+    let updated = null;
     setDrafts(prev => {
       const next = [...prev];
       const upd = { ...next[i], [field]: val };
@@ -467,8 +486,12 @@ export default function FourX4View({ onBack, user, onSave }) {
         upd.time_cost_minutes = null;
       }
       next[i] = upd;
+      updated = upd;
       return next;
     });
+    if (updated) {
+      storage.set(`dop_4x4_draft_${user}_${i}`, JSON.stringify(updated));
+    }
   }
 
   function selectFoundationCore(i, value) {
@@ -712,6 +735,9 @@ export default function FourX4View({ onBack, user, onSave }) {
       '4x4_protocols_' + user,
       JSON.stringify(base.concat(records))
     );
+    for (let slot = 0; slot < 4; slot++) {
+      await storage.delete(`dop_4x4_draft_${user}_${slot}`);
+    }
     if (onSave) await onSave();
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
