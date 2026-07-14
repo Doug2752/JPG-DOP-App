@@ -324,6 +324,11 @@ function emptyDraft() {
     weekly_target: null,
     time_cost_minutes: null,
     timeDNA: false,
+    measurable_value: null,
+    measurable_unit: '',
+    deact_declaration: '',
+    deact_frequency: null,
+    deact_uses_weekly_target: false,
     carryover: null,
     is_remediate_carry: false,
   };
@@ -562,6 +567,65 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
+    const shortName = drafts.find(
+      d => d.name.trim().split(/\s+/).filter(Boolean).length < 5
+    );
+    if (shortName) {
+      setSaveError(
+        `Protocol name must be at least 5 words. ` +
+        `"${shortName.name.trim() || '(empty)'}" does not meet the standard.`
+      );
+      return;
+    }
+    const missingMeasurable = drafts.find(
+      d => d.type === 'activation' &&
+        (d.measurable_value === null || !d.measurable_unit)
+    );
+    if (missingMeasurable) {
+      setSaveError(
+        `All activation protocols require a measurable target ` +
+        `(number and unit). Check "${missingMeasurable.name.trim() || 'unnamed protocol'}".`
+      );
+      return;
+    }
+    const belowTimeFloor = drafts.find(
+      d => d.type === 'activation' &&
+        !d.timeDNA &&
+        d.time_cost_minutes !== null &&
+        d.time_cost_minutes < 10
+    );
+    if (belowTimeFloor) {
+      setSaveError(
+        `Activation protocols require a minimum time cost of 10 minutes, ` +
+        `or select DNA if no time applies. ` +
+        `Check "${belowTimeFloor.name.trim() || 'unnamed protocol'}".`
+      );
+      return;
+    }
+    const missingDecl = drafts.find(
+      d => d.type === 'deactivation' &&
+        (!d.deact_declaration || d.deact_declaration.trim().length < 3)
+    );
+    if (missingDecl) {
+      setSaveError(
+        `All deactivation protocols require a declaration of the ` +
+        `specific behavior being stopped or reduced. ` +
+        `Check "${missingDecl.name.trim() || 'unnamed protocol'}".`
+      );
+      return;
+    }
+    const badDeactFreq = drafts.find(
+      d => d.type === 'deactivation' &&
+        d.deact_uses_weekly_target &&
+        (d.deact_frequency === null || d.deact_frequency < 3)
+    );
+    if (badDeactFreq) {
+      setSaveError(
+        `Deactivation weekly target must be at least 3 times per week. ` +
+        `Check "${badDeactFreq.name.trim() || 'unnamed protocol'}".`
+      );
+      return;
+    }
     const stalledKeepIn = drafts
       .filter(d => d.carryover && !d.is_remediate_carry)
       .map(d => ({
@@ -611,6 +675,11 @@ export default function FourX4View({ onBack, user, onSave }) {
         time_cost_minutes: d.timeDNA
           ? null
           : (d.time_cost_minutes ?? null),
+        measurable_value: d.type === 'activation' ? (d.measurable_value ?? null) : null,
+        measurable_unit: d.type === 'activation' ? (d.measurable_unit || null) : null,
+        deact_declaration: d.type === 'deactivation' ? (d.deact_declaration.trim() || null) : null,
+        deact_frequency: d.type === 'deactivation' && d.deact_uses_weekly_target ? (d.deact_frequency ?? null) : null,
+        deact_uses_weekly_target: d.type === 'deactivation' ? (d.deact_uses_weekly_target || false) : false,
         month_set: monthSet,
         active_from: activeFrom,
         active_until: null,
@@ -1207,6 +1276,109 @@ export default function FourX4View({ onBack, user, onSave }) {
                         );
                       }}
                     />
+                  </div>
+                )}
+
+                {/* Measurable Target (activations only) */}
+                {d.type === 'activation' && (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={LBL}>Measurable Target</div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        type="number"
+                        style={NUM_INPUT}
+                        placeholder="e.g. 150"
+                        value={d.measurable_value ?? ''}
+                        onChange={e => {
+                          const v = parseFloat(e.target.value);
+                          updateDraft(i, 'measurable_value', isNaN(v) ? null : v);
+                        }}
+                      />
+                      <select
+                        style={{
+                          padding: '6px 10px',
+                          borderRadius: 5,
+                          border: '1px solid #ccc',
+                          fontSize: 13,
+                          background: '#f0f0f0',
+                          cursor: 'pointer',
+                        }}
+                        value={d.measurable_unit}
+                        onChange={e => updateDraft(i, 'measurable_unit', e.target.value)}
+                      >
+                        <option value="">-- unit --</option>
+                        <option value="times">times</option>
+                        <option value="minutes">minutes</option>
+                        <option value="hours">hours</option>
+                        <option value="grams">grams</option>
+                        <option value="ounces">ounces</option>
+                        <option value="calories">calories</option>
+                        <option value="miles">miles</option>
+                        <option value="meters">meters</option>
+                        <option value="kilometers">kilometers</option>
+                        <option value="steps">steps</option>
+                        <option value="servings">servings</option>
+                        <option value="other">other</option>
+                      </select>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
+                      Enter a specific, measurable target (e.g. 150 grams, 4 miles, 30 minutes)
+                    </div>
+                  </div>
+                )}
+
+                {/* Deactivation Declaration (deactivations only) */}
+                {d.type === 'deactivation' && (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={LBL}>What specific behavior are you stopping or reducing?</div>
+                    <input
+                      type="text"
+                      style={{
+                        width: '100%',
+                        background: '#f0f0f0',
+                        borderRadius: 5,
+                        padding: 8,
+                        border: '1px solid #ccc',
+                        fontSize: 13,
+                        boxSizing: 'border-box',
+                      }}
+                      placeholder="e.g. Eating Doritos every day at lunch"
+                      value={d.deact_declaration}
+                      onChange={e => updateDraft(i, 'deact_declaration', e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* Deactivation Frequency (deactivations only) */}
+                {d.type === 'deactivation' && (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={LBL}>Frequency (optional — leave blank if binary done/not done)</div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <button
+                        style={selBtn(d.deact_uses_weekly_target === false)}
+                        onClick={() => {
+                          updateDraft(i, 'deact_uses_weekly_target', false);
+                          updateDraft(i, 'deact_frequency', null);
+                        }}
+                      >Binary</button>
+                      <button
+                        style={selBtn(d.deact_uses_weekly_target === true)}
+                        onClick={() => updateDraft(i, 'deact_uses_weekly_target', true)}
+                      >Weekly Target</button>
+                      {d.deact_uses_weekly_target && (
+                        <input
+                          type="number"
+                          min={3}
+                          style={NUM_INPUT}
+                          placeholder="min 3"
+                          value={d.deact_frequency ?? ''}
+                          onChange={e => {
+                            const v = parseInt(e.target.value, 10);
+                            updateDraft(i, 'deact_frequency', isNaN(v) ? null : (v < 3 ? 3 : v));
+                          }}
+                        />
+                      )}
+                    </div>
                   </div>
                 )}
 
