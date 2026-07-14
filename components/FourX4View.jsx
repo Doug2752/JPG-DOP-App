@@ -1028,10 +1028,17 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <span style={INSTR_DOT}>•</span>
                 <div style={{ flex: 1 }}>
                   <div style={INSTR_TOP_TITLE}>Fitness</div>
-                  <InstrItem mark="—">Add a morning or evening walk into your daily routine</InstrItem>
-                  <InstrItem mark="—">Start stretching in the morning after getting out of bed</InstrItem>
-                  <InstrItem mark="—">Incorporate some strength training at least four times a week</InstrItem>
-                  <InstrItem mark="—">Some sort of workout which makes me sweat at least 4 times a week</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Activations:</div>
+                  <InstrItem mark="—">Complete a strength training session of at least [duration] [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Run or walk at least [distance] [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Complete a morning stretch or mobility routine for at least [duration] every day</InstrItem>
+                  <InstrItem mark="—">Accumulate at least [steps] steps per day every day</InstrItem>
+                  <InstrItem mark="—">Complete a conditioning workout that elevates heart rate for at least [duration] [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Take a cold shower for a minimum of [duration] [frequency] times per week</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Deactivations:</div>
+                  <InstrItem mark="—">Eliminate skipping scheduled workouts — currently missing at least [frequency] per week (binary)</InstrItem>
+                  <InstrItem mark="—">Stop using the elevator and take stairs at work every day (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate sitting for more than [duration] without a movement break every day (binary)</InstrItem>
                 </div>
               </div>
 
@@ -1039,17 +1046,19 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <span style={INSTR_DOT}>•</span>
                 <div style={{ flex: 1 }}>
                   <div style={INSTR_TOP_TITLE}>Nutrition</div>
-                  <InstrItem mark="—">Take supplements every morning</InstrItem>
-                  <InstrItem mark="—">Cut out [blank] from my diet</InstrItem>
-                  <InstrItem mark="—">Drink more water every day, at least 32 ounces</InstrItem>
-                  <InstrItem mark="—">Reduce alcohol consumption to only two times a week</InstrItem>
-                  <InstrItem mark="—">Take my lunch to work at least 4 times a week</InstrItem>
-                  <InstrItem mark="—">Limit eating processed foods</InstrItem>
-                  <InstrItem mark="—">Consume at least 150g of protein a day</InstrItem>
-                  <InstrItem mark="—">Reduce caloric intake by [blank] percentage every day</InstrItem>
-                  <InstrItem mark="—">Track what I eat and drink every day</InstrItem>
-                  <InstrItem mark="—">Make coffee at home before I leave for work instead of buying coffee out</InstrItem>
-                  <InstrItem mark="—">Take a cooking class to learn to eat healthy</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Activations:</div>
+                  <InstrItem mark="—">Consume at least [quantity] of protein every day</InstrItem>
+                  <InstrItem mark="—">Drink at least [quantity] of water every day</InstrItem>
+                  <InstrItem mark="—">Prepare and bring lunch to work at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Log every meal and drink consumed at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Take all daily supplements every morning at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Eat a meal containing vegetables at least [frequency] times per week with a minimum of [quantity] servings per meal</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Deactivations:</div>
+                  <InstrItem mark="—">Eliminate buying paid coffee drinks — currently purchasing at least [frequency] times per week (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate fast food consumption — currently eating fast food at least [frequency] times per week (binary)</InstrItem>
+                  <InstrItem mark="—">Reduce alcohol consumption to no more than [frequency] times per week — currently at [frequency] or more</InstrItem>
+                  <InstrItem mark="—">Stop eating after [time] — currently doing so at least [frequency] nights per week (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate [specific food] from daily consumption — currently consuming every day (binary)</InstrItem>
                 </div>
               </div>
 
@@ -1057,29 +1066,35 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <span style={INSTR_DOT}>•</span>
                 <div style={{ flex: 1 }}>
                   <div style={INSTR_TOP_TITLE}>Sleep</div>
-                  <InstrItem mark="—">Not leaving the TV on while you sleep at night</InstrItem>
-                  <InstrItem mark="—">No scrolling right before bed</InstrItem>
-                  <InstrItem mark="—">Read before bed</InstrItem>
-                  <InstrItem mark="—">No phone use after getting in bed every night</InstrItem>
-                  <InstrItem mark="—">Commit to going to bed by a specific time 5 times a week</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Activations:</div>
+                  <InstrItem mark="—">Be in bed with lights off by [time] at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Complete a [duration] wind-down routine before bed at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Sleep a minimum of [duration] per night at least [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Keep bedroom temperature at or below [temperature] every night (binary)</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Deactivations:</div>
+                  <InstrItem mark="—">Stop leaving the TV on while sleeping — currently doing so every night (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate all phone use after getting into bed — currently doing so at least [frequency] nights per week (binary)</InstrItem>
+                  <InstrItem mark="—">Stop scrolling social media within [duration] of bedtime — currently doing so at least [frequency] nights per week (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate caffeine consumption after [time] — currently consuming at least [frequency] times per week (binary)</InstrItem>
                 </div>
               </div>
 
               <div style={{ ...INSTR_TOP_ITEM, marginBottom: 0 }}>
                 <span style={INSTR_DOT}>•</span>
                 <div style={{ flex: 1 }}>
-                  <div style={INSTR_TOP_TITLE}>Mental/Spiritual Health</div>
-                  <InstrItem mark="—">Reduce the amount of phone social media scrolling</InstrItem>
-                  <InstrItem mark="—">Make a purposeful phone call to someone you love</InstrItem>
-                  <InstrItem mark="—">Spend designated time on relationships or family members after work</InstrItem>
-                  <InstrItem mark="—">Protect mental bandwidth by not having meaningless conversations</InstrItem>
-                  <InstrItem mark="—">Work on the ability to say no more often when it's not productive</InstrItem>
-                  <InstrItem mark="—">Commit time every week for a date night</InstrItem>
-                  <InstrItem mark="—">Commit at least 10 minutes a day to my hobby ([hobby])</InstrItem>
-                  <InstrItem mark="—">Take a cold shower on the weekends, minimum of five minutes</InstrItem>
-                  <InstrItem mark="—">Check in with a mentor or someone I trust weekly</InstrItem>
-                  <InstrItem mark="—">Spend 10 minutes in the evening four times a week reading scripture</InstrItem>
-                  <InstrItem mark="—">Spend 5 minutes a day learning something new, at least four times a week</InstrItem>
+                  <div style={INSTR_TOP_TITLE}>Mental / Spiritual Health</div>
+                  <div style={INSTR_SUBHEAD}>Activations:</div>
+                  <InstrItem mark="—">Spend at least [duration] reading personal development material or scripture [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Write a minimum of [quantity] sentences of daily reflection or journaling [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Make a purposeful check-in call with a mentor or trusted person at least [frequency] per week for a minimum of [duration]</InstrItem>
+                  <InstrItem mark="—">Spend at least [duration] of dedicated focused time on a personal hobby or skill [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Learn something new and document it for at least [duration] [frequency] times per week</InstrItem>
+                  <InstrItem mark="—">Spend at least [duration] of undivided time with family or close relationships [frequency] times per week</InstrItem>
+                  <div style={INSTR_SUBHEAD}>Deactivations:</div>
+                  <InstrItem mark="—">Eliminate passive social media scrolling — currently spending at least [duration] per day (binary)</InstrItem>
+                  <InstrItem mark="—">Stop engaging in conversations that have no productive or relational value — currently doing so daily (binary)</InstrItem>
+                  <InstrItem mark="—">Reduce total daily screen time on non-work apps to no more than [duration] — currently averaging over [duration] (binary)</InstrItem>
+                  <InstrItem mark="—">Eliminate saying yes to requests that conflict with your priorities — currently doing so at least [frequency] times per week (binary)</InstrItem>
                 </div>
               </div>
             </div>
