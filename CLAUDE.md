@@ -62,29 +62,63 @@
 
 \## CURRENT BUILD STATE
 
-Built and verified: AM/PM blocks, Configure, two-tier gold color
+Built and committed:
 
-system, 4x4 Matrix (Set Up/Edit, Instructions, History, Metrics,
+\- AM/PM blocks, Configure, two-tier gold color system
 
-Period Close Pieces 1-3, Graduation workflow, Keep-in-4x4 pre-fill,
+\- 4x4 Matrix: Set Up/Edit, Instructions, History, Metrics
 
-weekly tally, mid-period edit warning modal).
+\- Period Close Pieces 1-3, Graduation workflow,
 
-NOT YET COMMITTED (awaiting July 31 real-period verification):
+  Keep-in-4x4 pre-fill, weekly tally
 
-reloadFourX4 fix, tier cap evaluation (evaluateAndWriteTierCap).
+\- Mid-period edit warning modal
 
-NOT YET BUILT: 25% growth requirement for Keep in 4x4, grace window
+\- Grace window reminder banner (PMBlock.jsx)
 
-reminder, graduated item visual marker, Promote/Drop/Keep budget
+\- 4x4 GRADUATE badge (Shared.jsx)
 
-reset on graduation (time\_cost\_minutes stops counting when promoted).
+\- Protocol enforcement rules (Rules 1-5 in runSave();
+
+  Rule 1 removed 07/15/2026, Rule 2 refined to block
+
+  minutes/hours)
+
+\- Deactivation Time saved auto-negate (07/15/2026)
+
+\- Per-card auto-save draft system (dop\_4x4\_draft keys)
+
+\- Mount field load fix (5 enforcement fields)
+
+\- Vitest Tier 1 test infrastructure (tests/ folder,
+
+  21 passing tests)
+
+NOT YET COMMITTED (awaiting July 31 real-period
+
+verification):
+
+\- reloadFourX4 fix
+
+\- evaluateAndWriteTierCap (30→60 min cap unlock)
+
+NOT YET BUILT:
+
+\- Setup Instructions — 4x4 section copy (Step 5/Priority 2)
+
+\- AM Lock box styling fix + Today's Takeaway sizing
+
+  (grouped — awaiting Doug's direction)
+
+\- "Show instructions on first visit" flag not resetting
+
+  when setup localStorage key is cleared
 
 Known credentials: Test / JPG2026 (case-insensitive).
 
-Brave opens localhost:5173 automatically on startup for daily entries
+Brave opens localhost:5173 automatically on startup —
 
-— do not change this port.
+do not change this port.
 
 
 

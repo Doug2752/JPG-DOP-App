@@ -49,6 +49,7 @@ const SECTIONS = [
   { h: 'Custom AM Items', b: 'Write your own AM checklist items. Use the + Add button to create as many as you need. Type a name in each box — it will appear in your daily checklist.' },
   { h: 'Reorder AM Items', b: 'Arrange your selected AM items in the exact order you complete them each morning. Use the arrows to move items up or down.' },
   { h: "Today's Takeaway", b: 'A new quote appears at the end of your AM block every day. Read it before you move on. Centered on discipline, time, and growth.' },
+  { h: '4x4 Matrix', b: 'The 4x4 Matrix has its own instructions panel. Go to the 4x4 tab and select Instructions to view setup guidance, protocol rules, and examples.' },
   { h: 'Evening Evaluation (1–10)', b: 'Tap your score at the top of the PM block. This is your overall day rating. Combined with your Morning Evaluation, it creates your daily performance picture over time.' },
   { h: 'PM PIT', b: 'PM PIT is your nightly investment in self-awareness. Log your Day Evaluation score, note what went well, and note what to improve. This closes the loop on the day — honest, brief, and consistent.' },
   { h: 'PM Required Items', b: 'PM PIT is required and cannot be removed — it includes your Day Evaluation score, what went well, and what to improve. This is your nightly close-out — brief, honest, and consistent.' },
