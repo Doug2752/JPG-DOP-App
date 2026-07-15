@@ -331,6 +331,8 @@ function emptyDraft() {
     deact_uses_weekly_target: false,
     carryover: null,
     is_remediate_carry: false,
+    is_alteration: false,
+    linked_to: null,
   };
 }
 
@@ -348,9 +350,12 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [gradBusy, setGradBusy] = useState(null);
   const [gradSummary, setGradSummary] = useState([]);
   const [showMidPeriodWarning, setShowMidPeriodWarning] = useState(false);
+  const [alteringIndex, setAlteringIndex] = useState(null);
+  const [alteredSlots, setAlteredSlots] = useState([]);
   const originalDraftsRef = useRef(null);
   const hasActivePeriodRef = useRef(false);
   const hasProgressRef = useRef(false);
+  const loadedProtocolsRef = useRef([]);
 
   useEffect(() => {
     if (!user) return;
@@ -386,6 +391,8 @@ export default function FourX4View({ onBack, user, onSave }) {
             deact_uses_weekly_target: ex.deact_uses_weekly_target === true,
             carryover: null,
             is_remediate_carry: ex.is_remediate_carry === true,
+            is_alteration: ex.is_alteration === true,
+            linked_to: ex.linked_to ?? null,
           });
         } else {
           let draft = emptyDraft();
@@ -435,6 +442,14 @@ export default function FourX4View({ onBack, user, onSave }) {
       });
 
       hasActivePeriodRef.current = loaded.length > 0;
+      loadedProtocolsRef.current = loaded;
+      const alreadyAltered = [];
+      for (let i = 0; i < 4; i++) {
+        if (loaded[i] && loaded[i].is_alteration) {
+          alreadyAltered.push(i);
+        }
+      }
+      setAlteredSlots(alreadyAltered);
       originalDraftsRef.current = nextDrafts;
       setDrafts(nextDrafts);
     })();
@@ -513,6 +528,35 @@ export default function FourX4View({ onBack, user, onSave }) {
     return sum + (Number(d.time_cost_minutes) || 0);
   }, 0);
 
+  function handleAlter(i) {
+    const original = loadedProtocolsRef.current[i];
+    if (!original) return;
+    const altDraft = {
+      ...emptyDraft(),
+      foundation_core: original.foundation_core,
+      name: original.name,
+      type: original.type,
+      time_of_day: original.time_of_day,
+      frequency: original.frequency,
+      weekly_target: original.weekly_target ?? null,
+      time_cost_minutes: original.time_cost_minutes ?? null,
+      timeDNA: !original.time_cost_minutes,
+      measurable_value: original.measurable_value ?? null,
+      measurable_unit: original.measurable_unit || '',
+      deact_declaration: original.deact_declaration || '',
+      deact_frequency: original.deact_frequency ?? null,
+      deact_uses_weekly_target:
+        original.deact_uses_weekly_target === true,
+      is_alteration: true,
+      linked_to: original.id,
+    };
+    const newDrafts = drafts.map((d, idx) =>
+      idx === i ? altDraft : d
+    );
+    setDrafts(newDrafts);
+    setAlteringIndex(i);
+  }
+
   function handleSave() {
     if (
       hasActivePeriodRef.current
@@ -529,11 +573,12 @@ export default function FourX4View({ onBack, user, onSave }) {
     setSaveError(null);
     setSaved(false);
 
+    const isAlterationSave = drafts.some(d => d.is_alteration === true);
     const todayISO = todayStr();
     const pv = await storage.get('4x4_protocols_' + user);
     const existingAll = pv && pv.value ? JSON.parse(pv.value) : [];
     const existingActive = existingAll.filter(r => r.status === 'active');
-    if (existingActive.length > 0) {
+    if (!isAlterationSave && existingActive.length > 0) {
       const monthSet = existingActive[0].month_set;
       if (!canClose(monthSet, todayISO)) {
         setSaveError(
@@ -544,7 +589,16 @@ export default function FourX4View({ onBack, user, onSave }) {
       }
     }
 
-    if (!drafts.every(d => d.foundation_core)) {
+    // During an alteration save, per-draft rules validate ONLY the
+    // altered draft(s) — unaltered committed protocols must not block
+    // (e.g. a legacy time-based measurable unit on an untouched card).
+    // The two cross-slot composition invariants (unique cores, >=1
+    // deactivation) and the period netCost budget stay on the full set.
+    const checkDrafts = isAlterationSave
+      ? drafts.filter(d => d.is_alteration === true)
+      : drafts;
+
+    if (!checkDrafts.every(d => d.foundation_core)) {
       setSaveError(
         'All 4 protocols must have a Foundation Core selected.'
       );
@@ -556,27 +610,27 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    if (!drafts.every(d => d.name.trim())) {
+    if (!checkDrafts.every(d => d.name.trim())) {
       setSaveError('All 4 protocols must have a name.');
       return;
     }
-    if (!drafts.every(d => d.type)) {
+    if (!checkDrafts.every(d => d.type)) {
       setSaveError('All 4 protocols must have a Type selected.');
       return;
     }
-    if (!drafts.every(d => d.time_of_day)) {
+    if (!checkDrafts.every(d => d.time_of_day)) {
       setSaveError(
         'All 4 protocols must have a Time of Day selected.'
       );
       return;
     }
-    if (!drafts.every(d => d.frequency)) {
+    if (!checkDrafts.every(d => d.frequency)) {
       setSaveError(
         'All 4 protocols must have a Frequency selected.'
       );
       return;
     }
-    if (!drafts.every(
+    if (!checkDrafts.every(
       d => d.timeDNA || d.time_cost_minutes !== null
     )) {
       setSaveError(
@@ -591,7 +645,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       return;
     }
     const TIME_UNITS = ['minutes', 'hours'];
-    const missingMeasurable = drafts.find(
+    const missingMeasurable = checkDrafts.find(
       d => d.type === 'activation' &&
         (d.measurable_value === null ||
          !d.measurable_unit ||
@@ -606,7 +660,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const belowTimeFloor = drafts.find(
+    const belowTimeFloor = checkDrafts.find(
       d => d.type === 'activation' &&
         !d.timeDNA &&
         d.time_cost_minutes !== null &&
@@ -620,7 +674,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const missingDecl = drafts.find(
+    const missingDecl = checkDrafts.find(
       d => d.type === 'deactivation' &&
         (!d.deact_declaration || d.deact_declaration.trim().length < 3)
     );
@@ -632,7 +686,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const badDeactFreq = drafts.find(
+    const badDeactFreq = checkDrafts.find(
       d => d.type === 'deactivation' &&
         d.deact_uses_weekly_target &&
         (d.deact_frequency === null || d.deact_frequency < 3)
@@ -644,7 +698,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const stalledKeepIn = drafts
+    const stalledKeepIn = checkDrafts
       .filter(d => d.carryover && !d.is_remediate_carry)
       .map(d => ({
         draft: d,
@@ -668,6 +722,76 @@ export default function FourX4View({ onBack, user, onSave }) {
         `Net time (${netCost} min) exceeds ` +
         `cap (${tier.cap} min).`
       );
+      return;
+    }
+    if (isAlterationSave) {
+      const nowAltered = [...alteredSlots];
+      for (let i = 0; i < drafts.length; i++) {
+        const d = drafts[i];
+        if (!d.is_alteration) continue;
+        const orig = existingAll.find(r => r.id === d.linked_to);
+        if (!orig) continue;
+        orig.status = 'altered_archived';
+        orig.active_until = todayISO;
+        orig.core_outcome = null;
+        const altered = {
+          id: '4x4_' + Date.now() + '_' + d.foundation_core,
+          foundation_core: d.foundation_core,
+          name: d.name.trim(),
+          type: d.type,
+          time_of_day: d.time_of_day,
+          frequency: d.frequency,
+          weekly_target:
+            d.frequency === 'weekly_target'
+              ? (d.weekly_target ?? null)
+              : null,
+          time_cost_minutes: d.timeDNA
+            ? null
+            : (d.time_cost_minutes ?? null),
+          measurable_value: d.type === 'activation'
+            ? (d.measurable_value ?? null) : null,
+          measurable_unit: d.type === 'activation'
+            ? (d.measurable_unit || null) : null,
+          deact_declaration: d.type === 'deactivation'
+            ? (d.deact_declaration.trim() || null) : null,
+          deact_frequency:
+            d.type === 'deactivation' && d.deact_uses_weekly_target
+              ? (d.deact_frequency ?? null) : null,
+          deact_uses_weekly_target: d.type === 'deactivation'
+            ? (d.deact_uses_weekly_target || false) : false,
+          month_set: orig.month_set,
+          active_from: todayISO,
+          active_until: null,
+          status: 'active',
+          core_outcome: null,
+          cycle_id: orig.cycle_id,
+          attempt_number: (orig.attempt_number || 1) + 1,
+          linked_to: orig.id,
+          coach_overridden: false,
+          coach_override_min_frequency: false,
+          is_keepin4x4: false,
+          is_remediate_carry: false,
+          prior_frequency: null,
+          prior_time_cost: null,
+          graduated_to_dop: false,
+          dop_item_id: null,
+          is_alteration: true,
+        };
+        existingAll.push(altered);
+        if (!nowAltered.includes(i)) nowAltered.push(i);
+      }
+      await storage.set(
+        '4x4_protocols_' + user,
+        JSON.stringify(existingAll)
+      );
+      setDrafts(prev => prev.map(
+        d => d.is_alteration ? emptyDraft() : d
+      ));
+      setAlteredSlots(nowAltered);
+      setAlteringIndex(null);
+      if (onSave) await onSave();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
       return;
     }
     const now = new Date();
@@ -1142,6 +1266,40 @@ export default function FourX4View({ onBack, user, onSave }) {
                   marginBottom: 10,
                 }}>{coreLabel}</div>
 
+                {loadedProtocolsRef.current[i]
+                  && d.is_alteration === false
+                  && alteringIndex !== i
+                  && (
+                    alteredSlots.includes(i) ? (
+                      <div style={{
+                        fontSize: 12,
+                        color: '#888',
+                        fontStyle: 'italic',
+                        marginBottom: 12,
+                      }}>
+                        Protocol altered this period — one
+                        alteration per protocol per period
+                        maximum.
+                      </div>
+                    ) : (
+                      <button
+                        disabled={alteredSlots.includes(i)}
+                        style={{
+                          background: GOLD_LIGHT,
+                          color: '#000',
+                          border: '1.5px solid #000',
+                          borderRadius: 5,
+                          padding: '6px 14px',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          marginBottom: 12,
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => handleAlter(i)}
+                      >Alter This Protocol</button>
+                    )
+                  )}
+
                 {d.carryover && d.carryover.wasRemediate && (
                   <div style={{
                     fontSize: 11,
@@ -1217,31 +1375,47 @@ export default function FourX4View({ onBack, user, onSave }) {
                 </div>
 
                 {/* Type */}
-                <div style={{ marginBottom: 8 }}>
-                  <div style={LBL}>Type</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      style={selBtn(
-                        d.type === 'activation'
-                      )}
-                      onClick={() =>
-                        updateDraft(
-                          i, 'type', 'activation'
-                        )
-                      }
-                    >Activation</button>
-                    <button
-                      style={selBtn(
-                        d.type === 'deactivation'
-                      )}
-                      onClick={() =>
-                        updateDraft(
-                          i, 'type', 'deactivation'
-                        )
-                      }
-                    >Deactivation</button>
+                {d.is_alteration === true ? (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={LBL}>Type</div>
+                    <div style={{
+                      fontSize: 13,
+                      color: '#555',
+                      fontStyle: 'italic',
+                      padding: '6px 0',
+                    }}>
+                      {d.type === 'activation'
+                        ? 'Activation (inherited — cannot change type)'
+                        : 'Deactivation (inherited — cannot change type)'}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={LBL}>Type</div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        style={selBtn(
+                          d.type === 'activation'
+                        )}
+                        onClick={() =>
+                          updateDraft(
+                            i, 'type', 'activation'
+                          )
+                        }
+                      >Activation</button>
+                      <button
+                        style={selBtn(
+                          d.type === 'deactivation'
+                        )}
+                        onClick={() =>
+                          updateDraft(
+                            i, 'type', 'deactivation'
+                          )
+                        }
+                      >Deactivation</button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Time of day */}
                 <div style={{ marginBottom: 8 }}>

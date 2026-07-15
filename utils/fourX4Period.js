@@ -151,11 +151,49 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     closedProtocols.push(base);
   }
 
+  // Alteration originals archived mid-period for the closing month:
+  // judged independently at close over their pre-alteration window.
+  // Kept out of the tier-cap evaluation (partial-period fragments).
+  const closingMonthSet = active[0].month_set;
+  const alteredOriginals = all.filter(r => (
+    r.status === 'altered_archived'
+    && r.month_set === closingMonthSet
+  ));
+  const alteredHistoryRecords = [];
+  const alteredGradProtocols = [];
+  for (const p of alteredOriginals) {
+    const timesCompleted = await countCompletions(
+      user, p.id, p.active_from, p.active_until
+    );
+    const timesExpected = computeTimesExpected(
+      p, p.active_from, p.active_until
+    );
+    const completionRate = timesExpected > 0
+      ? timesCompleted / timesExpected
+      : 0;
+    const gradBase = {
+      ...p,
+      status: 'pending_graduation_original',
+    };
+    alteredHistoryRecords.push({
+      ...gradBase,
+      times_completed: timesCompleted,
+      times_expected: timesExpected,
+      completion_rate: completionRate,
+      net_time_cost_snapshot: netTimeCostSnapshot,
+      period_date_range: periodDateRange(p.active_from, p.active_until),
+      audit_outcome: auditOutcome(completionRate),
+    });
+    alteredGradProtocols.push(gradBase);
+  }
+
   const hv = await storage.get('4x4_history_' + user);
   const existingHistory = hv && hv.value ? JSON.parse(hv.value) : [];
   await storage.set(
     '4x4_history_' + user,
-    JSON.stringify(existingHistory.concat(historyRecords))
+    JSON.stringify(
+      existingHistory.concat(historyRecords).concat(alteredHistoryRecords)
+    )
   );
 
   await evaluateAndWriteTierCap(user, storage, historyRecords);
@@ -186,8 +224,14 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     });
   });
 
-  const rest = all.filter(r => r.status !== 'active');
-  const merged = rest.concat(closedProtocols).concat(remediateCarries);
+  const rest = all.filter(r => (
+    r.status !== 'active'
+    && !(r.status === 'altered_archived' && r.month_set === closingMonthSet)
+  ));
+  const merged = rest
+    .concat(closedProtocols)
+    .concat(remediateCarries)
+    .concat(alteredGradProtocols);
   await storage.set('4x4_protocols_' + user, JSON.stringify(merged));
 
   return { closed: true, protocols: merged };
@@ -222,6 +266,7 @@ export async function getPendingGraduationDecisions(user) {
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const pending = all.filter(r => (
     r.status !== 'active'
+    && r.status !== 'altered_archived'
     && r.core_outcome !== 'advanced'
     && r.core_outcome !== 'retry'
     && !r.is_keepin4x4

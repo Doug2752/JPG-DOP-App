@@ -430,6 +430,61 @@ Note: deact_frequency input also clamps on onChange (v < 3 ? 3 : v) — UI-level
 
 ---
 
+### CATEGORY 18 — ALTERATION PROTOCOL TYPE (SCOPED 07/15/2026)
+
+**What it is:** A modification to an existing committed protocol.
+Not new, not removed — parameters changed. Two directions: scale
+down (target was too aggressive) or scale up (client wants more).
+
+**How it's initiated:** "Alter" button appears on each committed
+protocol card in Set Up/Edit. Not available on empty cards. No
+standalone Alteration type in the type selector.
+
+**Hard limit:** One alteration per protocol per period. Once a
+protocol has been altered, the Alter button is disabled for that
+card for the remainder of the period.
+
+**Workflow:**
+1. Client clicks Alter on a committed card
+2. Existing protocol fields pre-fill with current values
+3. Client edits only what they want to change
+4. Save runs full enforcement rules (inherited from underlying type)
+5. Net time budget recalculates against current tier cap —
+   blocked if over
+
+**Mid-period alteration:** Allowed but not encouraged.
+Pre-alteration completion history does not count toward consistency
+score. Clock resets at alteration date.
+
+**Data / history:**
+- Original protocol record archived, not overwritten
+- New altered record created, linked to original via linked_to /
+  cycle_id / attempt_number chain
+- Both records appear on History screen, judged independently
+
+**Graduation decision screen:**
+- Both original and altered versions appear as separate cards
+- Each judged independently at period close
+
+**Today tab daily checkoff:**
+- Client sees altered version only after alteration date
+- Original no longer appears on Today
+
+**Enforcement:**
+- Inherits rules of underlying type (activation or deactivation)
+- Net time budget recalculates — tier cap enforced at Save
+
+**Coach notification flag:** Post-Supabase only. No pre-launch
+build. Flag fires when alteration occurs mid-period or when
+altered protocol appears in period close history.
+
+**Build status:** SCOPED ONLY — not yet built. Dedicated build
+session required. Setup Instructions full copy pass is on hold
+until this feature is built — instructions must reflect final
+feature set.
+
+---
+
 ## SECTION H — PENDING REAL-WORLD VERIFICATION (July 31 period close)
 
 ### Primary (must verify at first real period close):
