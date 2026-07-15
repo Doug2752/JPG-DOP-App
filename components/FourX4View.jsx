@@ -590,24 +590,19 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const shortName = drafts.find(
-      d => d.name.trim().split(/\s+/).filter(Boolean).length < 5
-    );
-    if (shortName) {
-      setSaveError(
-        `Protocol name must be at least 5 words. ` +
-        `"${shortName.name.trim() || '(empty)'}" does not meet the standard.`
-      );
-      return;
-    }
+    const TIME_UNITS = ['minutes', 'hours'];
     const missingMeasurable = drafts.find(
       d => d.type === 'activation' &&
-        (d.measurable_value === null || !d.measurable_unit)
+        (d.measurable_value === null ||
+         !d.measurable_unit ||
+         TIME_UNITS.includes(d.measurable_unit))
     );
     if (missingMeasurable) {
       setSaveError(
         `All activation protocols require a measurable target ` +
-        `(number and unit). Check "${missingMeasurable.name.trim() || 'unnamed protocol'}".`
+        `(number and unit). Minutes and hours are not valid units ` +
+        `— use the Time added field for time-based targets. ` +
+        `Check "${missingMeasurable.name.trim() || 'unnamed protocol'}".`
       );
       return;
     }
@@ -1349,8 +1344,6 @@ export default function FourX4View({ onBack, user, onSave }) {
                       >
                         <option value="">-- unit --</option>
                         <option value="times">times</option>
-                        <option value="minutes">minutes</option>
-                        <option value="hours">hours</option>
                         <option value="grams">grams</option>
                         <option value="ounces">ounces</option>
                         <option value="calories">calories</option>
@@ -1427,7 +1420,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div>
                   <div style={LBL}>
                     {isDeact
-                      ? 'Time saved (min) — enter negative number'
+                      ? 'Time saved (min)'
                       : 'Time added (min)'}
                   </div>
                   <div style={{
@@ -1439,16 +1432,18 @@ export default function FourX4View({ onBack, user, onSave }) {
                       <input
                         type="number"
                         min={isDeact ? undefined : 0}
-                        max={isDeact ? 0 : undefined}
+                        max={undefined}
                         style={NUM_INPUT}
                         value={d.time_cost_minutes ?? ''}
-                        onChange={e => updateDraft(
-                          i,
-                          'time_cost_minutes',
-                          e.target.value === ''
-                            ? null
-                            : Number(e.target.value)
-                        )}
+                        onChange={e => {
+                          if (e.target.value === '') {
+                            updateDraft(i, 'time_cost_minutes', null);
+                            return;
+                          }
+                          const raw = Number(e.target.value);
+                          const val = isDeact && raw > 0 ? -raw : raw;
+                          updateDraft(i, 'time_cost_minutes', val);
+                        }}
                       />
                     )}
                     <button
