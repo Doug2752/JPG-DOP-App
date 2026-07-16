@@ -23,7 +23,7 @@ const SECTIONS = [
     h: 'Configuring Your DOP',
     b: (
       <>
-        <div style={{ ...tBody, marginBottom: 6 }}>Initially, you have to configure the DOP app. It's completely customizable to you and your activities. When you configure DOP, include every topic or action you do throughout the week — even ones you don't do every single day. Items can vary on weekends or non-work days, but build your DOP with all of these components included from the start. Part of the value of DOP is spotting trends over time, and that's only possible when actions are tracked consistently on the days they actually happen.</div>
+        <div style={{ ...tBody, marginBottom: 6 }}>Initially, you have to configure the DOP app. It's completely customizable to you and your activities. Plan for a total time commitment of around 30 minutes — this includes your AM PIT session. When you configure DOP, include every topic or action you do throughout the week — even ones you don't do every single day. Items can vary on weekends or non-work days, but build your DOP with all of these components included from the start. Part of the value of DOP is spotting trends over time, and that's only possible when actions are tracked consistently on the days they actually happen.</div>
         <div style={{ ...tBody, marginBottom: 4 }}>Each AM and PM section has three groups of items:</div>
         <div style={{ marginBottom: 6 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 4 }}><span style={bul}>•</span><span style={tBody}><strong>Required</strong> — these are locked in automatically and always included. They can't be unchecked.</span></div>
@@ -44,7 +44,7 @@ const SECTIONS = [
   },
   { h: 'Morning Evaluation (1–10)', b: 'Tap your score before you begin the AM checklist. This is how you feel when you wake up — honest and raw. Over time this data reveals patterns in sleep, recovery, and consistency.' },
   { h: 'AM Checklist', b: 'Work through each item in your personal order. Tap the checkbox on the right to mark it complete. PIT is required and cannot be removed.' },
-  { h: 'AM Required Items', b: 'PIT is required and cannot be removed. All sub-categories are locked: Thankful For, To Accomplish, N-I-T (Notes – Ideas – Thoughts), Daily Devotional, and Daily Book Study.' },
+  { h: 'AM Required Items', b: 'PIT is required and cannot be removed. All sub-categories are locked: Thankful For, To Accomplish, Notes – Ideas – Thoughts (N-I-T), Daily Devotional, and Daily Book Study.' },
   { h: 'AM Common Life Tasks', b: 'These are optional items that many people include in their morning routine. Recommended items are pre-selected. Toggle any on or off.' },
   { h: 'Custom AM Items', b: 'Write your own AM checklist items. Use the + Add button to create as many as you need. Type a name in each box — it will appear in your daily checklist.' },
   { h: 'Reorder AM Items', b: 'Arrange your selected AM items in the exact order you complete them each morning. Use the arrows to move items up or down.' },
