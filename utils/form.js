@@ -85,6 +85,8 @@ export function isDayComplete(form) {
   if (!amChecked) return false;
   const pmChecked = form.pmChecks && Object.values(form.pmChecks).some(v => v);
   const pmTextFilled = (form.pmGood && form.pmGood.trim().length > 0) || (form.pmBad && form.pmBad.trim().length > 0);
+  if (!form.pmLocked) return false;
+  if (!form.amLocked) return false;
   return !!(pmChecked || pmTextFilled);
 }
 

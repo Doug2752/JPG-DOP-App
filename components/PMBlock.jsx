@@ -171,13 +171,14 @@ export default function PMBlock({
 
       {/* Day Complete + Saved indicator */}
       <div style={{ background: '#fff', borderRadius: 5, border: `1px solid ${BORDER}`, padding: '12px 20px', margin: '14px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        {complete ? (
-          <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ Day Complete — Well executed.</div>
-        ) : (
-          <div style={{ color: '#888', fontSize: 13 }}>
-            Score both AM and PM evaluations and minimally check off completed required items to mark the day complete.
-          </div>
-        )}
+        {(() => {
+          const amDone = form.morningEval !== null && form.amLocked && form.amChecks && Object.values(form.amChecks).some(v => v);
+          const pmItemsDone = form.eveningEval !== null && form.pmChecks && Object.values(form.pmChecks).some(v => v);
+          if (complete) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ Day Complete — Well executed.</div>;
+          if (amDone && pmItemsDone) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ AM Complete · ✓ PM Items Done — PM Block Complete not yet clicked.</div>;
+          if (amDone) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ AM Complete</div>;
+          return <div style={{ color: '#888', fontSize: 13 }}>Score both AM and PM evaluations and minimally check off completed required items to mark the day complete.</div>;
+        })()}
         {saved && <div style={{ color: '#27ae60', fontSize: 11, marginTop: 4 }}>Saved.</div>}
       </div>
 
