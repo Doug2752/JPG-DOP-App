@@ -2097,7 +2097,7 @@ export default function FourX4View({ onBack, user, onSave }) {
 
                 <InstrItem mark="—">Promote it — it becomes a permanent part of your daily roadmap, and that Foundation Core opens up for something new.</InstrItem>
                 <InstrItem mark="—">Drop it — it's done. That Core opens up for a new protocol next month.</InstrItem>
-                <InstrItem mark="—">Keep it in the 4x4 — you keep building on it. Since it's continuing, it has to grow — you can't repeat the same habit at the same level and expect a different result.</InstrItem>
+                <InstrItem mark="—">Keep it in the 4x4 — you keep building on it. Since it's continuing, it has to grow — you can't repeat the same protocol at the same level and expect a different result.</InstrItem>
 
                 <div style={{ ...INSTR_BODY, marginTop: 8 }}>When you promote a protocol, it no longer counts against your 4x4 time budget. By that point it's simply part of how you live — your routine has already adjusted to it. Your full 30 or 60 minutes resets and becomes available again for genuinely new protocols. This is by design: if adopted protocols kept consuming your budget month after month, you'd eventually have no room left to add anything new. The time budget is there to govern what you're currently building and testing — not to carry the weight of everything you've already made part of your life.</div>
                 <div style={INSTR_BODY}>When a protocol is promoted, it appears in your AM or PM checklist with a gold GRADUATE badge next to its name. This is your confirmation that the protocol has earned its place as a permanent part of your daily standard.</div>
