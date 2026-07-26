@@ -8,11 +8,11 @@ import FormInstructionsModal from './FormInstructionsModal';
 export default function AMBlock({
   form, setup, allAMRows, amDone,
   toggleAM, toggleAMPitAll, upd, saveForm, quote,
-  showInstructions, onCloseInstructions,
+  showInstructions, onCloseInstructions, user,
 }) {
   return (
     <>
-      <PITButton />
+      <PITButton userId={user} />
 
       {showInstructions && (
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px', boxSizing: 'border-box', width: '100%' }}>

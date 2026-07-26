@@ -8,7 +8,7 @@ import { canClose, isGraceExpired, graceDeadlineDate } from '../utils/fourX4Peri
 export default function PMBlock({
   form, setup, allPMRows, pmDone,
   togglePM, upd, saveForm, complete, saved,
-  fourX4Protocols = [],
+  fourX4Protocols = [], user,
 }) {
   const monthSet = fourX4Protocols[0]?.month_set;
   const today = todayStr();
@@ -183,7 +183,7 @@ export default function PMBlock({
       </div>
 
       <div style={{ padding: '0 16px 16px' }}>
-        <PITButton />
+        <PITButton userId={user} />
       </div>
 
       {/* Footer */}

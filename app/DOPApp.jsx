@@ -352,6 +352,7 @@ export default function DOPApp() {
                 setShowInstructions(false);
                 localStorage.setItem('dop_instructions_seen', '1');
               }}
+              user={user}
             />
             {fourX4Protocols.length > 0 && (
               <FourX4DailyCard
@@ -372,6 +373,7 @@ export default function DOPApp() {
               complete={complete}
               saved={saved}
               fourX4Protocols={fourX4Protocols}
+              user={user}
             />
           </div>
         </div>

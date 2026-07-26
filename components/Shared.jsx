@@ -91,10 +91,10 @@ export function CheckRow({ item, checked, onToggle, duration, blockColor }) {
   );
 }
 
-export function PITButton() {
+export function PITButton({ userId }) {
   return (
     <a
-      href={PIT_URL}
+      href={userId ? `${PIT_URL}?hub_user=${userId}` : PIT_URL}
       target="_blank"
       rel="noreferrer"
       style={{

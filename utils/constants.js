@@ -11,7 +11,7 @@ export const MID = '#3a3a3a';
 export const BG = '#f8f8f6';
 export const BORDER = '#d0c8b8';
 
-export const PIT_URL = 'PASTE_PIT_APP_URL_HERE';
+export const PIT_URL = 'http://localhost:5174';
 
 export const BACKUP_QUOTES = [
   { text: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.', author: 'Aristotle' },
