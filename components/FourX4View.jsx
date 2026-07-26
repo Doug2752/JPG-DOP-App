@@ -2107,14 +2107,6 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div style={{ ...INSTR_BODY, marginBottom: 0 }}>If a protocol was altered during the period, both the original version and the altered version appear at period close as separate cards, each scored independently on its own window. The original is scored on the days before the alteration. The altered version is scored on the days after. Both are judged on their own merits.</div>
               </div>
             </div>
-
-            <div style={{ ...INSTR_TOP_ITEM, marginBottom: 0 }}>
-              <span style={INSTR_DOT}>•</span>
-              <div style={{ flex: 1 }}>
-                <div style={INSTR_TOP_TITLE}>Altering a Protocol</div>
-                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>If a running protocol needs to change mid-period, use the Alter This Protocol button on the protocol card. This creates a modified version while preserving the original for scoring purposes. The clock resets to the alteration date — your streak and time tracking restart from that point forward. Only one alteration is allowed per protocol per period. At period close, both the original and the altered version appear as separate cards in the graduation review.</div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
