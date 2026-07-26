@@ -32,7 +32,10 @@ const OLD_AM_IDS = ['am_c1', 'am_c2', 'am_c3', 'am_c4', 'am_c5'];
 const OLD_PM_IDS = ['pm_c1', 'pm_c2', 'pm_c3', 'pm_c4', 'pm_c5'];
 
 export function migrateSetup(saved) {
-  if (saved.amCustomItems && saved.pmCustomItems) return saved;
+  if (saved.amCustomItems && saved.pmCustomItems) {
+    if (!saved.amCommonSelected) return { ...saved, amCommonSelected: [] };
+    return saved;
+  }
 
   const oldAMLabels = saved.amCustomLabels || {};
   const amItems = [];
