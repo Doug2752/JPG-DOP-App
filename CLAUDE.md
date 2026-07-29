@@ -1,94 +1,90 @@
-# CLAUDE.md — DOP (Daily Operational Process)
+# CLAUDE.md — JPG-DOP-App
 
 ## APP IDENTITY
 
-- Name: DOP — Daily Operational Process
-- Full folder: C:\JPG-PROJECTS\JPG-DOP-App
-- GitHub repo: Doug2752/JPG-DOP-App
-- Dev port: 5173 (5174 fallback)
-- Purpose: Client's daily roadmap — AM/PM checklist housing
-  the process for the day. Contains the 4x4 Matrix feature.
-- Architecture: React + Vite, Class 3 modular, localStorage.
+- App name: Daily Operational Process (DOP)
+- Dev port: 5173
+- Repo: Doug2752/JPG-DOP-App
+- Local folder: C:\JPG-PROJECTS\JPG-DOP-App
+- Framework: React + Vite, Class 3 modular structure
+- Storage: localStorage (pre-Supabase)
+
+## CREDENTIALS
+
+- doug / jpg2026
+- test / JPG2026
+- Login comparison is case-insensitive on both sides
 
 ## NON-NEGOTIABLE WORKING RULES
 
-1. Investigation before action.
-2. Never assume.
-3. Never act without asking first.
-4. One task at a time (logic / styling / copy stay isolated).
-5. Plan mode always on.
-6. GitHub Desktop is the only trusted push mechanism.
-7. Browser-verify before commit.
-8. Never redraft finalized copy from scratch.
+1. Read this file first. Confirm you have read it before any action.
+2. Investigation prompt before every build — read actual source files before writing any code.
+3. One task at a time. Never bundle logic changes with styling or copy changes.
+4. Never touch .md files in this repo during code builds.
+5. Never start the dev server.
+6. Never commit — Doug commits via GitHub Desktop only.
+7. Opus for complex multi-file builds. Sonnet for small edits and investigations.
+8. Plan mode always on — present plan, wait for approval before executing.
 
-## MODEL SELECTION
+## BROWSER AND PORT
 
-- Opus — complex multi-file logic.
-- Sonnet — small edits, investigations, styling, cleanup.
-- Model stated at top of every prompt.
+- Firefox is the test browser (localhost:5173)
+- Brave auto-opens 5173 on startup — do not assume Brave is closed during dev work
 
-## BROWSER AND PORT REFERENCE
+## CURRENT BUILD STATE (as of 07/28/2026)
 
-- Firefox — code/build testing, OS default.
-- Brave — daily DOP/PIT entries only (localhost:5173).
-- Edge — Claude.ai chat sessions.
-- vite.config.js should carry server: { open: false, port: 5173 }.
+### Built and committed
 
-## CURRENT BUILD STATE
+- Full AM/PM block with lock system — AM Lock and PM Lock buttons always visible (padding 8px 20px always). Labels: "Mark AM Block Complete" / "Unlock AM Block" and "Mark PM Block Complete" / "Unlock PM Block." Unlock requires inline confirmation.
+- Four-state Day Complete display in PMBlock
+- isDayComplete() — 7 required conditions including amLocked and pmLocked
+- Grace window reminder banner (PMBlock, above PM Lock)
+- 4x4 Matrix full feature set — Set Up/Edit, Instructions, History, Metrics
+- Period close, graduation, keep-in-4x4, alteration
+- Tier cap 30→60
+- Auto-close on grace expiry
+- Weekly tally (FourX4DailyCard)
+- Per-card auto-save drafts
+- Common Protocol Examples
+- Mid-period edit warning
+- Setup Instructions modal (18 sections) — duplicate footer note removed
+- Configure tab (SetupScreen)
+- Archive — Last 30 Days
+- Open PIT button (localhost:5174?hub_user={userId})
+- NEVER TWICE box
+- Streak badge display (streak key never written — badge never appears in practice)
+- AI quote with BACKUP_QUOTES fallback
+- Load error banner (below Header when storage fails on login)
+- Save error banner (below load banner when save fails)
+- Header "Complete Configure to unlock" label below disabled 4x4 button
+- Measurable target hint corrected — "4 sets" not "30 minutes"
+- "Past Period Stats" label (always plural)
+- Vitest test suite — 21 passing tests
+- migrateSetup fix — amCommonSelected injection
 
-Built and committed:
+### Known bugs (not yet fixed)
 
-- AM/PM blocks, Configure, two-tier gold color system
-- 4x4 Matrix: Set Up/Edit, Instructions, History, Metrics
-- Period Close Pieces 1-3, Graduation workflow,
-  Keep-in-4x4 pre-fill, weekly tally
-- Mid-period edit warning modal
-- Grace window reminder banner (PMBlock.jsx)
-- 4x4 GRADUATE badge (Shared.jsx)
-- Protocol enforcement rules (Rules 1-5 in runSave();
-  Rule 1 removed 07/15/2026, Rule 2 refined to block
-  minutes/hours)
-- Deactivation Time saved auto-negate (07/15/2026)
-- Per-card auto-save draft system (dop_4x4_draft keys)
-- Mount field load fix (5 enforcement fields)
-- Alteration protocol type — full build (07/15/2026)
-- Vitest Tier 1 test infrastructure (tests/ folder,
-  21 passing tests)
-- Setup Instructions full copy pass (07/16/2026)
-- 4x4 Instructions panel Section 5 expanded —
-  GRADUATE badge paragraph and grace window banner
-  paragraph added (07/16/2026)
+- GRADUATE badge will not render — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Fix required before July 31.
+- Foundation Core selection not auto-saved — selectFoundationCore() bypasses updateDraft() storage write
+- Alteration saves never clear drafts — draft-clear loop is after alteration early-return
+- Grace banner Instructions panel copy is inaccurate — says "last 5 days" but fires at/after month end
+- "Stay logged in" checkbox in LoginScreen is uncontrolled — dead UI
+- progressLabel computed in DOPApp but never used
+- NAV_TEXT_DIM exported from constants but used nowhere
+- styles.js card export imported by nothing
+- FourX4View placeholder section branch is unreachable
+- storage.list() exported but used nowhere
+- Enforcement tests test local copies of rules, not shipping code
 
-NOT YET COMMITTED (awaiting July 31 real-period
-verification):
+### Post-Supabase (do not build)
 
-- reloadFourX4 fix
-- evaluateAndWriteTierCap (30→60 min cap unlock)
+- Tomorrow's Priorities → PIT transfer
+- AI quote API key wiring
+- Alteration coach notification flag
+- Streak persistence
+- 30-Day Cycle Architecture (designed, not built — requires dedicated build session)
 
-NOT YET BUILT:
+## GOVERNING DOCUMENT
 
-- AM Lock box styling fix + Today's Takeaway sizing
-  (grouped — awaiting Doug's direction)
-
-Known credentials: Test / JPG2026 (case-insensitive).
-Brave opens localhost:5173 automatically on startup —
-do not change this port.
-
-## KEY ARCHITECTURAL FACTS
-
-React + Vite, npm run dev port 5173, localStorage, no backend,
-case-insensitive login matching per CS v1.8 §8.2.
-DOP→PIT data transfer not possible until Supabase migration.
-4x4 Matrix lives inside DOP as a feature, not a separate app.
-Daily checkoff card lives in TODAY tab after AM/PM blocks.
-
-## REFERENCED GOVERNING DOCUMENTS
-
-Core Standard v1.8, Troubleshooting Guide v4.5,
-DOP Code Logic v2.4, Session Handoff Primer v2.7.
-
-## SESSION START PROTOCOL
-
-First instruction is always read-only:
-"Read CLAUDE.md and confirm you understand —
-do not run any commands yet."
+Code Logic doc: JPG-SYS-DOP-CodeLogic-WRK-v2.8
+This file is a context loader only — do not reproduce the full Code Logic doc here.
