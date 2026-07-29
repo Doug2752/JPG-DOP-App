@@ -89,7 +89,6 @@ export default function FormInstructionsModal({ onClose }) {
       <div style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.07)', borderRadius: 4, fontSize: 11, color: MID, fontStyle: 'italic', lineHeight: 1.6 }}>
         <strong style={{ fontStyle: 'normal' }}>NOTES:</strong>
         <ol style={{ margin: '4px 0 0 0', paddingLeft: 20 }}>
-          <li style={{ marginBottom: 4 }}>Note: Configure does not auto-save. You must click 'Save Setup — Enter DOP' to save your configuration.</li>
           <li>Everything you enter in your daily AM/PM form saves automatically as you go — there is no Save button on the Today screen.</li>
         </ol>
       </div>

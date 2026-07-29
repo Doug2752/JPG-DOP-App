@@ -1530,7 +1530,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                       </select>
                     </div>
                     <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
-                      Enter a specific, measurable target (e.g. 150 grams, 4 miles, 30 minutes)
+                      Enter a specific, measurable target (e.g. 150 grams, 4 miles, 4 sets)
                     </div>
                   </div>
                 )}
@@ -1911,7 +1911,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div style={GROUP_TITLE}>
                   {displayHistoryRecords.length > 1
                     ? 'Past Month Stats'
-                    : 'Past Month Stat'}
+                    : 'Past Period Stats'}
                 </div>
                 <div style={CARD}>
                   {metricColumns(coreStats.map(cs => ({

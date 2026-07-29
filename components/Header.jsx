@@ -54,6 +54,7 @@ export default function Header({
               })}
               disabled
             >4x4 Matrix</button>
+            <div style={{ fontSize: 9, color: NAV_TEXT, textAlign: 'center', marginTop: 2 }}>Complete Configure to unlock</div>
           </div>
         )}
       </div>
