@@ -540,7 +540,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       frequency: original.frequency,
       weekly_target: original.weekly_target ?? null,
       time_cost_minutes: original.time_cost_minutes ?? null,
-      timeDNA: !original.time_cost_minutes,
+      timeDNA: original.time_cost_minutes === null,
       measurable_value: original.measurable_value ?? null,
       measurable_unit: original.measurable_unit || '',
       deact_declaration: original.deact_declaration || '',
@@ -1806,7 +1806,9 @@ export default function FourX4View({ onBack, user, onSave }) {
                         )}
                         {isRetry && (
                           <span style={NEUTRAL_TAG}>
-                            Retry #{r.attempt_number || '?'}
+                            {r.attempt_number > 1
+                              ? `Retry #${r.attempt_number}`
+                              : 'Retry'}
                           </span>
                         )}
                       </div>

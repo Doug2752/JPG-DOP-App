@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BG, AM_STANDARD, AM_COMMON, AM_SUB_IDS, PM_STANDARD, PM_COMMON, PM_SUB_IDS, BACKUP_QUOTES } from '../utils/constants';
+import { BG, RED, AM_STANDARD, AM_COMMON, AM_SUB_IDS, PM_STANDARD, PM_COMMON, PM_SUB_IDS, BACKUP_QUOTES } from '../utils/constants';
 import { todayStr, fmtDate } from '../utils/date';
 import { emptyForm, defaultSetup, isDayComplete, getDailyQuote, migrateSetup } from '../utils/form';
 import { storage } from '../services/storage';
@@ -46,6 +46,8 @@ export default function DOPApp() {
   const [streak, setStreak] = useState(0);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [fourX4Protocols, setFourX4Protocols] = useState([]);
+  const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   const sk = (user || 'guest') + '_dop7_';
 
@@ -53,6 +55,7 @@ export default function DOPApp() {
   useEffect(() => {
     if (!user) return;
     (async () => {
+      setLoadError(false);
       try {
         const sv = await storage.get(sk + 'setup');
         if (sv && sv.value) setSetup(migrateSetup(JSON.parse(sv.value)));
@@ -70,6 +73,7 @@ export default function DOPApp() {
         setFourX4Protocols(active);
       } catch (e) {
         console.error('[DOP] setup-load failed:', e);
+        setLoadError(true);
       }
     })();
     loadQuote();
@@ -111,6 +115,7 @@ export default function DOPApp() {
 
   async function saveForm(next) {
     setForm(next);
+    setSaveError(false);
     try {
       await storage.set(sk + 'form_' + next.date, JSON.stringify(next));
       const dates = archiveDates.slice();
@@ -119,9 +124,11 @@ export default function DOPApp() {
         setArchiveDates(dates);
         await storage.set(sk + 'archiveDates', JSON.stringify(dates));
       }
-    } catch (_) {}
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1200);
+    } catch (_) {
+      setSaveError(true);
+    }
   }
 
   const upd = (f, v) => saveForm({ ...form, [f]: v });
@@ -267,6 +274,18 @@ export default function DOPApp() {
         onInstructions={() => setShowInstructions(prev => !prev)}
         onLogout={() => { setUser(null); setFirstName(''); }}
       />
+
+      {loadError && (
+        <div style={{ fontSize: 13, color: RED, textAlign: 'center', padding: 16, fontWeight: 600 }}>
+          Unable to load your data. Please refresh the page.
+        </div>
+      )}
+
+      {saveError && (
+        <div style={{ fontSize: 13, color: RED, textAlign: 'center', padding: 16, fontWeight: 600 }}>
+          Unable to save your data. Please refresh the page.
+        </div>
+      )}
 
       {/* Setup view — first time or returning via nav */}
       {(!setup.setupComplete || view === 'setup') && (
