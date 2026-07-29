@@ -1,5 +1,5 @@
-import React from 'react';
-import { GOLD, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER, GREEN_SAVE, GREY } from '../utils/constants';
+import React, { useState } from 'react';
+import { GOLD, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, MID, BORDER, GREEN_SAVE, GREY } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, TapScore } from './Shared';
 import { todayStr } from '../utils/date';
@@ -10,6 +10,7 @@ export default function PMBlock({
   togglePM, upd, saveForm, complete, saved,
   fourX4Protocols = [], user,
 }) {
+  const [confirmUnlockPM, setConfirmUnlockPM] = useState(false);
   const monthSet = fourX4Protocols[0]?.month_set;
   const today = todayStr();
   const showGraceBanner = !!monthSet && canClose(monthSet, today) && !isGraceExpired(monthSet, today);
@@ -159,14 +160,46 @@ export default function PMBlock({
           Day closed. Rest with diligence.
         </div>
         <button
-          onClick={() => saveForm({ ...form, pmLocked: !form.pmLocked, pmLockedAt: !form.pmLocked ? new Date().toISOString() : null })}
+          onClick={() => {
+            if (form.pmLocked) { setConfirmUnlockPM(true); return; }
+            saveForm({ ...form, pmLocked: true, pmLockedAt: new Date().toISOString() });
+          }}
           style={{
-            padding: form.pmLocked ? 0 : '8px 20px', borderRadius: 6, border: 'none',
+            padding: '8px 20px', borderRadius: 6, border: 'none',
             background: form.pmLocked ? 'transparent' : STEEL,
             color: form.pmLocked ? DARK : '#fff', fontWeight: 800, fontSize: 12,
             letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
           }}
-        >{form.pmLocked ? 'Finished' : 'Click here when PM PIT complete'}</button>
+        >{form.pmLocked ? 'Unlock PM Block' : 'Mark PM Block Complete'}</button>
+
+        {form.pmLocked && confirmUnlockPM && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ fontSize: 11, color: RED, fontWeight: 600, marginBottom: 6 }}>
+              Unlock PM block? Locked entries may be edited.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button
+                onClick={() => {
+                  saveForm({ ...form, pmLocked: false, pmLockedAt: null });
+                  setConfirmUnlockPM(false);
+                }}
+                style={{
+                  padding: '4px 12px', borderRadius: 4, fontSize: 11, fontWeight: 700,
+                  background: 'transparent', color: RED, border: `1.5px solid ${RED}`,
+                  cursor: 'pointer', letterSpacing: 0.3, whiteSpace: 'nowrap',
+                }}
+              >Confirm</button>
+              <button
+                onClick={() => setConfirmUnlockPM(false)}
+                style={{
+                  padding: '4px 12px', borderRadius: 4, fontSize: 11, fontWeight: 700,
+                  background: 'transparent', color: MID, border: `1.5px solid ${BORDER}`,
+                  cursor: 'pointer', letterSpacing: 0.3, whiteSpace: 'nowrap',
+                }}
+              >Cancel</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Day Complete + Saved indicator */}

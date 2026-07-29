@@ -1,5 +1,5 @@
-import React from 'react';
-import { GOLD, GOLD_LIGHT, DARK, BORDER, AM_SUB_IDS } from '../utils/constants';
+import React, { useState } from 'react';
+import { GOLD, GOLD_LIGHT, DARK, MID, RED, BORDER, AM_SUB_IDS } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, QuoteBox, TapScore } from './Shared';
 import FormInstructionsModal from './FormInstructionsModal';
@@ -9,6 +9,7 @@ export default function AMBlock({
   toggleAM, toggleAMPitAll, upd, saveForm, quote,
   showInstructions, onCloseInstructions, user,
 }) {
+  const [confirmUnlockAM, setConfirmUnlockAM] = useState(false);
   return (
     <>
       <PITButton userId={user} />
@@ -110,7 +111,10 @@ export default function AMBlock({
             Foundation set. Move into the day.
           </div>
           <button
-            onClick={() => saveForm({ ...form, amLocked: !form.amLocked, amLockedAt: !form.amLocked ? new Date().toISOString() : null })}
+            onClick={() => {
+              if (form.amLocked) { setConfirmUnlockAM(true); return; }
+              saveForm({ ...form, amLocked: true, amLockedAt: new Date().toISOString() });
+            }}
             style={{
               padding: '8px 20px', borderRadius: 6,
               border: form.amLocked ? 'none' : `1.5px solid ${DARK}`,
@@ -118,7 +122,36 @@ export default function AMBlock({
               color: DARK, fontWeight: 800, fontSize: 12,
               letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
             }}
-          >{form.amLocked ? 'Finished' : 'Click here when AM PIT complete'}</button>
+          >{form.amLocked ? 'Unlock AM Block' : 'Mark AM Block Complete'}</button>
+
+          {form.amLocked && confirmUnlockAM && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 11, color: RED, fontWeight: 600, marginBottom: 6 }}>
+                Unlock AM block? Locked entries may be edited.
+              </div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                <button
+                  onClick={() => {
+                    saveForm({ ...form, amLocked: false, amLockedAt: null });
+                    setConfirmUnlockAM(false);
+                  }}
+                  style={{
+                    padding: '4px 12px', borderRadius: 4, fontSize: 11, fontWeight: 700,
+                    background: 'transparent', color: RED, border: `1.5px solid ${RED}`,
+                    cursor: 'pointer', letterSpacing: 0.3, whiteSpace: 'nowrap',
+                  }}
+                >Confirm</button>
+                <button
+                  onClick={() => setConfirmUnlockAM(false)}
+                  style={{
+                    padding: '4px 12px', borderRadius: 4, fontSize: 11, fontWeight: 700,
+                    background: 'transparent', color: MID, border: `1.5px solid ${BORDER}`,
+                    cursor: 'pointer', letterSpacing: 0.3, whiteSpace: 'nowrap',
+                  }}
+                >Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div style={{ padding: '0 0 16px', marginTop: 16 }}>
