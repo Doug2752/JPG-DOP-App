@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BG, GOLD, GOLD_LIGHT, DARK, MID } from '../utils/constants';
+import { BG, GOLD, GOLD_LIGHT, DARK, MID, BORDER, DIVIDER_BG } from '../utils/constants';
 import { storage } from '../services/storage';
 import { todayStr } from '../utils/date';
 import {
@@ -41,7 +41,7 @@ const CARD = {
   background: 'white',
   borderRadius: 5,
   padding: 16,
-  border: '1px solid #d0c8b8',
+  border: `1px solid ${BORDER}`,
   marginBottom: 12,
 };
 
@@ -75,7 +75,7 @@ const LAND_BTN = {
 
 function selBtn(active) {
   return {
-    background: active ? '#111' : GOLD,
+    background: active ? DARK : GOLD,
     color: active ? GOLD : '#000',
     border: active
       ? '1.5px solid ' + GOLD
@@ -124,7 +124,7 @@ function metricColumns(columns, opts = {}) {
             borderRadius: 5,
             background: col.bg || 'transparent',
             borderRight: (divider && idx < columns.length - 1)
-              ? '1px solid #d0c8b8'
+              ? `1px solid ${BORDER}`
               : 'none',
           }}
         >
@@ -158,7 +158,7 @@ const AUDIT_LEGEND = {
 };
 
 const GROUP_TITLE = {
-  color: '#B8860B',
+  color: GOLD,
   fontSize: 16,
   fontWeight: 700,
   marginBottom: 10,
@@ -189,11 +189,11 @@ const EMPTY_STATE = {
   padding: '40px 20px',
   background: 'white',
   borderRadius: 5,
-  border: '1px solid #d0c8b8',
+  border: `1px solid ${BORDER}`,
 };
 
 const INSTR_PANEL = {
-  background: '#E0E0E0',
+  background: DIVIDER_BG,
   border: `2px solid ${GOLD}`,
   borderRadius: 8,
   padding: '18px 20px',
@@ -903,7 +903,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{
-            color: '#B8860B',
+            color: GOLD,
             fontSize: 22,
             fontWeight: 700,
             marginBottom: 6,
@@ -937,7 +937,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                   <div>
                     <div style={{
                       fontSize: 12,
-                      color: '#B8860B',
+                      color: GOLD,
                       fontWeight: 700,
                       marginBottom: 2,
                     }}>{f.label}</div>
@@ -1026,7 +1026,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{
-            color: '#B8860B',
+            color: GOLD,
             fontSize: 22,
             fontWeight: 700,
             marginBottom: 20,
@@ -1147,7 +1147,7 @@ export default function FourX4View({ onBack, user, onSave }) {
             marginBottom: 20,
           }}>
             <div style={{
-              color: '#B8860B',
+              color: GOLD,
               fontSize: 22,
               fontWeight: 700,
             }}>4x4 Matrix — Set Up / Edit</div>
@@ -1260,7 +1260,7 @@ export default function FourX4View({ onBack, user, onSave }) {
               <div key={i} style={CARD}>
 
                 <div style={{
-                  color: '#B8860B',
+                  color: GOLD,
                   fontSize: 15,
                   fontWeight: 700,
                   marginBottom: 10,
@@ -1724,7 +1724,7 @@ export default function FourX4View({ onBack, user, onSave }) {
           >Back</button>
 
           <div style={{
-            color: '#B8860B',
+            color: GOLD,
             fontSize: 22,
             fontWeight: 700,
             marginBottom: 20,
@@ -1858,7 +1858,7 @@ export default function FourX4View({ onBack, user, onSave }) {
           >Back</button>
 
           <div style={{
-            color: '#B8860B',
+            color: GOLD,
             fontSize: 22,
             fontWeight: 700,
             marginBottom: 20,
@@ -2184,7 +2184,7 @@ export default function FourX4View({ onBack, user, onSave }) {
             }}
           >Back</button>
           <div style={{
-            color: '#B8860B',
+            color: GOLD,
             fontSize: 22,
             fontWeight: 700,
           }}>4x4 Matrix</div>

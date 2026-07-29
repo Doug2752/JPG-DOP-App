@@ -1,5 +1,5 @@
 import React from 'react';
-import { GOLD, DARK, MID } from '../utils/constants';
+import { GOLD, DARK, MID, DIVIDER_BG } from '../utils/constants';
 
 const tTitle  = { fontSize: 13, fontWeight: 800, color: DARK, marginBottom: 3 };
 const tBody   = { fontSize: 12, color: MID, lineHeight: 1.7 };
@@ -62,7 +62,7 @@ const SECTIONS = [
 
 export default function FormInstructionsModal({ onClose }) {
   return (
-    <div style={{ background: '#E0E0E0', border: `2px solid ${GOLD}`, borderRadius: 8, padding: '18px 20px', marginBottom: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>
+    <div style={{ background: DIVIDER_BG, border: `2px solid ${GOLD}`, borderRadius: 8, padding: '18px 20px', marginBottom: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>
       <div style={{ fontWeight: 800, fontSize: 13, color: DARK, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12, paddingBottom: 8, borderBottom: `2px solid ${GOLD}` }}>
         DOP — Set-Up and Instructions
       </div>

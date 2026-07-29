@@ -1,4 +1,4 @@
-import { BORDER, MID, DARK, GOLD } from '../utils/constants';
+import { BORDER, MID, DARK, GOLD, WHITE } from '../utils/constants';
 
 export const inp = {
   width: '100%',
@@ -8,7 +8,7 @@ export const inp = {
   fontSize: 13,
   fontFamily: 'sans-serif',
   boxSizing: 'border-box',
-  background: '#fff',
+  background: WHITE,
 };
 
 export const lbl = {
@@ -38,7 +38,7 @@ export const gbtn = (extra = {}) => ({
   fontSize: 12,
   fontWeight: 700,
   background: GOLD,
-  color: '#fff',
+  color: WHITE,
   letterSpacing: 0.5,
   whiteSpace: 'nowrap',
   ...extra,

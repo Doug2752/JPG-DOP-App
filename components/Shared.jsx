@@ -1,5 +1,5 @@
 import React from 'react';
-import { GOLD, GOLD_LIGHT, STEEL, DARK, BORDER } from '../utils/constants';
+import { GOLD, GOLD_LIGHT, STEEL, DARK, BORDER, GOLD_TEXT, QUOTE_BG } from '../utils/constants';
 import { PIT_URL } from '../utils/constants';
 
 export function RecommendedBadge() {
@@ -52,7 +52,7 @@ export function CheckRow({ item, checked, onToggle, duration, blockColor }) {
           {item.label || ''}
         </span>
         {item.desc ? (
-          <span style={{ color: checked ? '#7a5c00' : '#999', fontSize: 11, marginLeft: 6 }}>
+          <span style={{ color: checked ? GOLD_TEXT : '#999', fontSize: 11, marginLeft: 6 }}>
             — {item.desc}
           </span>
         ) : null}
@@ -72,7 +72,7 @@ export function CheckRow({ item, checked, onToggle, duration, blockColor }) {
         ) : null}
       </div>
       {duration ? (
-        <span style={{ fontSize: 11, color: checked ? '#7a5c00' : '#aaa', whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' }}>
+        <span style={{ fontSize: 11, color: checked ? GOLD_TEXT : '#aaa', whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' }}>
           {duration}
         </span>
       ) : null}
@@ -114,7 +114,7 @@ export function QuoteBox({ quote }) {
   if (!quote) return null;
   return (
     <div style={{
-      background: '#ede4cf', borderRadius: 5, padding: '16px 20px',
+      background: QUOTE_BG, borderRadius: 5, padding: '16px 20px',
       border: `1px solid ${GOLD}`, textAlign: 'center', width: '100%',
     }}>
       <div style={{ fontSize: 10, fontWeight: 800, color: GOLD, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 10 }}>

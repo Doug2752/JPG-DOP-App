@@ -1,5 +1,5 @@
 import React from 'react';
-import { GOLD } from '../utils/constants';
+import { GOLD, DARK, NAV_TEXT } from '../utils/constants';
 import { gbtn } from './styles';
 
 export default function Header({
@@ -10,7 +10,7 @@ export default function Header({
 }) {
   return (
     <div style={{
-      background: '#111',
+      background: DARK,
       borderBottom: `2px solid ${GOLD}`,
       padding: '0 20px',
       display: 'flex',
@@ -60,7 +60,7 @@ export default function Header({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {streak > 0 && (
-          <div style={{ background: GOLD, color: '#000', borderRadius: 20, padding: '3px 12px', fontSize: 11, fontWeight: 900, letterSpacing: 1 }}>
+          <div style={{ background: GOLD, color: DARK, borderRadius: 20, padding: '3px 12px', fontSize: 11, fontWeight: 900, letterSpacing: 1 }}>
             {streak} Day Streak
           </div>
         )}
@@ -68,9 +68,9 @@ export default function Header({
           style={{ padding: '6px 14px', borderRadius: 5, border: `1.5px solid ${GOLD}`, background: 'transparent', color: GOLD, fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.5, whiteSpace: 'nowrap' }}
           onClick={onInstructions}
         >{showInstructions ? 'Close Set-Up and Instructions' : 'Set-Up and Instructions'}</button>
-        <span style={{ color: '#aaa', fontSize: 12 }}>{firstName}</span>
+        <span style={{ color: NAV_TEXT, fontSize: 12 }}>{firstName}</span>
         <button
-          style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 12 }}
+          style={{ background: 'transparent', border: 'none', color: NAV_TEXT, cursor: 'pointer', fontSize: 12 }}
           onClick={onLogout}
         >Logout</button>
       </div>

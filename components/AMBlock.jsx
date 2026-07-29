@@ -54,9 +54,9 @@ export default function AMBlock({
                   onClick={toggleAMPitAll}
                   style={{
                     fontSize: 10, fontWeight: 800,
-                    color: '#000',
+                    color: DARK,
                     background: allSubChecked ? GOLD : GOLD_LIGHT,
-                    border: '1.5px solid #000', borderRadius: 4,
+                    border: `1.5px solid ${DARK}`, borderRadius: 4,
                     padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: 0.5,
                   }}
                 >{allSubChecked ? '✓ All Done' : 'Check All'}</button>
@@ -103,19 +103,19 @@ export default function AMBlock({
 
         {/* AM Lock + Quote */}
         <div style={{ margin: '8px 0 0', padding: '16px 18px', background: GOLD, border: `1.5px solid ${GOLD}`, borderRadius: 5, textAlign: 'center' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#000', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: DARK, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6 }}>
             {form.amLocked ? 'AM Block — Locked' : 'AM Block Complete'}
           </div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#000', fontStyle: 'italic', marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: DARK, fontStyle: 'italic', marginBottom: 12 }}>
             Foundation set. Move into the day.
           </div>
           <button
             onClick={() => saveForm({ ...form, amLocked: !form.amLocked, amLockedAt: !form.amLocked ? new Date().toISOString() : null })}
             style={{
               padding: '8px 20px', borderRadius: 6,
-              border: form.amLocked ? 'none' : '1.5px solid #000',
+              border: form.amLocked ? 'none' : `1.5px solid ${DARK}`,
               background: form.amLocked ? GOLD : GOLD_LIGHT,
-              color: '#000', fontWeight: 800, fontSize: 12,
+              color: DARK, fontWeight: 800, fontSize: 12,
               letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
             }}
           >{form.amLocked ? 'Finished' : 'Click here when AM PIT complete'}</button>

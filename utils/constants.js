@@ -10,6 +10,14 @@ export const DARK = '#1a1a1a';
 export const MID = '#3a3a3a';
 export const BG = '#f8f8f6';
 export const BORDER = '#d0c8b8';
+export const GREEN_SAVE = '#27ae60';
+export const GREY = '#888888';
+export const GOLD_TEXT = '#7a5c00';
+export const QUOTE_BG = '#ede4cf';
+export const DIVIDER_BG = '#E0E0E0';
+export const NAV_TEXT = '#aaaaaa';
+export const NAV_TEXT_DIM = '#666666';
+export const WHITE = '#ffffff';
 
 export const PIT_URL = 'http://localhost:5174';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { GOLD, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER } from '../utils/constants';
+import { GOLD, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER, GREEN_SAVE, GREY } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, TapScore } from './Shared';
 import { todayStr } from '../utils/date';
@@ -86,7 +86,7 @@ export default function PMBlock({
 
       {/* Tomorrow's Priorities */}
       <div style={{ borderRadius: 0, overflow: 'hidden', marginBottom: 14 }}>
-        <div style={{ background: '#1a1a1a', padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
+        <div style={{ background: DARK, padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
           <div style={{ color: RED, fontWeight: 900, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }}>
             Tomorrow's Priorities
           </div>
@@ -139,8 +139,8 @@ export default function PMBlock({
       {showGraceBanner && (
         <div style={{
           margin: '0 16px 14px', padding: '10px 16px',
-          background: GOLD, border: '1.5px solid #000', borderRadius: 5,
-          color: '#000', fontWeight: 700, fontSize: 13, textAlign: 'center',
+          background: GOLD, border: `1.5px solid ${DARK}`, borderRadius: 5,
+          color: DARK, fontWeight: 700, fontSize: 13, textAlign: 'center',
         }}>
           {graceBannerText}
         </div>
@@ -163,7 +163,7 @@ export default function PMBlock({
           style={{
             padding: form.pmLocked ? 0 : '8px 20px', borderRadius: 6, border: 'none',
             background: form.pmLocked ? 'transparent' : STEEL,
-            color: form.pmLocked ? '#000' : '#fff', fontWeight: 800, fontSize: 12,
+            color: form.pmLocked ? DARK : '#fff', fontWeight: 800, fontSize: 12,
             letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer',
           }}
         >{form.pmLocked ? 'Finished' : 'Click here when PM PIT complete'}</button>
@@ -177,9 +177,9 @@ export default function PMBlock({
           if (complete) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ Day Complete — Well executed.</div>;
           if (amDone && pmItemsDone) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ AM Complete · ✓ PM Items Done — PM Block Complete not yet clicked.</div>;
           if (amDone) return <div style={{ color: GOLD, fontWeight: 800, fontSize: 14 }}>✓ AM Complete</div>;
-          return <div style={{ color: '#888', fontSize: 13 }}>Score both AM and PM evaluations and minimally check off completed required items to mark the day complete.</div>;
+          return <div style={{ color: GREY, fontSize: 13 }}>Score both AM and PM evaluations and minimally check off completed required items to mark the day complete.</div>;
         })()}
-        {saved && <div style={{ color: '#27ae60', fontSize: 11, marginTop: 4 }}>Saved.</div>}
+        {saved && <div style={{ color: GREEN_SAVE, fontSize: 11, marginTop: 4 }}>Saved.</div>}
       </div>
 
       <div style={{ padding: '0 16px 16px' }}>
