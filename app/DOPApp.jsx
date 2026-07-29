@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BG } from '../utils/constants';
-import {
-  AM_STANDARD, AM_COMMON, AM_SUB_IDS,
-  PM_STANDARD, PM_COMMON, PM_SUB_IDS,
-  BACKUP_QUOTES,
-} from '../utils/constants';
+import { BG, AM_STANDARD, AM_COMMON, AM_SUB_IDS, PM_STANDARD, PM_COMMON, PM_SUB_IDS, BACKUP_QUOTES } from '../utils/constants';
 import { todayStr, fmtDate } from '../utils/date';
 import { emptyForm, defaultSetup, isDayComplete, getDailyQuote, migrateSetup } from '../utils/form';
 import { storage } from '../services/storage';

@@ -130,19 +130,6 @@ export function QuoteBox({ quote }) {
   );
 }
 
-export function SectionDivider({ label }) {
-  return (
-    <div style={{
-      background: '#f5f5f5', borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`,
-      padding: '7px 14px',
-    }}>
-      <span style={{ fontSize: 10, fontWeight: 800, color: '#aaa', textTransform: 'uppercase', letterSpacing: 1.5 }}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
 export function ColumnHeader() {
   return (
     <div style={{

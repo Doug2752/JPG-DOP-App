@@ -1,6 +1,5 @@
 import React from 'react';
-import { GOLD, GOLD_LIGHT, DARK, BORDER } from '../utils/constants';
-import { AM_SUB_IDS } from '../utils/constants';
+import { GOLD, GOLD_LIGHT, DARK, BORDER, AM_SUB_IDS } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, QuoteBox, TapScore } from './Shared';
 import FormInstructionsModal from './FormInstructionsModal';

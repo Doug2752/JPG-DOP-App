@@ -1,5 +1,5 @@
 import React from 'react';
-import { GOLD, GOLD_LIGHT, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER } from '../utils/constants';
+import { GOLD, STEEL, STEEL_LIGHT, RED, RED_LIGHT, DARK, BORDER } from '../utils/constants';
 import { inp, lbl } from './styles';
 import { CheckRow, PITButton, TapScore } from './Shared';
 import { todayStr } from '../utils/date';
