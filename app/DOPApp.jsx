@@ -219,7 +219,7 @@ export default function DOPApp() {
     if (!item) {
       const ci = (setup.amCustomItems || []).find(i => i && i.id === id);
       const label = ci ? ci.label : null;
-      if (label && label.trim()) allAMRows.push({ id, label, sub: false });
+      if (label && label.trim()) allAMRows.push({ ...ci, sub: false });
       return;
     }
     if (setup.amCommonSelected.includes(id)) allAMRows.push(item);
@@ -241,7 +241,7 @@ export default function DOPApp() {
     if (!item) {
       const ci = (setup.pmCustomItems || []).find(i => i.id === id);
       const label = ci ? ci.label : null;
-      if (label && label.trim()) allPMRows.push({ id, label, sub: false });
+      if (label && label.trim()) allPMRows.push({ ...ci, sub: false });
       return;
     }
     const inStd = setup.pmSelected?.includes(id);
