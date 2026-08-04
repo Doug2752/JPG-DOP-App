@@ -126,7 +126,18 @@ All color constants live in utils/constants.js.
 - **4x4 promoted protocol time-cost rule:** when a protocol graduates out of 4x4 into permanent DOP, its time_cost_minutes stops counting toward the Time Governor budget.
 - **Configure behavior:** Required items = always-on, cannot be unchecked. Recommended = on-by-default but user-toggleable.
 - **Protocol enforcement Rule 2:** measurable target required — blocks when measurable_value null, measurable_unit empty, OR unit is minutes/hours. Hint text: "4 sets."
-- **30-Day Cycle Architecture — designed, not built.** Period logic is still calendar-month anchored. No start-date storage key exists. Requires dedicated build session before any code.
+## 30-DAY CYCLE ARCHITECTURE
+
+Status: DESIGNED — NOT BUILT as of 08/03/2026
+- program_start_date: auto-set when coach unlocks OBT access
+- tracking_start_date: client-set, anchors the 30-day cycle
+- Days 1–14: OBT Foundation Tracking only
+- Days 15–21: Analysis Week — DOP/PIT locked, coaching outside apps
+- Days 22–30: Onramp — DOP/PIT open, no enforcement
+- Day 31+: Full enforcement, Cycle 1 begins
+- month_set field to be retired — replaced with cycle_start: "YYYY-MM-DD"
+- All period date math in fourX4Period.js will be replaced
+- HUB owns cycle and tier data — spokes read only
 
 ## CURRENT BUILD STATE (confirmed in source 07/28/2026)
 
@@ -187,7 +198,7 @@ All color constants live in utils/constants.js.
 
 ## GOVERNING DOCUMENT
 
-- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v2.8
+- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v2.9
 - This file is a context loader only — do not reproduce the full Code Logic doc here.
 
 ## SESSION START PROTOCOL
@@ -200,4 +211,4 @@ Wait for Claude Code to confirm it has read this file and understood the rules. 
 
 ---
 
-*DOP CLAUDE.md — v1.1 — updated 07/29/2026. Full color system, UI parameters, locked rules, and build state added. Aligned to Code Logic v2.8.*
+*DOP CLAUDE.md — v1.1 — updated 07/29/2026. Full color system, UI parameters, locked rules, and build state added. Aligned to Code Logic v2.9.*
