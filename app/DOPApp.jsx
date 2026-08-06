@@ -118,7 +118,8 @@ export default function DOPApp() {
     setSaveError(false);
     try {
       await storage.set(sk + 'form_' + next.date, JSON.stringify(next));
-      const dates = archiveDates.slice();
+      const adRaw = await storage.get(sk + 'archiveDates');
+      const dates = adRaw && adRaw.value ? JSON.parse(adRaw.value) : [];
       if (!dates.includes(next.date)) {
         dates.push(next.date);
         setArchiveDates(dates);
