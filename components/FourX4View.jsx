@@ -350,6 +350,8 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [gradBusy, setGradBusy] = useState(null);
   const [gradSummary, setGradSummary] = useState([]);
   const [promoteCandidate, setPromoteCandidate] = useState(null);
+  const [modifyCandidate, setModifyCandidate] = useState(null);
+  const [modifyDraft, setModifyDraft] = useState(null);
   const [alteringIndex, setAlteringIndex] = useState(null);
   const [alteredSlots, setAlteredSlots] = useState([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -905,6 +907,117 @@ export default function FourX4View({ onBack, user, onSave }) {
     setPromoteCandidate(null);
   }
 
+  function handleModify(rec) {
+    setModifyCandidate(rec);
+    setModifyDraft({
+      foundation_core: rec.foundation_core,
+      name: rec.name || '',
+      type: rec.type || null,
+      time_of_day: rec.time_of_day || null,
+      frequency: rec.frequency || null,
+      weekly_target: rec.weekly_target ?? null,
+      time_cost_minutes: rec.time_cost_minutes ?? null,
+      timeDNA: rec.time_cost_minutes === null,
+      measurable_value: rec.measurable_value ?? null,
+      measurable_unit: rec.measurable_unit || '',
+      deact_declaration: rec.deact_declaration || '',
+      deact_frequency: rec.deact_frequency ?? null,
+      deact_uses_weekly_target: rec.deact_uses_weekly_target === true,
+    });
+  }
+
+  function handleModifyDraftChange(field, val) {
+    setModifyDraft(prev => {
+      const upd = { ...prev, [field]: val };
+      if (field === 'timeDNA' && val) {
+        upd.time_cost_minutes = null;
+      }
+      return upd;
+    });
+  }
+
+  async function handleModifySave() {
+    const d = modifyDraft;
+    if (!d.name.trim()) {
+      setSaveError('Protocol must have a name.');
+      return;
+    }
+    if (!d.type) {
+      setSaveError('Protocol must have a Type selected.');
+      return;
+    }
+    if (!d.time_of_day) {
+      setSaveError('Protocol must have a Time of Day selected.');
+      return;
+    }
+    if (!d.frequency) {
+      setSaveError('Protocol must have a Frequency selected.');
+      return;
+    }
+    if (!d.timeDNA && d.time_cost_minutes === null) {
+      setSaveError('Protocol must have a Time value or DNA selected.');
+      return;
+    }
+    if (d.type === 'activation') {
+      const hasTimeCost = !d.timeDNA && d.time_cost_minutes !== null && d.time_cost_minutes > 0;
+      if (!hasTimeCost && (d.measurable_value === null || !d.measurable_unit)) {
+        setSaveError(
+          'Activation protocols without a Time added value require a ' +
+          'measurable target (number and unit).'
+        );
+        return;
+      }
+      if (!d.timeDNA && d.time_cost_minutes !== null && d.time_cost_minutes < 10) {
+        setSaveError(
+          'Activation protocols require a minimum time cost of ' +
+          '10 minutes, or select DNA if no time applies.'
+        );
+        return;
+      }
+    }
+    if (d.type === 'deactivation') {
+      if (!d.deact_declaration || d.deact_declaration.trim().length < 3) {
+        setSaveError(
+          'Deactivation protocols require a declaration of the ' +
+          'specific behavior being stopped or reduced.'
+        );
+        return;
+      }
+      if (d.deact_uses_weekly_target && (d.deact_frequency === null || d.deact_frequency < 3)) {
+        setSaveError('Deactivation weekly target must be at least 3 times per week.');
+        return;
+      }
+    }
+    const updates = {
+      name: d.name,
+      type: d.type,
+      time_of_day: d.time_of_day,
+      frequency: d.frequency,
+      weekly_target: d.frequency === 'weekly_target' ? (d.weekly_target ?? null) : null,
+      time_cost_minutes: d.timeDNA ? null : (d.time_cost_minutes ?? null),
+      measurable_value: d.type === 'activation' ? (d.measurable_value ?? null) : null,
+      measurable_unit: d.type === 'activation' ? (d.measurable_unit || null) : null,
+      deact_declaration: d.type === 'deactivation' ? (d.deact_declaration.trim() || null) : null,
+      deact_frequency: d.type === 'deactivation' && d.deact_uses_weekly_target
+        ? (d.deact_frequency ?? null) : null,
+      deact_uses_weekly_target: d.type === 'deactivation'
+        ? (d.deact_uses_weekly_target || false) : false,
+    };
+    setPendingGrad(prev => prev.map(p =>
+      p.id === modifyCandidate.id ? { ...p, ...updates } : p
+    ));
+    const pv = await storage.get('4x4_protocols_' + user);
+    const all = pv && pv.value ? JSON.parse(pv.value) : [];
+    const idx = all.findIndex(r => r.id === modifyCandidate.id);
+    if (idx !== -1) {
+      all[idx] = { ...all[idx], ...updates };
+      await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+    }
+    setSaveError(null);
+    setModifyCandidate(null);
+    setModifyDraft(null);
+  }
+
   async function handleDrop(record) {
     setGradBusy(record.id);
     await dropProtocol(user, record.id);
@@ -981,7 +1094,245 @@ export default function FourX4View({ onBack, user, onSave }) {
                   </div>
                 </div>
 
-                {promoteCandidate && promoteCandidate.id === rec.id ? (
+                {modifyCandidate && modifyCandidate.id === rec.id ? (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={LBL}>Name</div>
+                      <input
+                        type="text"
+                        style={{
+                          width: '100%',
+                          background: '#f0f0f0',
+                          borderRadius: 5,
+                          padding: 8,
+                          border: '1px solid #ccc',
+                          fontSize: 14,
+                          boxSizing: 'border-box',
+                        }}
+                        placeholder="Describe your protocol..."
+                        value={modifyDraft.name}
+                        onChange={e => handleModifyDraftChange('name', e.target.value.toUpperCase())}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={LBL}>Type</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          style={selBtn(modifyDraft.type === 'activation')}
+                          onClick={() => handleModifyDraftChange('type', 'activation')}
+                        >Activation</button>
+                        <button
+                          style={selBtn(modifyDraft.type === 'deactivation')}
+                          onClick={() => handleModifyDraftChange('type', 'deactivation')}
+                        >Deactivation</button>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={LBL}>Time of Day</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {TOD_OPTS.map(t => (
+                          <button
+                            key={t.value}
+                            style={selBtn(modifyDraft.time_of_day === t.value)}
+                            onClick={() => handleModifyDraftChange('time_of_day', t.value)}
+                          >{t.label}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={LBL}>Frequency</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          style={selBtn(modifyDraft.frequency === 'daily')}
+                          onClick={() => handleModifyDraftChange('frequency', 'daily')}
+                        >Daily</button>
+                        <button
+                          style={selBtn(modifyDraft.frequency === 'weekly_target')}
+                          onClick={() => handleModifyDraftChange('frequency', 'weekly_target')}
+                        >Weekly Target</button>
+                      </div>
+                    </div>
+
+                    {modifyDraft.frequency === 'weekly_target' && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={LBL}>Times per week (min 3)</div>
+                        <input
+                          type="number"
+                          min={3}
+                          style={NUM_INPUT}
+                          value={modifyDraft.weekly_target ?? ''}
+                          onChange={e => {
+                            const v = parseInt(e.target.value, 10);
+                            handleModifyDraftChange('weekly_target', isNaN(v) ? null : (v < 3 ? 3 : v));
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {modifyDraft.type === 'activation' && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={LBL}>Measurable Target</div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <input
+                            type="number"
+                            style={NUM_INPUT}
+                            placeholder="e.g. 150"
+                            value={modifyDraft.measurable_value ?? ''}
+                            onChange={e => {
+                              const v = parseFloat(e.target.value);
+                              handleModifyDraftChange('measurable_value', isNaN(v) ? null : v);
+                            }}
+                          />
+                          <select
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: 5,
+                              border: '1px solid #ccc',
+                              fontSize: 13,
+                              background: '#f0f0f0',
+                              cursor: 'pointer',
+                            }}
+                            value={modifyDraft.measurable_unit}
+                            onChange={e => handleModifyDraftChange('measurable_unit', e.target.value)}
+                          >
+                            <option value="">-- unit --</option>
+                            <option value="times">times</option>
+                            <option value="minutes">minutes</option>
+                            <option value="hours">hours</option>
+                            <option value="grams">grams</option>
+                            <option value="ounces">ounces</option>
+                            <option value="calories">calories</option>
+                            <option value="miles">miles</option>
+                            <option value="meters">meters</option>
+                            <option value="kilometers">kilometers</option>
+                            <option value="steps">steps</option>
+                            <option value="servings">servings</option>
+                            <option value="other">other</option>
+                          </select>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
+                          Enter a specific, measurable target (e.g. 150 grams, 4 miles, 4 sets)
+                        </div>
+                      </div>
+                    )}
+
+                    {modifyDraft.type === 'deactivation' && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={LBL}>What specific behavior are you stopping or reducing?</div>
+                        <input
+                          type="text"
+                          style={{
+                            width: '100%',
+                            background: '#f0f0f0',
+                            borderRadius: 5,
+                            padding: 8,
+                            border: '1px solid #ccc',
+                            fontSize: 13,
+                            boxSizing: 'border-box',
+                          }}
+                          placeholder="e.g. Eating Doritos every day at lunch"
+                          value={modifyDraft.deact_declaration}
+                          onChange={e => handleModifyDraftChange('deact_declaration', e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    {modifyDraft.type === 'deactivation' && (
+                      <div style={{ marginBottom: 8 }}>
+                        <div style={LBL}>Frequency (optional — leave blank if binary done/not done)</div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          <button
+                            style={selBtn(modifyDraft.deact_uses_weekly_target === false)}
+                            onClick={() => {
+                              handleModifyDraftChange('deact_uses_weekly_target', false);
+                              handleModifyDraftChange('deact_frequency', null);
+                            }}
+                          >Binary</button>
+                          <button
+                            style={selBtn(modifyDraft.deact_uses_weekly_target === true)}
+                            onClick={() => handleModifyDraftChange('deact_uses_weekly_target', true)}
+                          >Weekly Target</button>
+                          {modifyDraft.deact_uses_weekly_target && (
+                            <input
+                              type="number"
+                              min={3}
+                              style={NUM_INPUT}
+                              placeholder="min 3"
+                              value={modifyDraft.deact_frequency ?? ''}
+                              onChange={e => {
+                                const v = parseInt(e.target.value, 10);
+                                handleModifyDraftChange('deact_frequency', isNaN(v) ? null : (v < 3 ? 3 : v));
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={LBL}>
+                        {modifyDraft.type === 'deactivation' ? 'Time saved (min)' : 'Time added (min)'}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {!modifyDraft.timeDNA && (
+                          <input
+                            type="number"
+                            style={NUM_INPUT}
+                            value={modifyDraft.time_cost_minutes ?? ''}
+                            onChange={e => {
+                              if (e.target.value === '') {
+                                handleModifyDraftChange('time_cost_minutes', null);
+                                return;
+                              }
+                              const raw = Number(e.target.value);
+                              const val = modifyDraft.type === 'deactivation' && raw > 0 ? -raw : raw;
+                              handleModifyDraftChange('time_cost_minutes', val);
+                            }}
+                          />
+                        )}
+                        <button
+                          style={selBtn(modifyDraft.timeDNA)}
+                          onClick={() => handleModifyDraftChange('timeDNA', !modifyDraft.timeDNA)}
+                        >DNA</button>
+                      </div>
+                    </div>
+
+                    {saveError && (
+                      <div style={{ color: '#CC2222', fontSize: 12, marginBottom: 8 }}>{saveError}</div>
+                    )}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={handleModifySave}
+                        style={{
+                          background: DARK,
+                          color: GOLD,
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: '7px 16px',
+                          borderRadius: 5,
+                          border: '1.5px solid ' + GOLD,
+                          cursor: 'pointer',
+                        }}
+                      >Save Changes</button>
+                      <button
+                        onClick={() => { setModifyCandidate(null); setModifyDraft(null); setSaveError(null); }}
+                        style={{
+                          background: 'white',
+                          color: DARK,
+                          fontWeight: 600,
+                          fontSize: 13,
+                          padding: '7px 16px',
+                          borderRadius: 5,
+                          border: `1.5px solid ${BORDER}`,
+                          cursor: 'pointer',
+                        }}
+                      >Cancel</button>
+                    </div>
+                  </div>
+                ) : promoteCandidate && promoteCandidate.id === rec.id ? (
                   <div style={{ marginTop: 14 }}>
                     <div style={{
                       fontSize: 13,
@@ -1102,6 +1453,22 @@ export default function FourX4View({ onBack, user, onSave }) {
                         opacity: busy ? 0.6 : 1,
                       }}
                     >KEEP IN 4x4</button>
+                    <button
+                      disabled={busy}
+                      onClick={() => handleModify(rec)}
+                      style={{
+                        flex: 1,
+                        background: 'white',
+                        color: DARK,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        borderRadius: 5,
+                        padding: '12px 0',
+                        border: '1.5px solid ' + BORDER,
+                        cursor: busy ? 'default' : 'pointer',
+                        opacity: busy ? 0.6 : 1,
+                      }}
+                    >MODIFY</button>
                   </div>
                 )}
               </div>
