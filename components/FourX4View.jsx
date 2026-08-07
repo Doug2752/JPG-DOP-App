@@ -520,11 +520,17 @@ export default function FourX4View({ onBack, user, onSave }) {
   }
 
   function selectFoundationCore(i, value) {
-    setDrafts(prev => prev.map((d, idx) => {
-      if (idx === i) return { ...d, foundation_core: value };
-      if (d.foundation_core === value) return { ...d, foundation_core: null };
-      return d;
-    }));
+    setDrafts(prev => {
+      const next = prev.map((d, idx) => {
+        if (idx === i) return { ...d, foundation_core: value };
+        if (d.foundation_core === value) return { ...d, foundation_core: null };
+        return d;
+      });
+      next.forEach((d, idx) => {
+        storage.set(`dop_4x4_draft_${user}_${idx}`, JSON.stringify(d));
+      });
+      return next;
+    });
   }
 
   function draftsChanged() {
