@@ -532,7 +532,6 @@ export default function FourX4View({ onBack, user, onSave }) {
     if (!original) return;
     const altDraft = {
       ...emptyDraft(),
-      foundation_core: original.foundation_core,
       name: original.name,
       time_of_day: original.time_of_day,
       frequency: original.frequency,
@@ -634,18 +633,16 @@ export default function FourX4View({ onBack, user, onSave }) {
       );
       return;
     }
-    const TIME_UNITS = ['minutes', 'hours'];
-    const missingMeasurable = checkDrafts.find(
-      d => d.type === 'activation' &&
-        (d.measurable_value === null ||
-         !d.measurable_unit ||
-         TIME_UNITS.includes(d.measurable_unit))
-    );
+    const missingMeasurable = checkDrafts.find(d => {
+      if (d.type !== 'activation') return false;
+      const hasTimeCost = !d.timeDNA && d.time_cost_minutes !== null && d.time_cost_minutes > 0;
+      if (hasTimeCost) return false;
+      return d.measurable_value === null || !d.measurable_unit;
+    });
     if (missingMeasurable) {
       setSaveError(
-        `All activation protocols require a measurable target ` +
-        `(number and unit). Minutes and hours are not valid units ` +
-        `— use the Time added field for time-based targets. ` +
+        `Activation protocols without a Time added value require a measurable target ` +
+        `(number and unit). ` +
         `Check "${missingMeasurable.name.trim() || 'unnamed protocol'}".`
       );
       return;
@@ -1471,6 +1468,8 @@ export default function FourX4View({ onBack, user, onSave }) {
                       >
                         <option value="">-- unit --</option>
                         <option value="times">times</option>
+                        <option value="minutes">minutes</option>
+                        <option value="hours">hours</option>
                         <option value="grams">grams</option>
                         <option value="ounces">ounces</option>
                         <option value="calories">calories</option>
@@ -1746,24 +1745,17 @@ export default function FourX4View({ onBack, user, onSave }) {
                       {pctLabel(r.completion_rate)}
                     </div>
 
-                    {(r.status === 'incomplete' || isRetry) && (
+                    {isRetry && (
                       <div style={{
                         display: 'flex',
                         gap: 8,
                         marginTop: 8,
                       }}>
-                        {r.status === 'incomplete' && (
-                          <span style={NEUTRAL_TAG}>
-                            Incomplete
-                          </span>
-                        )}
-                        {isRetry && (
-                          <span style={NEUTRAL_TAG}>
-                            {r.attempt_number > 1
-                              ? `Retry #${r.attempt_number}`
-                              : 'Retry'}
-                          </span>
-                        )}
+                        <span style={NEUTRAL_TAG}>
+                          {r.attempt_number > 1
+                            ? `Retry #${r.attempt_number}`
+                            : 'Retry'}
+                        </span>
                       </div>
                     )}
                   </div>
