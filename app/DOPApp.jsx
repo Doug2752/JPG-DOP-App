@@ -259,8 +259,6 @@ export default function DOPApp() {
   const totalItems = allAMRows.length + allPMRows.length + 2;
   const complete = isDayComplete(form);
   const isToday = !archiveDate || archiveDate === todayStr();
-  const progressLabel = complete ? 'Day Complete' : `${totalDone} / ${totalItems}`;
-
   return (
     <div style={{ minHeight: '100vh', background: BG, fontFamily: 'sans-serif' }} onClick={() => setShowDatePicker(false)}>
       <Header

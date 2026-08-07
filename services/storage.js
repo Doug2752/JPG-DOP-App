@@ -27,16 +27,4 @@ export const storage = {
       return Promise.reject(e);
     }
   },
-  list: (prefix) => {
-    try {
-      const keys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!prefix || k.startsWith(prefix)) keys.push(k);
-      }
-      return Promise.resolve({ keys });
-    } catch (e) {
-      return Promise.resolve({ keys: [] });
-    }
-  },
 };

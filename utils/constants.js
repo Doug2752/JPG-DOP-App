@@ -16,7 +16,6 @@ export const GOLD_TEXT = '#7a5c00';
 export const QUOTE_BG = '#ede4cf';
 export const DIVIDER_BG = '#E0E0E0';
 export const NAV_TEXT = '#aaaaaa';
-export const NAV_TEXT_DIM = '#666666';
 export const WHITE = '#ffffff';
 
 export const PIT_URL = 'http://localhost:5174';

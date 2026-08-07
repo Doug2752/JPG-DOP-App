@@ -812,6 +812,11 @@ export default function FourX4View({ onBack, user, onSave }) {
         '4x4_protocols_' + user,
         JSON.stringify(existingAll)
       );
+      for (let slot = 0; slot < drafts.length; slot++) {
+        if (drafts[slot].is_alteration) {
+          await storage.delete(`dop_4x4_draft_${user}_${slot}`);
+        }
+      }
       setDrafts(prev => prev.map(
         d => d.is_alteration ? emptyDraft() : d
       ));
