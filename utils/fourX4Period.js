@@ -292,7 +292,7 @@ export async function getPendingGraduationDecisions(user) {
  * toward the 4x4 Time Governor budget automatically, since only
  * status:'active' records feed the Set Up / Edit net-cost calculation.
  */
-export async function promoteProtocol(user, protocolId) {
+export async function promoteProtocol(user, protocolId, timeOfDayOverride) {
   const sk = (user || 'guest') + '_dop7_';
 
   const pv = await storage.get('4x4_protocols_' + user);
@@ -301,18 +301,19 @@ export async function promoteProtocol(user, protocolId) {
   if (idx === -1) return null;
   const protocol = all[idx];
 
+  const resolvedTimeOfDay = timeOfDayOverride || protocol.time_of_day;
   const dopItemId = 'grad_' + Date.now() + '_' + protocol.foundation_core;
   const label = protocol.name;
 
   const sv = await storage.get(sk + 'setup');
   const setup = sv && sv.value ? JSON.parse(sv.value) : null;
   if (setup) {
-    if (protocol.time_of_day === 'am' || protocol.time_of_day === 'both') {
+    if (resolvedTimeOfDay === 'am' || resolvedTimeOfDay === 'both') {
       const id = 'am_custom_' + dopItemId;
       setup.amCustomItems = [...(setup.amCustomItems || []), { id, label, graduated_from_4x4: true }];
       setup.amOrder = [...(setup.amOrder || []), id];
     }
-    if (protocol.time_of_day === 'pm' || protocol.time_of_day === 'both') {
+    if (resolvedTimeOfDay === 'pm' || resolvedTimeOfDay === 'both') {
       const id = 'pm_custom_' + dopItemId;
       setup.pmCustomItems = [...(setup.pmCustomItems || []), { id, label, graduated_from_4x4: true }];
       setup.pmOrder = [...(setup.pmOrder || []), id];

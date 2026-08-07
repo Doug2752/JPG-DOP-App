@@ -349,6 +349,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [pendingGrad, setPendingGrad] = useState([]);
   const [gradBusy, setGradBusy] = useState(null);
   const [gradSummary, setGradSummary] = useState([]);
+  const [promoteCandidate, setPromoteCandidate] = useState(null);
   const [alteringIndex, setAlteringIndex] = useState(null);
   const [alteredSlots, setAlteredSlots] = useState([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -893,9 +894,15 @@ export default function FourX4View({ onBack, user, onSave }) {
   }
 
   async function handlePromote(record) {
-    setGradBusy(record.id);
-    await promoteProtocol(user, record.id);
-    recordGradChoice(record, 'promote');
+    setPromoteCandidate(record);
+  }
+
+  async function handleConfirmPromote(timeOfDay) {
+    if (!promoteCandidate) return;
+    setGradBusy(promoteCandidate.id);
+    await promoteProtocol(user, promoteCandidate.id, timeOfDay);
+    recordGradChoice(promoteCandidate, 'promote');
+    setPromoteCandidate(null);
   }
 
   async function handleDrop(record) {
@@ -974,60 +981,129 @@ export default function FourX4View({ onBack, user, onSave }) {
                   </div>
                 </div>
 
-                <div style={{
-                  display: 'flex',
-                  gap: 10,
-                  marginTop: 14,
-                }}>
-                  <button
-                    disabled={busy}
-                    onClick={() => handlePromote(rec)}
-                    style={{
-                      flex: 1,
-                      background: GOLD,
-                      color: '#000',
+                {promoteCandidate && promoteCandidate.id === rec.id ? (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{
+                      fontSize: 13,
                       fontWeight: 700,
-                      fontSize: 14,
-                      borderRadius: 5,
-                      padding: '12px 0',
-                      border: 'none',
-                      cursor: busy ? 'default' : 'pointer',
-                      opacity: busy ? 0.6 : 1,
-                    }}
-                  >PROMOTE</button>
-                  <button
-                    disabled={busy}
-                    onClick={() => handleDrop(rec)}
-                    style={{
-                      flex: 1,
-                      background: '#1a1a1a',
-                      color: GOLD,
-                      fontWeight: 700,
-                      fontSize: 14,
-                      borderRadius: 5,
-                      padding: '12px 0',
-                      border: '1.5px solid ' + GOLD,
-                      cursor: busy ? 'default' : 'pointer',
-                      opacity: busy ? 0.6 : 1,
-                    }}
-                  >DROP</button>
-                  <button
-                    disabled={busy}
-                    onClick={() => handleKeepIn4x4(rec)}
-                    style={{
-                      flex: 1,
-                      background: GOLD_LIGHT,
-                      color: '#000',
-                      fontWeight: 700,
-                      fontSize: 14,
-                      borderRadius: 5,
-                      padding: '12px 0',
-                      border: '1.5px solid ' + GOLD,
-                      cursor: busy ? 'default' : 'pointer',
-                      opacity: busy ? 0.6 : 1,
-                    }}
-                  >KEEP IN 4x4</button>
-                </div>
+                      color: DARK,
+                      marginBottom: 10,
+                    }}>Add to AM, PM, or Both?</div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        disabled={busy}
+                        onClick={() => handleConfirmPromote('am')}
+                        style={{
+                          background: DARK,
+                          color: GOLD,
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: '7px 16px',
+                          borderRadius: 5,
+                          border: '1.5px solid ' + GOLD,
+                          cursor: busy ? 'default' : 'pointer',
+                        }}
+                      >AM</button>
+                      <button
+                        disabled={busy}
+                        onClick={() => handleConfirmPromote('pm')}
+                        style={{
+                          background: DARK,
+                          color: GOLD,
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: '7px 16px',
+                          borderRadius: 5,
+                          border: '1.5px solid ' + GOLD,
+                          cursor: busy ? 'default' : 'pointer',
+                        }}
+                      >PM</button>
+                      <button
+                        disabled={busy}
+                        onClick={() => handleConfirmPromote('both')}
+                        style={{
+                          background: DARK,
+                          color: GOLD,
+                          fontWeight: 700,
+                          fontSize: 13,
+                          padding: '7px 16px',
+                          borderRadius: 5,
+                          border: '1.5px solid ' + GOLD,
+                          cursor: busy ? 'default' : 'pointer',
+                        }}
+                      >Both</button>
+                    </div>
+                    <button
+                      onClick={() => setPromoteCandidate(null)}
+                      style={{
+                        background: 'white',
+                        color: DARK,
+                        fontWeight: 600,
+                        fontSize: 13,
+                        padding: '7px 16px',
+                        borderRadius: 5,
+                        border: `1.5px solid ${BORDER}`,
+                        cursor: 'pointer',
+                        marginTop: 8,
+                      }}
+                    >Cancel</button>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    gap: 10,
+                    marginTop: 14,
+                  }}>
+                    <button
+                      disabled={busy}
+                      onClick={() => handlePromote(rec)}
+                      style={{
+                        flex: 1,
+                        background: GOLD,
+                        color: '#000',
+                        fontWeight: 700,
+                        fontSize: 14,
+                        borderRadius: 5,
+                        padding: '12px 0',
+                        border: 'none',
+                        cursor: busy ? 'default' : 'pointer',
+                        opacity: busy ? 0.6 : 1,
+                      }}
+                    >PROMOTE</button>
+                    <button
+                      disabled={busy}
+                      onClick={() => handleDrop(rec)}
+                      style={{
+                        flex: 1,
+                        background: '#1a1a1a',
+                        color: GOLD,
+                        fontWeight: 700,
+                        fontSize: 14,
+                        borderRadius: 5,
+                        padding: '12px 0',
+                        border: '1.5px solid ' + GOLD,
+                        cursor: busy ? 'default' : 'pointer',
+                        opacity: busy ? 0.6 : 1,
+                      }}
+                    >DROP</button>
+                    <button
+                      disabled={busy}
+                      onClick={() => handleKeepIn4x4(rec)}
+                      style={{
+                        flex: 1,
+                        background: GOLD_LIGHT,
+                        color: '#000',
+                        fontWeight: 700,
+                        fontSize: 14,
+                        borderRadius: 5,
+                        padding: '12px 0',
+                        border: '1.5px solid ' + GOLD,
+                        cursor: busy ? 'default' : 'pointer',
+                        opacity: busy ? 0.6 : 1,
+                      }}
+                    >KEEP IN 4x4</button>
+                  </div>
+                )}
               </div>
             );
           })}
