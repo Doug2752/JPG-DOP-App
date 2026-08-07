@@ -349,7 +349,6 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [pendingGrad, setPendingGrad] = useState([]);
   const [gradBusy, setGradBusy] = useState(null);
   const [gradSummary, setGradSummary] = useState([]);
-  const [showMidPeriodWarning, setShowMidPeriodWarning] = useState(false);
   const [alteringIndex, setAlteringIndex] = useState(null);
   const [alteredSlots, setAlteredSlots] = useState([]);
   const originalDraftsRef = useRef(null);
@@ -535,7 +534,6 @@ export default function FourX4View({ onBack, user, onSave }) {
       ...emptyDraft(),
       foundation_core: original.foundation_core,
       name: original.name,
-      type: original.type,
       time_of_day: original.time_of_day,
       frequency: original.frequency,
       weekly_target: original.weekly_target ?? null,
@@ -558,14 +556,6 @@ export default function FourX4View({ onBack, user, onSave }) {
   }
 
   function handleSave() {
-    if (
-      hasActivePeriodRef.current
-      && hasProgressRef.current
-      && draftsChanged()
-    ) {
-      setShowMidPeriodWarning(true);
-      return;
-    }
     runSave();
   }
 
@@ -1099,27 +1089,6 @@ export default function FourX4View({ onBack, user, onSave }) {
 
   // ── Set Up / Edit screen ────────────────────────────
   if (section === 'Set Up / Edit') {
-    if (showMidPeriodWarning) {
-      return (
-        <div style={PAGE}>
-          <div style={{ maxWidth: 500, margin: '80px auto', textAlign: 'center' }}>
-            <div style={{ color: DARK, fontSize: 16, fontWeight: 600, marginBottom: 24, lineHeight: 1.5 }}>
-              Your current progress is saved. Changes apply from today forward. Continue?
-            </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <button
-                style={{ padding: '12px 28px', borderRadius: 5, border: 'none', background: '#ddd', color: DARK, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
-                onClick={() => setShowMidPeriodWarning(false)}
-              >CANCEL</button>
-              <button
-                style={{ padding: '12px 28px', borderRadius: 5, border: 'none', background: GOLD, color: 'black', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
-                onClick={() => { setShowMidPeriodWarning(false); runSave(); }}
-              >CONFIRM</button>
-            </div>
-          </div>
-        </div>
-      );
-    }
     return (
       <div style={PAGE}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -1375,47 +1344,31 @@ export default function FourX4View({ onBack, user, onSave }) {
                 </div>
 
                 {/* Type */}
-                {d.is_alteration === true ? (
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={LBL}>Type</div>
-                    <div style={{
-                      fontSize: 13,
-                      color: '#555',
-                      fontStyle: 'italic',
-                      padding: '6px 0',
-                    }}>
-                      {d.type === 'activation'
-                        ? 'Activation (inherited — cannot change type)'
-                        : 'Deactivation (inherited — cannot change type)'}
-                    </div>
+                <div style={{ marginBottom: 8 }}>
+                  <div style={LBL}>Type</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      style={selBtn(
+                        d.type === 'activation'
+                      )}
+                      onClick={() =>
+                        updateDraft(
+                          i, 'type', 'activation'
+                        )
+                      }
+                    >Activation</button>
+                    <button
+                      style={selBtn(
+                        d.type === 'deactivation'
+                      )}
+                      onClick={() =>
+                        updateDraft(
+                          i, 'type', 'deactivation'
+                        )
+                      }
+                    >Deactivation</button>
                   </div>
-                ) : (
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={LBL}>Type</div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button
-                        style={selBtn(
-                          d.type === 'activation'
-                        )}
-                        onClick={() =>
-                          updateDraft(
-                            i, 'type', 'activation'
-                          )
-                        }
-                      >Activation</button>
-                      <button
-                        style={selBtn(
-                          d.type === 'deactivation'
-                        )}
-                        onClick={() =>
-                          updateDraft(
-                            i, 'type', 'deactivation'
-                          )
-                        }
-                      >Deactivation</button>
-                    </div>
-                  </div>
-                )}
+                </div>
 
                 {/* Time of day */}
                 <div style={{ marginBottom: 8 }}>
