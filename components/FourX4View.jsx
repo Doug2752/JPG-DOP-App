@@ -351,7 +351,9 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [gradSummary, setGradSummary] = useState([]);
   const [alteringIndex, setAlteringIndex] = useState(null);
   const [alteredSlots, setAlteredSlots] = useState([]);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const originalDraftsRef = useRef(null);
+  const closeConfirmRef = useRef(null);
   const hasActivePeriodRef = useRef(false);
   const hasProgressRef = useRef(false);
   const loadedProtocolsRef = useRef([]);
@@ -488,6 +490,12 @@ export default function FourX4View({ onBack, user, onSave }) {
     })();
   }, [user, section]);
 
+  useEffect(() => {
+    if (showCloseConfirm && closeConfirmRef.current) {
+      closeConfirmRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [showCloseConfirm]);
+
   const displayHistoryRecords = historyRecords;
   const displayActiveProtocols = drafts.filter(d => d.foundation_core);
 
@@ -556,6 +564,30 @@ export default function FourX4View({ onBack, user, onSave }) {
 
   function handleSave() {
     runSave();
+  }
+
+  async function handleManualClose() {
+    const pv = await storage.get('4x4_protocols_' + user);
+    const all = pv && pv.value ? JSON.parse(pv.value) : [];
+    const active = all.filter(r => r.status === 'active');
+    if (active.length === 0) return;
+    const monthSet = active[0].month_set;
+    const todayISO = todayStr();
+    if (!canClose(monthSet, todayISO)) {
+      setSaveError(
+        `Period can't be closed yet. It can be closed ` +
+        `${describeCloseWindow(monthSet)}.`
+      );
+      return;
+    }
+    await closeActivePeriod(user, todayISO, { status: 'history' });
+    const tv = await storage.get('4x4_tier_' + user);
+    if (tv && tv.value) setTier(JSON.parse(tv.value));
+    const pending = await getPendingGraduationDecisions(user);
+    setPendingGrad(pending);
+    hasActivePeriodRef.current = false;
+    if (onSave) await onSave();
+    setShowCloseConfirm(false);
   }
 
   async function runSave() {
@@ -1638,6 +1670,68 @@ export default function FourX4View({ onBack, user, onSave }) {
             }}
             onClick={handleSave}
           >Save 4x4</button>
+
+          {hasActivePeriodRef.current && (
+            <button
+              style={{
+                width: '100%',
+                background: DARK,
+                color: GOLD,
+                fontWeight: 700,
+                fontSize: 13,
+                borderRadius: 5,
+                padding: '8px 20px',
+                border: '1.5px solid ' + GOLD,
+                cursor: 'pointer',
+                marginTop: 12,
+              }}
+              onClick={() => setShowCloseConfirm(true)}
+            >Close This Period</button>
+          )}
+
+          {showCloseConfirm && (
+            <div ref={closeConfirmRef} style={{
+              marginTop: 12,
+              background: 'white',
+              border: `1.5px solid ${BORDER}`,
+              borderRadius: 5,
+              padding: 16,
+            }}>
+              <div style={{
+                fontSize: 13,
+                color: DARK,
+                marginBottom: 12,
+              }}>Close your current period? This cannot be undone.</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  style={{
+                    background: DARK,
+                    color: GOLD,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    padding: '7px 16px',
+                    borderRadius: 5,
+                    border: '1.5px solid ' + GOLD,
+                    cursor: 'pointer',
+                  }}
+                  onClick={handleManualClose}
+                >Confirm Close</button>
+                <button
+                  style={{
+                    background: 'white',
+                    color: DARK,
+                    fontWeight: 600,
+                    fontSize: 13,
+                    padding: '7px 16px',
+                    borderRadius: 5,
+                    border: `1.5px solid ${BORDER}`,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setShowCloseConfirm(false)}
+                >Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
