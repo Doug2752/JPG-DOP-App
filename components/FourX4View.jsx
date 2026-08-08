@@ -4,7 +4,7 @@ import { storage } from '../services/storage';
 import { todayStr } from '../utils/date';
 import {
   canClose, closeActivePeriod, describeCloseWindow,
-  runAutoCloseCheck, graceDeadlineDate,
+  runAutoCloseCheck, graceDeadlineDate, getCycleData,
   getPendingGraduationDecisions, promoteProtocol, dropProtocol,
   keepIn4x4Protocol, getKeepIn4x4Carryovers, keepIn4x4GrowthPercent,
   countCompletions,
@@ -580,12 +580,12 @@ export default function FourX4View({ onBack, user, onSave }) {
     const all = pv && pv.value ? JSON.parse(pv.value) : [];
     const active = all.filter(r => r.status === 'active');
     if (active.length === 0) return;
-    const monthSet = active[0].month_set;
+    const cycleStart = active[0].cycle_start || (await getCycleData(user)).cycle_start;
     const todayISO = todayStr();
-    if (!canClose(monthSet, todayISO)) {
+    if (!canClose(cycleStart, todayISO)) {
       setSaveError(
         `Period can't be closed yet. It can be closed ` +
-        `${describeCloseWindow(monthSet)}.`
+        `${describeCloseWindow(cycleStart)}.`
       );
       return;
     }
@@ -609,11 +609,11 @@ export default function FourX4View({ onBack, user, onSave }) {
     const existingAll = pv && pv.value ? JSON.parse(pv.value) : [];
     const existingActive = existingAll.filter(r => r.status === 'active');
     if (!isAlterationSave && existingActive.length > 0) {
-      const monthSet = existingActive[0].month_set;
-      if (!canClose(monthSet, todayISO)) {
+      const cycleStart = existingActive[0].cycle_start || (await getCycleData(user)).cycle_start;
+      if (!canClose(cycleStart, todayISO)) {
         setSaveError(
           `Current period can't close yet. It can be closed ` +
-          `${describeCloseWindow(monthSet)}.`
+          `${describeCloseWindow(cycleStart)}.`
         );
         return;
       }
@@ -787,7 +787,7 @@ export default function FourX4View({ onBack, user, onSave }) {
               ? (d.deact_frequency ?? null) : null,
           deact_uses_weekly_target: d.type === 'deactivation'
             ? (d.deact_uses_weekly_target || false) : false,
-          month_set: orig.month_set,
+          cycle_start: orig.cycle_start,
           active_from: todayISO,
           active_until: null,
           status: 'active',
@@ -827,12 +827,8 @@ export default function FourX4View({ onBack, user, onSave }) {
       setTimeout(() => setSaved(false), 2500);
       return;
     }
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1)
-      .padStart(2, '0');
-    const monthSet = `${yyyy}-${mm}`;
-    const activeFrom = `${yyyy}-${mm}-01`;
+    const { cycle_start: cycleStart } = await getCycleData(user);
+    const activeFrom = todayISO;
     const ts = Date.now();
     const records = drafts.map(d => {
       const co = d.carryover;
@@ -855,7 +851,7 @@ export default function FourX4View({ onBack, user, onSave }) {
         deact_declaration: d.type === 'deactivation' ? (d.deact_declaration.trim() || null) : null,
         deact_frequency: d.type === 'deactivation' && d.deact_uses_weekly_target ? (d.deact_frequency ?? null) : null,
         deact_uses_weekly_target: d.type === 'deactivation' ? (d.deact_uses_weekly_target || false) : false,
-        month_set: monthSet,
+        cycle_start: cycleStart,
         active_from: activeFrom,
         active_until: null,
         status: 'active',

@@ -3,8 +3,15 @@ import { todayStr } from './date';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+const CYCLE_LENGTH_DAYS = 30;
+const GRACE_DEADLINE_DAYS = 34;
+
 function isoDate(d) {
   return d.toISOString().slice(0, 10);
+}
+
+function addDays(iso, n) {
+  return new Date(new Date(iso + 'T00:00:00Z').getTime() + n * DAY_MS);
 }
 
 function fmtMonthDay(iso) {
@@ -20,26 +27,61 @@ function daysBetweenInclusive(fromISO, untilISO) {
   return Math.round((b - a) / DAY_MS) + 1;
 }
 
-export function monthEndDate(monthSet) {
-  const [y, m] = monthSet.split('-').map(Number);
-  return new Date(Date.UTC(y, m, 0));
+const CYCLE_FALLBACK = {
+  cycle_start: '2026-08-01',
+  tracking_start_date: null,
+  onramp_end: null,
+};
+
+/**
+ * Reads the HUB client record for `username` out of the shared
+ * localStorage key `hub_clients` and returns its cycle anchors. HUB owns
+ * this data; DOP is read-only against it. Falls back to a fixed
+ * cycle_start when no record is found so dev testing always exercises the
+ * 30-day cycle path rather than silently skipping it.
+ */
+export async function getCycleData(username) {
+  let clients;
+  try {
+    clients = JSON.parse(localStorage.getItem('hub_clients'));
+  } catch (_) {
+    return { ...CYCLE_FALLBACK };
+  }
+  if (!Array.isArray(clients) || !username) return { ...CYCLE_FALLBACK };
+
+  const target = String(username).trim().toLowerCase();
+  const match = clients.find(c => c && [
+    c.username, c.name, c.client_name, c.user, c.id,
+  ].some(v => v && String(v).trim().toLowerCase() === target));
+  if (!match) return { ...CYCLE_FALLBACK };
+
+  return {
+    cycle_start: match.cycle_start ?? CYCLE_FALLBACK.cycle_start,
+    tracking_start_date: match.tracking_start_date ?? null,
+    onramp_end: match.onramp_end ?? null,
+  };
 }
 
-export function graceDeadlineDate(monthSet) {
-  return new Date(monthEndDate(monthSet).getTime() + 5 * DAY_MS);
+/** Reads the cycle anchor off the active record, falling back to HUB. */
+async function resolveCycleStart(user, active) {
+  return active[0].cycle_start || (await getCycleData(user)).cycle_start;
 }
 
-export function canClose(monthSet, todayISO) {
-  return todayISO >= isoDate(monthEndDate(monthSet));
+export function graceDeadlineDate(cycleStart) {
+  return addDays(cycleStart, GRACE_DEADLINE_DAYS);
 }
 
-export function isGraceExpired(monthSet, todayISO) {
-  return todayISO > isoDate(graceDeadlineDate(monthSet));
+export function canClose(cycleStart, todayISO) {
+  return todayISO >= isoDate(addDays(cycleStart, CYCLE_LENGTH_DAYS));
 }
 
-export function describeCloseWindow(monthSet) {
-  const start = isoDate(monthEndDate(monthSet));
-  const end = isoDate(graceDeadlineDate(monthSet));
+export function isGraceExpired(cycleStart, todayISO) {
+  return todayISO > isoDate(graceDeadlineDate(cycleStart));
+}
+
+export function describeCloseWindow(cycleStart) {
+  const start = isoDate(addDays(cycleStart, CYCLE_LENGTH_DAYS));
+  const end = isoDate(graceDeadlineDate(cycleStart));
   return `${fmtMonthDay(start)} through ${fmtMonthDay(end)}`;
 }
 
@@ -48,12 +90,8 @@ export function periodDateRange(fromISO, untilISO) {
   return `${fmtMonthDay(fromISO)} - ${fmtMonthDay(untilISO)} (${days} days)`;
 }
 
-function nextMonthOf(monthSet) {
-  const [y, m] = monthSet.split('-').map(Number);
-  const d = new Date(Date.UTC(y, m, 1));
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  return { monthSet: `${yyyy}-${mm}`, firstDay: `${yyyy}-${mm}-01` };
+export function nextCycleOf(cycleStart) {
+  return { cycleStart: isoDate(addDays(cycleStart, CYCLE_LENGTH_DAYS)) };
 }
 
 export function computeTimesExpected(protocol, fromISO, untilISO) {
@@ -151,13 +189,13 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     closedProtocols.push(base);
   }
 
-  // Alteration originals archived mid-period for the closing month:
+  // Alteration originals archived mid-cycle for the closing cycle:
   // judged independently at close over their pre-alteration window.
   // Kept out of the tier-cap evaluation (partial-period fragments).
-  const closingMonthSet = active[0].month_set;
+  const closingCycleStart = await resolveCycleStart(user, active);
   const alteredOriginals = all.filter(r => (
     r.status === 'altered_archived'
-    && r.month_set === closingMonthSet
+    && r.cycle_start === closingCycleStart
   ));
   const alteredHistoryRecords = [];
   const alteredGradProtocols = [];
@@ -203,15 +241,16 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
   historyRecords.forEach((hr, idx) => {
     if (hr.audit_outcome !== 'remediate') return;
     const closedRecord = closedProtocols[idx];
-    const { monthSet: nextMonthSet, firstDay } =
-      nextMonthOf(closedRecord.month_set);
+    const { cycleStart: nextCycleStart } = nextCycleOf(
+      closedRecord.cycle_start || closingCycleStart
+    );
     remediateCarries.push({
       ...closedRecord,
       id: '4x4_' + ts + '_' + closedRecord.foundation_core,
       status: 'active',
       core_outcome: null,
-      month_set: nextMonthSet,
-      active_from: firstDay,
+      cycle_start: nextCycleStart,
+      active_from: nextCycleStart,
       active_until: null,
       times_completed: 0,
       times_expected: 0,
@@ -226,7 +265,7 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
 
   const rest = all.filter(r => (
     r.status !== 'active'
-    && !(r.status === 'altered_archived' && r.month_set === closingMonthSet)
+    && !(r.status === 'altered_archived' && r.cycle_start === closingCycleStart)
   ));
   const merged = rest
     .concat(closedProtocols)
@@ -425,9 +464,9 @@ export function keepIn4x4GrowthPercent(draft, carryover) {
 }
 
 /**
- * Called on app load, before the Today view renders. If the active period's
- * grace window (5 days past month-end) has expired, auto-closes it with
- * status/core_outcome "incomplete" using whatever partial data exists.
+ * Called on app load, before the Today view renders. If the active cycle's
+ * grace window (through day 34 of the cycle) has expired, auto-closes it
+ * with status/core_outcome "incomplete" using whatever partial data exists.
  * Returns the current full protocols array (merged if a close happened).
  */
 export async function runAutoCloseCheck(user) {
@@ -437,10 +476,10 @@ export async function runAutoCloseCheck(user) {
   const active = all.filter(r => r.status === 'active');
   if (active.length === 0) return all;
 
-  const monthSet = active[0].month_set;
-  if (!isGraceExpired(monthSet, todayStr())) return all;
+  const cycleStart = await resolveCycleStart(user, active);
+  if (!isGraceExpired(cycleStart, todayStr())) return all;
 
-  const graceEndISO = isoDate(graceDeadlineDate(monthSet));
+  const graceEndISO = isoDate(graceDeadlineDate(cycleStart));
   const result = await closeActivePeriod(user, graceEndISO, {
     status: 'incomplete',
     core_outcome: 'incomplete',

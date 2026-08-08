@@ -63,8 +63,9 @@ All color constants live in utils/constants.js.
 | QUOTE_BG | #ede4cf | QuoteBox background. Defined in Shared.jsx. |
 | DIVIDER_BG | #E0E0E0 | Instructions panel background (FormInstructionsModal and FourX4View INSTR_PANEL). |
 | NAV_TEXT | #aaaaaa | Nav bar username text color. |
-| NAV_TEXT_DIM | #666666 | Exported but currently unused in any component. |
 | WHITE | #ffffff | Input backgrounds, button text (styles.js). |
+
+**NOTE:** NAV_TEXT_DIM (#666666) was removed from constants.js 08/07/2026 — it was exported but used nowhere.
 
 **Two-tier gold rule (locked):** GOLD_LIGHT = clickable/action. GOLD = informational/non-interactive. Both: black text + 1.5px solid black border on light/white backgrounds. Exception: elements on dark/black nav bar get NO black border.
 
@@ -103,7 +104,13 @@ All color constants live in utils/constants.js.
 
 ### 4x4 GRADUATE Badge
 - Designed to appear on protocol cards promoted out of 4x4 into permanent DOP.
-- **CURRENTLY NOT RENDERING** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Fix required before July 31 period close verification.
+- **BUG STILL OPEN** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. CheckRow checks item.graduated_from_4x4 but never receives it. Verify at August period close — fix required if badge does not render after promotion.
+
+### Close This Period Button (BUILT 08/07/2026)
+- **Location:** Set Up / Edit section of 4x4 tab, below Save 4x4 button
+- **Visibility:** renders only when an active period exists
+- **Behavior:** click opens inline confirm dialog; dialog auto-scrolls into view; Confirm fires handleManualClose(); Cancel dismisses
+- **Styling:** background DARK, color GOLD, fontWeight 700, fontSize 13, padding 8px 20px, borderRadius 5, border 1.5px solid GOLD
 
 ### Header
 - Disabled 4x4 button shows "Complete Configure to unlock" label below it (fontSize 9, NAV_TEXT color).
@@ -125,10 +132,14 @@ All color constants live in utils/constants.js.
 - **isDayComplete() gates:** 7 required conditions including amLocked and pmLocked. Module-level pure function — no hooks, no dependencies.
 - **4x4 promoted protocol time-cost rule:** when a protocol graduates out of 4x4 into permanent DOP, its time_cost_minutes stops counting toward the Time Governor budget.
 - **Configure behavior:** Required items = always-on, cannot be unchecked. Recommended = on-by-default but user-toggleable.
-- **Protocol enforcement Rule 2:** measurable target required — blocks when measurable_value null, measurable_unit empty, OR unit is minutes/hours. Hint text: "4 sets."
+- **Protocol enforcement Rule 2 (UPDATED 08/07/2026):** measurable target is optional when time_cost_minutes is non-null and non-zero. Required when time cost is null, zero, or DNA. Minutes and hours are valid measurable target units.
+- **Alter This Protocol is the only supported mid-period modification path (locked 08/07/2026):** direct field edits in Set Up / Edit are blocked mid-month by the canClose gate. Warning dialog removed — canClose error is the only response.
+- **Alteration is a full replacement (locked 08/07/2026):** client can change any field during alteration including type and foundation core. One alteration per protocol per period.
+- **Incomplete tag removed (locked 08/07/2026):** auto-closed periods no longer display an Incomplete tag in History.
+
 ## 30-DAY CYCLE ARCHITECTURE
 
-Status: DESIGNED — NOT BUILT as of 08/03/2026
+Status: DESIGNED — NOT BUILT. HUB shared data model built 08/07/2026 — DOP cycle architecture build is next.
 - program_start_date: auto-set when coach unlocks OBT access
 - tracking_start_date: client-set, anchors the 30-day cycle
 - Days 1–14: OBT Foundation Tracking only
@@ -139,7 +150,7 @@ Status: DESIGNED — NOT BUILT as of 08/03/2026
 - All period date math in fourX4Period.js will be replaced
 - HUB owns cycle and tier data — spokes read only
 
-## CURRENT BUILD STATE (confirmed in source 07/28/2026)
+## CURRENT BUILD STATE (confirmed in source 08/07/2026)
 
 ### Built and committed
 - Full AM/PM block with lock system — labels, padding, unlock confirmation
@@ -147,48 +158,47 @@ Status: DESIGNED — NOT BUILT as of 08/03/2026
 - isDayComplete() — 7 required conditions including amLocked and pmLocked
 - Grace window reminder banner (PMBlock, above PM Lock)
 - 4x4 Matrix full feature set — Set Up/Edit, Instructions, History, Metrics
-- Period close, graduation, keep-in-4x4, alteration
-- Tier cap 30→60. Auto-close on grace expiry. Weekly tally.
-- Per-card auto-save drafts. Common Protocol Examples. Mid-period edit warning.
+- Period close:
+  - Auto-close on grace expiry
+  - Manual close button — Close This Period (BUILT 08/07/2026)
+- Graduation decision screen — four options:
+  - Promote with AM/PM selection step (BUILT 08/07/2026)
+  - Drop
+  - Keep In 4x4 with 25% combined growth gate
+  - Modify — full inline edit form with 9 validation gates (BUILT 08/07/2026)
+- Alteration system — full replacement, type and foundation core changeable, one per period
+- Alteration draft clear on save (FIXED 08/07/2026)
+- Foundation core auto-save in selectFoundationCore (FIXED 08/07/2026)
+- Tier cap 30→60. Weekly tally. Keep-in-4x4 carry. Remediate auto-carry.
+- Per-card auto-save drafts. Common Protocol Examples.
 - Setup Instructions modal (18 sections)
 - Configure tab (SetupScreen)
 - Archive — Last 30 Days
 - Open PIT button (localhost:5174?hub_user={userId})
 - NEVER TWICE box
-- AI quote with BACKUP_QUOTES fallback
+- AI quote with BACKUP_QUOTES fallback (API key not wired — intentional, post-Supabase)
 - Load error banner and Save error banner (DOPApp)
 - Header "Complete Configure to unlock" label below disabled 4x4 button
-- Measurable target hint corrected — "4 sets" not "30 minutes"
-- "Past Period Stats" label (always plural)
-- Vitest test suite — 21 passing tests (3 files)
+- Vitest test suite — 21 passing tests (3 files: smoke, enforcement, autosave)
 - migrateSetup fix — amCommonSelected injection
-- All hardcoded colors replaced with named constants across 7 files
-- Dead imports cleaned (DOPApp, AMBlock, PMBlock, Shared — SectionDivider removed)
-- timeDNA null check corrected
-- Retry label guarded
-- False-positive Saved fixed — only fires on successful save
-- Duplicate FormInstructionsModal footer note removed
+- All hardcoded colors replaced with named constants
+- Dead code removed: progressLabel, NAV_TEXT_DIM, storage.list(), LoginScreen hardcoded hex
 
 ### Known bugs (not yet fixed)
-- **GRADUATE badge will not render** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Fix required before July 31.
-- Foundation Core selection not auto-saved — selectFoundationCore() bypasses updateDraft() storage write
-- Alteration saves never clear drafts — draft-clear loop is after alteration early-return
+- **GRADUATE badge will not render** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Verify at August period close — fix required if badge does not appear.
 - Grace banner Instructions panel copy inaccurate — held pending period logic redesign
 - "Stay logged in" checkbox in LoginScreen is dead UI — post-Supabase
-- progressLabel computed in DOPApp but never used
-- NAV_TEXT_DIM exported from constants but used nowhere
 - styles.js card export imported by nothing
 - FourX4View placeholder section branch is unreachable
-- storage.list() exported but used nowhere
-- Enforcement tests test local copies of rules, not shipping code
-- Streak badge display wired but streak key never written — badge never appears
+- Enforcement tests test local copies of rules, not shipping code — Rule 1 (removed) still asserted; Keep-in-4x4 and netCost gates untested
+- Streak badge display wired but streak key never written — badge never appears (full streak system needs spec)
 
 ### Post-Supabase (do not build)
 - Tomorrow's Priorities → PIT transfer
 - AI quote API key wiring
 - Alteration coach notification flag
 - Streak persistence
-- 30-Day Cycle Architecture (dedicated build session required first)
+- 30-Day Cycle Architecture (HUB data model now built — DOP cycle architecture build is next)
 
 ## VITEST
 
@@ -198,7 +208,7 @@ Status: DESIGNED — NOT BUILT as of 08/03/2026
 
 ## GOVERNING DOCUMENT
 
-- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v2.9
+- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v3.1
 - This file is a context loader only — do not reproduce the full Code Logic doc here.
 
 ## SESSION START PROTOCOL
@@ -211,4 +221,4 @@ Wait for Claude Code to confirm it has read this file and understood the rules. 
 
 ---
 
-*DOP CLAUDE.md — v1.1 — updated 07/29/2026. Full color system, UI parameters, locked rules, and build state added. Aligned to Code Logic v2.9.*
+*DOP CLAUDE.md — v1.2 — updated 08/07/2026. Code Logic reference updated to v3.1. Manual close button, AM/PM at promotion, Modify at graduation added to built list. Foundation core auto-save and alteration draft clear marked fixed. Dead code removals noted. GRADUATE badge bug status updated. Rule 2 updated. NAV_TEXT_DIM removed from color table.*

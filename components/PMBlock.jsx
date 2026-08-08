@@ -11,14 +11,14 @@ export default function PMBlock({
   fourX4Protocols = [], user,
 }) {
   const [confirmUnlockPM, setConfirmUnlockPM] = useState(false);
-  const monthSet = fourX4Protocols[0]?.month_set;
+  const cycleStart = fourX4Protocols[0]?.cycle_start;
   const today = todayStr();
-  const showGraceBanner = !!monthSet && canClose(monthSet, today) && !isGraceExpired(monthSet, today);
+  const showGraceBanner = !!cycleStart && canClose(cycleStart, today) && !isGraceExpired(cycleStart, today);
   let graceBannerText = '';
   if (showGraceBanner) {
-    const [y, m] = monthSet.split('-').map(Number);
-    const monthName = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
-    const daysLeft = Math.round((graceDeadlineDate(monthSet) - new Date(today + 'T00:00:00Z')) / 86400000);
+    const deadline = graceDeadlineDate(cycleStart);
+    const daysLeft = Math.round((deadline - new Date(today + 'T00:00:00Z')) / 86400000);
+    const monthName = new Date(cycleStart + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
     graceBannerText = daysLeft > 0
       ? `Your ${monthName} period is ready to close — You have ${daysLeft} days left before it auto-closes.`
       : `Your ${monthName} period is ready to close — 0 days left, closing today.`;
