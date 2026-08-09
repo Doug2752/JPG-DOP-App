@@ -96,9 +96,11 @@ All color constants live in utils/constants.js.
 - **Background:** GOLD (#B8860B), Border: 1.5px solid #000, BorderRadius: 5
 - **File:** components/BrandBar.jsx
 
-### Grace Window Reminder Banner
+### Grace Window Reminder Banner (UPDATED 08/08/2026)
 - **Position:** inside PMBlock, immediately above PM Lock box
-- **Timing:** fires when today >= month-end date; stops when today > month-end + 5 days. Fires AT and AFTER month end — NOT the 5 days before. The 4x4 Instructions panel copy stating "last 5 days of every period" is inaccurate — held pending period logic redesign.
+- **Timing:** fires when today >= cycle_start + 30 days; stops when today > cycle_start + 34 days. Anchored to client's 30-day cycle start date — no calendar month logic.
+- **Source field:** reads fourX4Protocols[0]?.cycle_start (not month_set)
+- **Month name:** derived from cycle_start ISO date via toLocaleDateString — NOT from splitting a YYYY-MM string
 - **Copy:** "Your [Month] period is ready to close — You have [X] days left before it auto-closes."
 - **Styling:** background GOLD, 1.5px solid DARK, borderRadius 5, padding 10px 16px, fontWeight 700, fontSize 13, textAlign center
 
@@ -133,33 +135,34 @@ All color constants live in utils/constants.js.
 - **4x4 promoted protocol time-cost rule:** when a protocol graduates out of 4x4 into permanent DOP, its time_cost_minutes stops counting toward the Time Governor budget.
 - **Configure behavior:** Required items = always-on, cannot be unchecked. Recommended = on-by-default but user-toggleable.
 - **Protocol enforcement Rule 2 (UPDATED 08/07/2026):** measurable target is optional when time_cost_minutes is non-null and non-zero. Required when time cost is null, zero, or DNA. Minutes and hours are valid measurable target units.
-- **Alter This Protocol is the only supported mid-period modification path (locked 08/07/2026):** direct field edits in Set Up / Edit are blocked mid-month by the canClose gate. Warning dialog removed — canClose error is the only response.
+- **Alter This Protocol is the only supported mid-period modification path (locked 08/07/2026):** direct field edits in Set Up / Edit are blocked mid-period by the canClose gate. Warning dialog removed — canClose error is the only response.
 - **Alteration is a full replacement (locked 08/07/2026):** client can change any field during alteration including type and foundation core. One alteration per protocol per period.
 - **Incomplete tag removed (locked 08/07/2026):** auto-closed periods no longer display an Incomplete tag in History.
+- **cycle_start is the authoritative period anchor (locked 08/08/2026):** all date math uses cycle_start (YYYY-MM-DD). month_set is retired. New and altered protocol records write cycle_start. active_from = todayISO on period save.
 
-## 30-DAY CYCLE ARCHITECTURE
+## 30-DAY CYCLE ARCHITECTURE (BUILT 08/08/2026)
 
-Status: DESIGNED — NOT BUILT. HUB shared data model built 08/07/2026 — DOP cycle architecture build is next.
-- program_start_date: auto-set when coach unlocks OBT access
-- tracking_start_date: client-set, anchors the 30-day cycle
-- Days 1–14: OBT Foundation Tracking only
-- Days 15–21: Analysis Week — DOP/PIT locked, coaching outside apps
-- Days 22–30: Onramp — DOP/PIT open, no enforcement
-- Day 31+: Full enforcement, Cycle 1 begins
-- month_set field to be retired — replaced with cycle_start: "YYYY-MM-DD"
-- All period date math in fourX4Period.js will be replaced
-- HUB owns cycle and tier data — spokes read only
+Status: FULLY BUILT. fourX4Period.js and all consumer files migrated to cycle_start anchoring.
 
-## CURRENT BUILD STATE (confirmed in source 08/07/2026)
+- **getCycleData(username)** — reads hub_clients from localStorage, returns { cycle_start, tracking_start_date, onramp_end }. Falls back to cycle_start: '2026-08-01' when no matching record found.
+- **cycle_start** — replaces month_set throughout. YYYY-MM-DD format. Sourced from hub_clients via getCycleData.
+- **Grace window:** cycle_start + 30 days (open) through cycle_start + 34 days (auto-close).
+- **Remediate carry active_from:** nextCycleOf(cycle_start).cycleStart = cycle_start + 30 days.
+- **active_from on new period:** todayISO (not first of month).
+- **HUB owns all cycle/tier data** — DOP reads hub_clients via getCycleData(), never writes.
+- **Phase gating enforced in HUB WheelView** — not in DOP itself.
+- **Dev fallback:** cycle_start '2026-08-01' used when no hub_clients record matches login username.
+
+## CURRENT BUILD STATE (confirmed in source 08/08/2026)
 
 ### Built and committed
 - Full AM/PM block with lock system — labels, padding, unlock confirmation
 - Four-state Day Complete display in PMBlock
 - isDayComplete() — 7 required conditions including amLocked and pmLocked
-- Grace window reminder banner (PMBlock, above PM Lock)
+- Grace window reminder banner (PMBlock, above PM Lock) — now cycle_start anchored
 - 4x4 Matrix full feature set — Set Up/Edit, Instructions, History, Metrics
 - Period close:
-  - Auto-close on grace expiry
+  - Auto-close on grace expiry (cycle_start + 34 days)
   - Manual close button — Close This Period (BUILT 08/07/2026)
 - Graduation decision screen — four options:
   - Promote with AM/PM selection step (BUILT 08/07/2026)
@@ -183,10 +186,12 @@ Status: DESIGNED — NOT BUILT. HUB shared data model built 08/07/2026 — DOP c
 - migrateSetup fix — amCommonSelected injection
 - All hardcoded colors replaced with named constants
 - Dead code removed: progressLabel, NAV_TEXT_DIM, storage.list(), LoginScreen hardcoded hex
+- **30-Day Cycle Architecture — BUILT 08/08/2026:** fourX4Period.js fully rewritten (getCycleData, nextCycleOf, cycle_start date math throughout). FourX4View.jsx consumer migration complete. PMBlock.jsx grace banner migrated to cycle_start.
 
 ### Known bugs (not yet fixed)
 - **GRADUATE badge will not render** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Verify at August period close — fix required if badge does not appear.
-- Grace banner Instructions panel copy inaccurate — held pending period logic redesign
+- **AUDIT_LEGEND copy uses "next month" language** — FourX4View display copy only, no logic impact. Low priority.
+- Grace banner Instructions panel copy may be inaccurate — review after cycle architecture stabilizes
 - "Stay logged in" checkbox in LoginScreen is dead UI — post-Supabase
 - styles.js card export imported by nothing
 - FourX4View placeholder section branch is unreachable
@@ -198,7 +203,6 @@ Status: DESIGNED — NOT BUILT. HUB shared data model built 08/07/2026 — DOP c
 - AI quote API key wiring
 - Alteration coach notification flag
 - Streak persistence
-- 30-Day Cycle Architecture (HUB data model now built — DOP cycle architecture build is next)
 
 ## VITEST
 
@@ -208,7 +212,7 @@ Status: DESIGNED — NOT BUILT. HUB shared data model built 08/07/2026 — DOP c
 
 ## GOVERNING DOCUMENT
 
-- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v3.1
+- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v3.2
 - This file is a context loader only — do not reproduce the full Code Logic doc here.
 
 ## SESSION START PROTOCOL
@@ -221,4 +225,4 @@ Wait for Claude Code to confirm it has read this file and understood the rules. 
 
 ---
 
-*DOP CLAUDE.md — v1.2 — updated 08/07/2026. Code Logic reference updated to v3.1. Manual close button, AM/PM at promotion, Modify at graduation added to built list. Foundation core auto-save and alteration draft clear marked fixed. Dead code removals noted. GRADUATE badge bug status updated. Rule 2 updated. NAV_TEXT_DIM removed from color table.*
+*DOP CLAUDE.md — v1.3 — updated 08/08/2026. 30-Day Cycle Architecture marked BUILT. getCycleData, cycle_start anchoring, grace banner timing all updated. AUDIT_LEGEND copy bug logged. Code Logic reference updated to v3.2.*
