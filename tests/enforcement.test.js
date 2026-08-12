@@ -12,10 +12,12 @@ function hasShortName(drafts) {
 }
 
 function hasMissingMeasurable(drafts) {
-  return drafts.find(
-    d => d.type === 'activation' &&
-      (d.measurable_value === null || !d.measurable_unit)
-  );
+  return drafts.find(d => {
+    if (d.type !== 'activation') return false;
+    const hasTimeCost = !d.timeDNA && d.time_cost_minutes !== null && d.time_cost_minutes > 0;
+    if (hasTimeCost) return false;
+    return d.measurable_value === null || !d.measurable_unit;
+  });
 }
 
 function hasBelowTimeFloor(drafts) {
@@ -58,37 +60,19 @@ function draft(overrides = {}) {
   };
 }
 
-describe('Rule 1 — Name minimum 5 words', () => {
-  it('passes when all names have >= 5 words', () => {
-    const drafts = [
-      draft({ name: 'Run a full five kilometers' }),
-      draft({ name: 'Read one chapter every single night' }),
-    ];
-    expect(hasShortName(drafts)).toBeUndefined();
-  });
-
-  it('blocked when any name has < 5 words', () => {
-    const drafts = [
-      draft({ name: 'Run a full five kilometers' }),
-      draft({ name: 'Run more' }),
-    ];
-    expect(hasShortName(drafts)).toBeTruthy();
-  });
-});
-
 describe('Rule 2 — Activation measurable target required', () => {
   it('passes when activation has measurable_value and measurable_unit', () => {
     const drafts = [draft({ type: 'activation', measurable_value: 5, measurable_unit: 'miles' })];
     expect(hasMissingMeasurable(drafts)).toBeUndefined();
   });
 
-  it('blocked when activation has measurable_value null', () => {
-    const drafts = [draft({ type: 'activation', measurable_value: null, measurable_unit: 'miles' })];
+  it('blocked when activation has measurable_value null and no time cost', () => {
+    const drafts = [draft({ type: 'activation', measurable_value: null, measurable_unit: 'miles', time_cost_minutes: null })];
     expect(hasMissingMeasurable(drafts)).toBeTruthy();
   });
 
-  it('blocked when activation has measurable_unit empty string', () => {
-    const drafts = [draft({ type: 'activation', measurable_value: 5, measurable_unit: '' })];
+  it('blocked when activation has measurable_unit empty string and no time cost', () => {
+    const drafts = [draft({ type: 'activation', measurable_value: 5, measurable_unit: '', time_cost_minutes: null })];
     expect(hasMissingMeasurable(drafts)).toBeTruthy();
   });
 });

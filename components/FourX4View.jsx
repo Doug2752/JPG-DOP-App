@@ -148,12 +148,12 @@ function metricColumns(columns, opts = {}) {
 const AUDIT_LEGEND = {
   unlocked: "You executed at 85% or higher. You've earned the " +
     'ability to add up to 30 more minutes of invested time to ' +
-    "next month's protocols, raising your daily cap from 30 " +
+    "next cycle's protocols, raising your daily cap from 30 " +
     'to 60 minutes.',
   standard: 'You executed between 75% and 84%. You advance to ' +
-    'next month at the standard 30-minute daily time cap.',
+    'next cycle at the standard 30-minute daily time cap.',
   remediate: 'You executed below 75%. Lagging protocols carry ' +
-    'into next month and no new protocols can be added until ' +
+    'into next cycle and no new protocols can be added until ' +
     'consistency improves.',
 };
 
@@ -2495,7 +2495,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div style={INSTR_BODY}>The 4x4 Matrix works differently. Every addition to your day is paired with an equal commitment to reducing or eliminating something that isn't serving you. You don't just add positive behavior — you make room for it by cutting the negative and non-gainful behavior that's already crowding your time. That trade is the entire foundation of the system.</div>
 
                 <div style={INSTR_SUBHEAD}>How It Works</div>
-                <div style={INSTR_BODY}>Each month, you set exactly 4 protocols — one for each Foundation Core. Every protocol is either an Activation (something you're adding) or a Deactivation (something you're reducing or removing). At least 1 of your 4 protocols must be a Deactivation, every month, without exception.</div>
+                <div style={INSTR_BODY}>Each period, you set exactly 4 protocols — one for each Foundation Core. Every protocol is either an Activation (something you're adding) or a Deactivation (something you're reducing or removing). At least 1 of your 4 protocols must be a Deactivation, every month, without exception.</div>
                 <div style={INSTR_BODY}>In the DOP app, specifically the 4x4 Matrix section, the app itself tracks, calculates, and walks you through both setup and monthly implementation. It may seem complicated at first — that's because of the checks and balances built in to make the system actually work. In short order, you'll become comfortable with it, and the app will keep you aligned and on track.</div>
                 <div style={INSTR_BODY}>It's also worth using the History section within the 4x4 Matrix to look back at your past protocols and results. The numbers guide us on our journey.</div>
 
@@ -2503,7 +2503,7 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div style={INSTR_BODY}>Once you set your 4x4 protocols, they appear right in your Today checklist alongside your AM and PM items — same daily habit of checking them off. What sets them apart is how they're measured. Standard DOP items are already locked in as part of your routine. 4x4 protocols are still being proven — each one carries its own weekly and monthly score, tracking whether it's ready to become a permanent part of your day.</div>
 
                 <div style={INSTR_SUBHEAD}>How It Progresses</div>
-                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>At the end of every monthly period, you look at each of your 4 protocols and decide what happens to it next: keep building on it, promote it into a permanent part of your daily standard, or drop it. Protocols that prove out over time graduate out of the 4x4 and into your permanent DOP roadmap — freeing that slot for something new. The 4x4 space always stays reserved for what's currently changing, not for what's already become who you are.</div>
+                <div style={{ ...INSTR_BODY, marginBottom: 0 }}>At the end of every period, you look at each of your 4 protocols and decide what happens to it next: keep building on it, promote it into a permanent part of your daily standard, or drop it. Protocols that prove out over time graduate out of the 4x4 and into your permanent DOP roadmap — freeing that slot for something new. The 4x4 space always stays reserved for what's currently changing, not for what's already become who you are.</div>
               </div>
             </div>
 
@@ -2594,51 +2594,10 @@ export default function FourX4View({ onBack, user, onSave }) {
                 <div style={INSTR_BODY}>When a protocol is promoted, it appears in your AM or PM checklist with a gold GRADUATE badge next to its name. This is your confirmation that the protocol has earned its place as a permanent part of your daily standard.</div>
 
                 <div style={INSTR_BODY}>If the protocol scored Remediate (below 75%), there's no choice to make — it automatically carries into next month as-is, and no new addition can be added to that Core until it's back on track. This isn't a penalty. It's the system keeping your focus where it's needed before letting you take on more.</div>
-                <div style={INSTR_BODY}>During the last 5 days of every period, a gold banner appears in your PM block counting down the days remaining before the period closes. This is your reminder to complete any outstanding checklist items and prepare for the end-of-month review. The banner cannot be dismissed — it stays visible until the window passes.</div>
+                <div style={INSTR_BODY}>During the last 5 days of every period, a gold banner appears in your PM block counting down the days remaining before the period closes. This is your reminder to complete any outstanding checklist items and prepare for the end-of-period review. The banner cannot be dismissed — it stays visible until the window passes.</div>
                 <div style={{ ...INSTR_BODY, marginBottom: 0 }}>If a protocol was altered during the period, both the original version and the altered version appear at period close as separate cards, each scored independently on its own window. The original is scored on the days before the alteration. The altered version is scored on the days after. Both are judged on their own merits.</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Placeholder sections ────────────────────────────
-  if (section) {
-    return (
-      <div style={PAGE}>
-        <div style={{
-          maxWidth: 900,
-          margin: '0 auto',
-          background: 'white',
-          borderRadius: '5px',
-          padding: '24px',
-        }}>
-          <button
-            style={{
-              background: '#1a1a1a',
-              color: GOLD,
-              border: '1.5px solid ' + GOLD,
-              borderRadius: '5px',
-              padding: '6px 16px',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              marginBottom: 20,
-            }}
-            onClick={() => setSection(null)}
-          >Back</button>
-          <div style={{
-            textAlign: 'center',
-            color: 'white',
-            fontSize: 18,
-            fontWeight: 600,
-            background: '#1a1a1a',
-            borderRadius: '5px',
-            padding: '40px',
-          }}>
-            {section}
           </div>
         </div>
       </div>
