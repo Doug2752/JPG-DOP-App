@@ -5,6 +5,7 @@ import { todayStr } from '../utils/date';
 import {
   canClose, closeActivePeriod, describeCloseWindow,
   runAutoCloseCheck, graceDeadlineDate, getCycleData,
+  evaluateAndWriteTierCap,
   getPendingGraduationDecisions, promoteProtocol, dropProtocol,
   keepIn4x4Protocol, getKeepIn4x4Carryovers, keepIn4x4GrowthPercent,
   countCompletions,
@@ -364,10 +365,9 @@ export default function FourX4View({ onBack, user, onSave }) {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const tv = await storage.get('4x4_tier_' + user);
-      if (tv && tv.value) {
-        setTier(JSON.parse(tv.value));
-      }
+      const { tier: hubTier, cap_override_minutes: capOverride } = await getCycleData(user);
+      const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
+      setTier(tierData);
 
       const pv = await storage.get('4x4_protocols_' + user);
       const loaded = pv && pv.value
@@ -580,7 +580,8 @@ export default function FourX4View({ onBack, user, onSave }) {
     const all = pv && pv.value ? JSON.parse(pv.value) : [];
     const active = all.filter(r => r.status === 'active');
     if (active.length === 0) return;
-    const cycleStart = active[0].cycle_start || (await getCycleData(user)).cycle_start;
+    const { cycle_start: hubCycleStart, tier: hubTier, cap_override_minutes: capOverride } = await getCycleData(user);
+    const cycleStart = active[0].cycle_start || hubCycleStart;
     const todayISO = todayStr();
     if (!canClose(cycleStart, todayISO)) {
       setSaveError(
@@ -590,8 +591,8 @@ export default function FourX4View({ onBack, user, onSave }) {
       return;
     }
     await closeActivePeriod(user, todayISO, { status: 'history' });
-    const tv = await storage.get('4x4_tier_' + user);
-    if (tv && tv.value) setTier(JSON.parse(tv.value));
+    const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
+    setTier(tierData);
     const pending = await getPendingGraduationDecisions(user);
     setPendingGrad(pending);
     hasActivePeriodRef.current = false;
@@ -827,7 +828,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       setTimeout(() => setSaved(false), 2500);
       return;
     }
-    const { cycle_start: cycleStart } = await getCycleData(user);
+    const { cycle_start: cycleStart, tier: hubTier, cap_override_minutes: capOverride } = await getCycleData(user);
     const activeFrom = todayISO;
     const ts = Date.now();
     const records = drafts.map(d => {
@@ -874,8 +875,8 @@ export default function FourX4View({ onBack, user, onSave }) {
 
     if (existingActive.length > 0) {
       await closeActivePeriod(user, todayISO, { status: 'history' });
-      const tv = await storage.get('4x4_tier_' + user);
-      if (tv && tv.value) setTier(JSON.parse(tv.value));
+      const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
+      setTier(tierData);
     }
     const pv2 = await storage.get('4x4_protocols_' + user);
     const base = pv2 && pv2.value ? JSON.parse(pv2.value) : [];

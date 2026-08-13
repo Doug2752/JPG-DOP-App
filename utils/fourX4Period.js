@@ -31,6 +31,8 @@ const CYCLE_FALLBACK = {
   cycle_start: '2026-08-01',
   tracking_start_date: null,
   onramp_end: null,
+  tier: 4,
+  cap_override_minutes: null,
 };
 
 /**
@@ -59,6 +61,8 @@ export async function getCycleData(username) {
     cycle_start: match.cycle_start ?? CYCLE_FALLBACK.cycle_start,
     tracking_start_date: match.tracking_start_date ?? null,
     onramp_end: match.onramp_end ?? null,
+    tier: match.tier ?? 4,
+    cap_override_minutes: match.cap_override_minutes ?? null,
   };
 }
 
@@ -234,7 +238,8 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     )
   );
 
-  await evaluateAndWriteTierCap(user, storage, historyRecords);
+  const { tier: hubTier, cap_override_minutes: capOverride } = await getCycleData(user);
+  await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
 
   const ts = Date.now();
   const remediateCarries = [];
@@ -277,18 +282,20 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
 }
 
 /**
- * Tier cap unlock rule, re-evaluated every period close (never
- * permanent): cap upgrades 30 -> 60 when at least 2 of the 4
- * Foundation Cores hit a 0.85+ completion rate for the period AND
- * every remaining Core is still at 0.50+. Otherwise the cap holds
- * (or reverts) to 30.
+ * Writes the Time Governor cap for the user. Cap is sourced from HUB:
+ * capOverride (positive integer) if set, else tier 1 → 60 min,
+ * all other tiers → 30 min.
  */
-export async function evaluateAndWriteTierCap(user, storage, historyRecords) {
-  const rates = historyRecords.map(r => r.completion_rate);
-  const highCount = rates.filter(r => r >= 0.85).length;
-  const remaining = rates.filter(r => r < 0.85);
-  const unlocked = highCount >= 2 && remaining.every(r => r >= 0.50);
-  const tierData = unlocked ? { tier: 2, cap: 60 } : { tier: 1, cap: 30 };
+export async function evaluateAndWriteTierCap(user, storage, tier, capOverride) {
+  let cap;
+  if (capOverride !== null && capOverride !== undefined && Number.isInteger(capOverride) && capOverride > 0) {
+    cap = capOverride;
+  } else if (tier === 1) {
+    cap = 60;
+  } else {
+    cap = 30;
+  }
+  const tierData = { tier, cap };
   await storage.set('4x4_tier_' + user, JSON.stringify(tierData));
   return tierData;
 }
