@@ -65,7 +65,7 @@ All color constants live in utils/constants.js.
 | NAV_TEXT | #aaaaaa | Nav bar username text color. |
 | WHITE | #ffffff | Input backgrounds, button text (styles.js). |
 
-**NOTE:** NAV_TEXT_DIM (#666666) was removed from constants.js 08/07/2026 — it was exported but used nowhere.
+**NOTE:** NAV_TEXT_DIM (#666666) was removed from constants.js 08/07/2026 — exported but used nowhere.
 
 **Two-tier gold rule (locked):** GOLD_LIGHT = clickable/action. GOLD = informational/non-interactive. Both: black text + 1.5px solid black border on light/white backgrounds. Exception: elements on dark/black nav bar get NO black border.
 
@@ -139,6 +139,7 @@ All color constants live in utils/constants.js.
 - **Alteration is a full replacement (locked 08/07/2026):** client can change any field during alteration including type and foundation core. One alteration per protocol per period.
 - **Incomplete tag removed (locked 08/07/2026):** auto-closed periods no longer display an Incomplete tag in History.
 - **cycle_start is the authoritative period anchor (locked 08/08/2026):** all date math uses cycle_start (YYYY-MM-DD). month_set is retired. New and altered protocol records write cycle_start. active_from = todayISO on period save.
+- **Streak system deferred (08/12/2026):** streak badge concept dropped from active backlog. Do not build until explicitly re-scoped.
 
 ## 30-DAY CYCLE ARCHITECTURE (BUILT 08/08/2026)
 
@@ -153,13 +154,13 @@ Status: FULLY BUILT. fourX4Period.js and all consumer files migrated to cycle_st
 - **Phase gating enforced in HUB WheelView** — not in DOP itself.
 - **Dev fallback:** cycle_start '2026-08-01' used when no hub_clients record matches login username.
 
-## CURRENT BUILD STATE (confirmed in source 08/08/2026)
+## CURRENT BUILD STATE (confirmed in source 08/12/2026)
 
 ### Built and committed
 - Full AM/PM block with lock system — labels, padding, unlock confirmation
 - Four-state Day Complete display in PMBlock
 - isDayComplete() — 7 required conditions including amLocked and pmLocked
-- Grace window reminder banner (PMBlock, above PM Lock) — now cycle_start anchored
+- Grace window reminder banner (PMBlock, above PM Lock) — cycle_start anchored
 - 4x4 Matrix full feature set — Set Up/Edit, Instructions, History, Metrics
 - Period close:
   - Auto-close on grace expiry (cycle_start + 34 days)
@@ -182,21 +183,27 @@ Status: FULLY BUILT. fourX4Period.js and all consumer files migrated to cycle_st
 - AI quote with BACKUP_QUOTES fallback (API key not wired — intentional, post-Supabase)
 - Load error banner and Save error banner (DOPApp)
 - Header "Complete Configure to unlock" label below disabled 4x4 button
-- Vitest test suite — 21 passing tests (3 files: smoke, enforcement, autosave)
 - migrateSetup fix — amCommonSelected injection
 - All hardcoded colors replaced with named constants
 - Dead code removed: progressLabel, NAV_TEXT_DIM, storage.list(), LoginScreen hardcoded hex
-- **30-Day Cycle Architecture — BUILT 08/08/2026:** fourX4Period.js fully rewritten (getCycleData, nextCycleOf, cycle_start date math throughout). FourX4View.jsx consumer migration complete. PMBlock.jsx grace banner migrated to cycle_start.
+- **30-Day Cycle Architecture — BUILT 08/08/2026:** fourX4Period.js fully rewritten. FourX4View.jsx and PMBlock.jsx consumer migration complete.
+- **Cleanup pass — BUILT 08/12/2026:**
+  - AUDIT_LEGEND: all three strings updated from "next month" to "next cycle" / "next cycle's"
+  - Instructions panel copy: "Each period," / "At the end of every period," / "end-of-period review" — all corrected
+  - Dead `card` export removed from components/styles.js (was imported by nothing)
+  - Unreachable placeholder section block removed from FourX4View.jsx
+  - Enforcement tests: Rule 1 test block deleted, hasMissingMeasurable updated with hasTimeCost exemption, blocked test cases updated with time_cost_minutes: null
+  - 19/19 tests passing (down from 21 — 2 Rule 1 tests correctly removed)
+
+### styles.js exports (current — 08/12/2026)
+- `inp` — imported by PMBlock.jsx, AMBlock.jsx, SetupScreen.jsx, SetupRow.jsx, BrandBar.jsx
+- `lbl` — imported by PMBlock.jsx, AMBlock.jsx
+- `gbtn` — imported by SetupScreen.jsx, BrandBar.jsx, Header.jsx
+- `card` — **REMOVED 08/12/2026** — was imported by nothing
 
 ### Known bugs (not yet fixed)
 - **GRADUATE badge will not render** — DOPApp drops graduated_from_4x4 flag when rebuilding custom rows. Verify at August period close — fix required if badge does not appear.
-- **AUDIT_LEGEND copy uses "next month" language** — FourX4View display copy only, no logic impact. Low priority.
-- Grace banner Instructions panel copy may be inaccurate — review after cycle architecture stabilizes
 - "Stay logged in" checkbox in LoginScreen is dead UI — post-Supabase
-- styles.js card export imported by nothing
-- FourX4View placeholder section branch is unreachable
-- Enforcement tests test local copies of rules, not shipping code — Rule 1 (removed) still asserted; Keep-in-4x4 and netCost gates untested
-- Streak badge display wired but streak key never written — badge never appears (full streak system needs spec)
 
 ### Post-Supabase (do not build)
 - Tomorrow's Priorities → PIT transfer
@@ -206,13 +213,13 @@ Status: FULLY BUILT. fourX4Period.js and all consumer files migrated to cycle_st
 
 ## VITEST
 
-- 21 passing tests across 3 files: smoke.test.jsx, enforcement.test.js, autosave.test.js
+- 19/19 passing tests across 3 files: smoke.test.jsx (1), enforcement.test.js (13), autosave.test.js (5)
 - Run: npm test
-- Note: enforcement tests test local copies of rules, not shipping code
+- Note: enforcement tests updated 08/12/2026 — hasMissingMeasurable now matches shipping code with hasTimeCost exemption
 
 ## GOVERNING DOCUMENT
 
-- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v3.2
+- **Code Logic doc:** JPG-SYS-DOP-CodeLogic-WRK-v3.3
 - This file is a context loader only — do not reproduce the full Code Logic doc here.
 
 ## SESSION START PROTOCOL
@@ -225,4 +232,4 @@ Wait for Claude Code to confirm it has read this file and understood the rules. 
 
 ---
 
-*DOP CLAUDE.md — v1.3 — updated 08/08/2026. 30-Day Cycle Architecture marked BUILT. getCycleData, cycle_start anchoring, grace banner timing all updated. AUDIT_LEGEND copy bug logged. Code Logic reference updated to v3.2.*
+*DOP CLAUDE.md — v1.4 — updated 08/12/2026. Cleanup pass: AUDIT_LEGEND "next cycle" copy, Instructions panel "period" language, dead card export removed from styles.js, unreachable placeholder block removed from FourX4View, enforcement tests synced to shipping code. 19/19 tests passing. Streak system dropped from active backlog. Code Logic reference updated to v3.3.*
