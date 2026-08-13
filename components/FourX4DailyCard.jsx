@@ -1,59 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { GOLD, BORDER } from '../utils/constants';
 import { todayStr } from '../utils/date';
-import { countCompletions } from '../utils/fourX4Period';
 const SHADOW = '0 1px 4px rgba(0,0,0,0.06)';
 
-function currentWeekRange() {
-  const d = new Date(todayStr() + 'T00:00:00Z');
-  const day = d.getUTCDay();
-  const diffToMonday = day === 0 ? 6 : day - 1;
-  const monday = new Date(d);
-  monday.setUTCDate(d.getUTCDate() - diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setUTCDate(monday.getUTCDate() + 6);
+function cycleWeekRange(cycleStart) {
   const iso = x => x.toISOString().slice(0, 10);
-  return { monday: iso(monday), sunday: iso(sunday) };
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const today = new Date(todayStr() + 'T00:00:00Z');
+  const start = new Date(cycleStart + 'T00:00:00Z');
+  const daysElapsed = Math.max(0, Math.floor((today - start) / DAY_MS));
+  const windowOffset = Math.floor(daysElapsed / 7) * 7;
+  const windowStart = new Date(start.getTime() + windowOffset * DAY_MS);
+  const windowEnd = new Date(windowStart.getTime() + 6 * DAY_MS);
+  return { windowStart: iso(windowStart), windowEnd: iso(windowEnd) };
+}
+
+function pctColor(pct) {
+  if (pct >= 75) return '#2E7D32';
+  if (pct >= 50) return '#F9A825';
+  return '#C0392B';
 }
 
 export default function FourX4DailyCard({
   protocols, form, saveForm, user,
 }) {
   const checks = form.fourX4Checks || {};
-  const checkedCount = protocols.filter(
-    p => !!checks[p.id]
-  ).length;
+  const checkedCount = protocols.filter(p => !!checks[p.id]).length;
   const total = protocols.length;
-  const allDone =
-    checkedCount === total && total > 0;
+  const allDone = checkedCount === total && total > 0;
   const [weeklyCounts, setWeeklyCounts] = useState({});
+
   useEffect(() => {
-    if (!user) return;
-    const weeklyProtocols = protocols.filter(
-      p => p.frequency === 'weekly_target'
-    );
-    if (weeklyProtocols.length === 0) return;
-    const { monday, sunday } = currentWeekRange();
-    let cancelled = false;
-    (async () => {
-      const results = {};
-      for (const p of weeklyProtocols) {
+    if (!user || protocols.length === 0) return;
+    const cycleStart = protocols[0]?.cycle_start || '2026-08-01';
+    const { windowStart, windowEnd } = cycleWeekRange(cycleStart);
+    const sk = user + '_dop7_';
+    let dates = [];
+    try {
+      dates = JSON.parse(localStorage.getItem(sk + 'archiveDates')) || [];
+    } catch (_) { dates = []; }
+    const inRange = dates.filter(d => d >= windowStart && d <= windowEnd);
+    const results = {};
+    for (const p of protocols) {
+      let count = 0;
+      for (const d of inRange) {
         try {
-          results[p.id] = await countCompletions(
-            user, p.id, monday, sunday
-          );
-        } catch (e) {
-          results[p.id] = 'error';
-        }
+          const raw = localStorage.getItem(sk + 'form_' + d);
+          if (raw) {
+            const f = JSON.parse(raw);
+            if (f.fourX4Checks && f.fourX4Checks[p.id]) count++;
+          }
+        } catch (_) { /* skip unparsable day */ }
       }
-      if (!cancelled) setWeeklyCounts(results);
-    })();
-    return () => { cancelled = true; };
-  }, [user, protocols]);
+      results[p.id] = count;
+    }
+    setWeeklyCounts(results);
+  }, [user, protocols.length, protocols.map(p => p.id).join(',')]);
+
   function toggle(id) {
     const next = { ...checks, [id]: !checks[id] };
     saveForm({ ...form, fourX4Checks: next });
   }
+
   return (
     <div style={{
       background: 'white',
@@ -92,13 +100,18 @@ export default function FourX4DailyCard({
       <div style={{ padding: '4px 0' }}>
         {protocols.map((p, i) => {
           const checked = !!checks[p.id];
-          const isLast = i === protocols.length-1;
-          const coreLabel =
-            p.foundation_core.replace(/_/g, ' ');
+          const isLast = i === protocols.length - 1;
+          const coreLabel = p.foundation_core.replace(/_/g, ' ');
           const todLabel =
             p.time_of_day === 'both'
               ? 'AM + PM'
               : p.time_of_day.toUpperCase();
+          const count = weeklyCounts[p.id];
+          const hasCount = count !== undefined && count !== 'error';
+          const denom = p.frequency === 'weekly_target' ? p.weekly_target : 7;
+          const pct = hasCount && denom > 0
+            ? Math.min(100, Math.round((count / denom) * 100))
+            : null;
           return (
             <div
               key={p.id}
@@ -106,9 +119,7 @@ export default function FourX4DailyCard({
                 display: 'flex',
                 alignItems: 'center',
                 padding: '10px 16px',
-                borderBottom: isLast
-                  ? 'none'
-                  : '1px solid #f0f0f0',
+                borderBottom: isLast ? 'none' : '1px solid #f0f0f0',
               }}
             >
               <div style={{ flex: 1 }}>
@@ -146,11 +157,22 @@ export default function FourX4DailyCard({
                     color: '#999',
                     marginTop: 2,
                   }}>
-                    {weeklyCounts[p.id] === undefined
-                      || weeklyCounts[p.id] === 'error'
-                      ? '—'
-                      : weeklyCounts[p.id]}
+                    {hasCount ? count : '—'}
                     {' of '}{p.weekly_target}{' this week'}
+                    {pct !== null && (
+                      <span style={{ color: pctColor(pct) }}>
+                        {' — '}{pct}{'%'}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {p.frequency === 'daily' && pct !== null && (
+                  <div style={{
+                    fontSize: 11,
+                    color: pctColor(pct),
+                    marginTop: 2,
+                  }}>
+                    {pct}{'%'}
                   </div>
                 )}
               </div>
@@ -165,8 +187,7 @@ export default function FourX4DailyCard({
                   border: checked
                     ? '1.5px solid ' + GOLD
                     : '1.5px solid #ccc',
-                  background: checked
-                    ? GOLD : 'white',
+                  background: checked ? GOLD : 'white',
                   color: '#000',
                   fontSize: 13,
                   fontWeight: 900,
