@@ -85,6 +85,21 @@ export default function PMBlock({
         );
       })}
 
+      {/* PM Deviation */}
+      <div style={{ padding: '12px 16px 14px', marginTop: 16, marginBottom: 8 }}>
+        <label style={lbl}>
+          PM Deviation{' '}
+          <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(optional)</span>
+        </label>
+        <textarea
+          value={form.pmDeviation || ''}
+          onChange={e => upd('pmDeviation', e.target.value)}
+          rows={2}
+          style={{ ...inp, resize: 'vertical' }}
+          placeholder="Note anything abnormal or items not completed this evening..."
+        />
+      </div>
+
       {/* Tomorrow's Priorities */}
       <div style={{ borderRadius: 0, overflow: 'hidden', marginBottom: 14 }}>
         <div style={{ background: DARK, padding: '10px 16px', borderTop: `2px solid ${RED}` }}>
@@ -102,39 +117,6 @@ export default function PMBlock({
             placeholder="The single most important action tomorrow..."
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ flex: 1, height: 1, background: BORDER }} />
-          <span style={{ fontSize: 10, fontWeight: 800, color: '#bbb', letterSpacing: 2, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Optional</span>
-          <div style={{ flex: 1, height: 1, background: BORDER }} />
-        </div>
-        <div style={{ padding: '4px 16px 14px' }}>
-          <label style={lbl}>
-            Tomorrow's Appointments & Must-Do's{' '}
-            <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(also in PIT)</span>
-          </label>
-          <textarea
-            value={form.tomorrowAppts || ''}
-            onChange={e => upd('tomorrowAppts', e.target.value)}
-            rows={3}
-            style={{ ...inp, resize: 'vertical', marginBottom: 12 }}
-            placeholder="Key appointments and tasks for tomorrow..."
-          />
-        </div>
-      </div>
-
-      {/* PM Deviation */}
-      <div style={{ padding: '0 16px 14px' }}>
-        <label style={lbl}>
-          PM Deviation{' '}
-          <span style={{ fontWeight: 400, color: '#aaa', textTransform: 'none', letterSpacing: 0, fontSize: 11 }}>(optional)</span>
-        </label>
-        <textarea
-          value={form.pmDeviation || ''}
-          onChange={e => upd('pmDeviation', e.target.value)}
-          rows={2}
-          style={{ ...inp, resize: 'vertical' }}
-          placeholder="Note anything abnormal or items not completed this evening..."
-        />
       </div>
 
       {showGraceBanner && (
