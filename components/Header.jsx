@@ -1,6 +1,5 @@
 import React from 'react';
-import { GOLD, DARK, NAV_TEXT } from '../utils/constants';
-import { gbtn } from './styles';
+import { GOLD, DARK } from '../utils/constants';
 
 export default function Header({
   view, goToday, setView, isToday,
@@ -22,58 +21,66 @@ export default function Header({
       boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
       height: 52,
     }}>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button
-          style={gbtn({ background: view === 'setup' ? GOLD : '#333', border: 'none' })}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <span
           onClick={() => setView('setup')}
-        >Configure</button>
-        <button
-          style={gbtn({ background: view === 'form' && isToday && setupComplete ? GOLD : '#333', border: 'none' })}
+          style={view === 'setup'
+            ? { color: GOLD, fontWeight: 700, fontSize: 13, cursor: 'pointer', borderBottom: '2px solid #B8860B', paddingBottom: 2 }
+            : { color: 'rgba(255,255,255,0.5)', fontWeight: 500, fontSize: 13, cursor: 'pointer' }}
+        >Configure</span>
+        <span
           onClick={goToday}
-        >Today</button>
-        <button
-          style={gbtn({ background: view === 'archive' ? GOLD : '#333', border: 'none' })}
+          style={view === 'form' && isToday && setupComplete
+            ? { color: GOLD, fontWeight: 700, fontSize: 13, cursor: 'pointer', borderBottom: '2px solid #B8860B', paddingBottom: 2 }
+            : { color: 'rgba(255,255,255,0.5)', fontWeight: 500, fontSize: 13, cursor: 'pointer' }}
+        >Today</span>
+        <span
           onClick={() => setView('archive')}
-        >Archive</button>
+          style={view === 'archive'
+            ? { color: GOLD, fontWeight: 700, fontSize: 13, cursor: 'pointer', borderBottom: '2px solid #B8860B', paddingBottom: 2 }
+            : { color: 'rgba(255,255,255,0.5)', fontWeight: 500, fontSize: 13, cursor: 'pointer' }}
+        >Archive</span>
         {setupComplete ? (
-          <button
-            style={gbtn({
-              background: view === '4x4' ? GOLD : '#333',
-              border: 'none',
-            })}
+          <span
             onClick={() => setView('4x4')}
-          >4x4 Matrix</button>
+            style={view === '4x4'
+              ? { color: GOLD, fontWeight: 700, fontSize: 13, cursor: 'pointer', borderBottom: '2px solid #B8860B', paddingBottom: 2 }
+              : { color: 'rgba(255,255,255,0.5)', fontWeight: 500, fontSize: 13, cursor: 'pointer' }}
+          >4x4 Matrix</span>
         ) : (
           <div title="Complete DOP Configure setup to unlock 4x4.">
-            <button
-              style={gbtn({
-                background: '#333',
-                border: 'none',
-                opacity: 0.5,
-                cursor: 'not-allowed',
-              })}
-              disabled
-            >4x4 Matrix</button>
-            <div style={{ fontSize: 9, color: NAV_TEXT, textAlign: 'center', marginTop: 2 }}>Complete Configure to unlock</div>
+            <span style={{ color: 'rgba(255,255,255,0.2)', fontWeight: 500, fontSize: 13, cursor: 'not-allowed' }}>4x4 Matrix</span>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 2 }}>Complete Configure to unlock</div>
+          </div>
+        )}
+        {streak > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 1.5, height: 16, background: 'rgba(255,255,255,0.25)' }} />
+            <span style={{ color: GOLD, fontSize: 12, fontWeight: 700, letterSpacing: 0.5 }}>
+              {streak} Day Streak
+            </span>
           </div>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {streak > 0 && (
-          <div style={{ background: GOLD, color: DARK, borderRadius: 20, padding: '3px 12px', fontSize: 11, fontWeight: 900, letterSpacing: 1 }}>
-            {streak} Day Streak
-          </div>
-        )}
-        <button
-          style={{ padding: '6px 14px', borderRadius: 5, border: `1.5px solid ${GOLD}`, background: 'transparent', color: GOLD, fontSize: 11, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.5, whiteSpace: 'nowrap' }}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span
           onClick={onInstructions}
-        >{showInstructions ? 'Close Set-Up and Instructions' : 'Set-Up and Instructions'}</button>
-        <span style={{ color: NAV_TEXT, fontSize: 12 }}>{firstName}</span>
-        <button
-          style={{ background: 'transparent', border: 'none', color: NAV_TEXT, cursor: 'pointer', fontSize: 12 }}
+          style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}
+        >
+          {showInstructions ? 'Close Set-Up and Instructions' : 'Set-Up and Instructions'}
+        </span>
+        <div style={{ width: 1.5, height: 16, background: 'rgba(255,255,255,0.25)' }} />
+        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
+          {firstName}
+        </span>
+        <div style={{ width: 1.5, height: 16, background: 'rgba(255,255,255,0.25)' }} />
+        <span
           onClick={onLogout}
-        >Logout</button>
+          style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, cursor: 'pointer' }}
+        >
+          Logout
+        </span>
       </div>
     </div>
   );

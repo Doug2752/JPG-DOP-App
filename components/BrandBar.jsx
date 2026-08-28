@@ -1,28 +1,33 @@
 import React from 'react';
 import { GOLD, DARK, BORDER } from '../utils/constants';
 import { inp, gbtn } from './styles';
-import { todayStr, fmtDate } from '../utils/date';
+import { todayStr, fmtDate, fmtDateShort } from '../utils/date';
 
 const LOGO_SRC = '/jpglogo.png';
 
 export default function BrandBar({ form, upd, showDatePicker, setShowDatePicker, goToday, loadArchive, readOnlyDate }) {
   return (
     <div
-      style={{ background: '#fff', borderBottom: `4px solid ${GOLD}`, padding: '10px 20px' }}
+      style={{ background: '#fff', borderBottom: `2px solid ${GOLD}`, padding: '10px 20px' }}
       onClick={() => setShowDatePicker(false)}
     >
-      <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
-        {/* Logo */}
-        <img src={LOGO_SRC} alt="Jones Performance Group" style={{ width: 260, height: 'auto', display: 'block' }} />
+        {/* LEFT — Logo */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+          <img src={LOGO_SRC} alt="Jones Performance Group" style={{ width: 260, height: 'auto', display: 'block' }} />
+        </div>
 
-        {/* Center: DOP title + date picker */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ marginBottom: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 38, fontWeight: 900, color: '#000', lineHeight: 1 }}>DOP</div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#000', letterSpacing: 0.5, marginTop: 3 }}>Daily Operational Process</div>
+        {/* CENTER — DOP title and subtitle only */}
+        <div style={{ flex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontSize: 52, fontWeight: 900, color: '#000', lineHeight: 1 }}>DOP</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#000', letterSpacing: 0.5, marginTop: 3 }}>
+            Daily Operational Process
           </div>
+        </div>
 
+        {/* RIGHT — Date picker only */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
           {readOnlyDate !== undefined ? (
             <div style={{ marginBottom: 10, fontSize: 12, fontWeight: 600, color: '#555' }}>
               {readOnlyDate
@@ -36,7 +41,7 @@ export default function BrandBar({ form, upd, showDatePicker, setShowDatePicker,
                 onClick={() => setShowDatePicker(p => !p)}
                 style={{ background: '#fff', border: `1px solid ${GOLD}`, borderRadius: 5, padding: '4px 14px', fontSize: 12, fontWeight: 600, color: DARK, cursor: 'pointer', letterSpacing: 0.3 }}
               >
-                {fmtDate(form.date)}
+                {fmtDateShort(form.date)}
                 <span style={{ marginLeft: 8, fontSize: 16, color: GOLD, lineHeight: 1 }}>▾</span>
               </button>
 
@@ -62,27 +67,8 @@ export default function BrandBar({ form, upd, showDatePicker, setShowDatePicker,
               )}
             </div>
           )}
-
-          {/* Never Twice */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, border: '1.5px solid #000', borderRadius: 5, padding: '5px 14px', background: GOLD }}>
-              <span style={{ fontSize: 15, fontWeight: 900, color: '#000', letterSpacing: 1, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Never Twice</span>
-              <span style={{ fontSize: 8, fontWeight: 600, color: '#000', letterSpacing: 0.3, whiteSpace: 'nowrap' }}>Miss one — never miss the second.</span>
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 10, fontWeight: 700, color: DARK, letterSpacing: 0.3, marginTop: 6, userSelect: 'none' }}>
-              <input
-                type="checkbox"
-                checked={form.neverTwiceRead || false}
-                onChange={e => upd('neverTwiceRead', e.target.checked)}
-                style={{ width: 13, height: 13, cursor: 'pointer', accentColor: GOLD }}
-              />
-              I've read this. Never twice.
-            </label>
-          </div>
         </div>
 
-        {/* Right spacer */}
-        <div style={{ width: 76 }} />
       </div>
     </div>
   );
