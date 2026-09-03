@@ -47,18 +47,19 @@ export async function getCycleData(username) {
   try {
     clients = JSON.parse(localStorage.getItem('hub_clients'));
   } catch (_) {
-    return { ...CYCLE_FALLBACK };
+    return { error: 'no_account' };
   }
-  if (!Array.isArray(clients) || !username) return { ...CYCLE_FALLBACK };
+  if (!Array.isArray(clients) || !username) return { error: 'no_account' };
 
   const target = String(username).trim().toLowerCase();
   const match = clients.find(c => c && [
     c.username, c.name, c.client_name, c.user, c.id,
   ].some(v => v && String(v).trim().toLowerCase() === target));
-  if (!match) return { ...CYCLE_FALLBACK };
+  if (!match) return { error: 'no_start_date' };
 
+  if (!match.cycle_start) return { error: 'no_start_date' };
   return {
-    cycle_start: match.cycle_start ?? CYCLE_FALLBACK.cycle_start,
+    cycle_start: match.cycle_start,
     tracking_start_date: match.tracking_start_date ?? null,
     onramp_end: match.onramp_end ?? null,
     tier: match.tier ?? 4,

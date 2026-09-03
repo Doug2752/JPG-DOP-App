@@ -356,6 +356,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   const [alteringIndex, setAlteringIndex] = useState(null);
   const [alteredSlots, setAlteredSlots] = useState([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [cycleError, setCycleError] = useState(null);
   const originalDraftsRef = useRef(null);
   const closeConfirmRef = useRef(null);
   const hasActivePeriodRef = useRef(false);
@@ -365,7 +366,12 @@ export default function FourX4View({ onBack, user, onSave }) {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { tier: hubTier, cap_override_minutes: capOverride } = await getCycleData(user);
+      const cycleData = await getCycleData(user);
+      if (cycleData.error) {
+        setCycleError(cycleData.error);
+        return;
+      }
+      const { tier: hubTier, cap_override_minutes: capOverride } = cycleData;
       const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
       setTier(tierData);
 
@@ -1568,6 +1574,19 @@ export default function FourX4View({ onBack, user, onSave }) {
             }}
             onClick={finishGraduationFlow}
           >DONE</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (cycleError) {
+    const msg = cycleError === 'no_start_date'
+      ? 'Your program start date could not be verified. To fix this, open HUB, go to the Client Agreements, Docs & Forms spoke, and confirm your program start date is entered correctly on your client application.'
+      : 'Your account information could not be loaded. Please contact your coach.';
+    return (
+      <div style={PAGE}>
+        <div style={{ textAlign: 'center', color: GOLD, fontSize: 15, padding: 40, maxWidth: 480, margin: 'auto' }}>
+          {msg}
         </div>
       </div>
     );
