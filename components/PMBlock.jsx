@@ -13,7 +13,8 @@ export default function PMBlock({
   const [confirmUnlockPM, setConfirmUnlockPM] = useState(false);
   const cycleStart = fourX4Protocols[0]?.cycle_start;
   const today = todayStr();
-  const showGraceBanner = !!cycleStart && canClose(cycleStart, today) && !isGraceExpired(cycleStart, today);
+  const hasActiveProtocols = fourX4Protocols.some(r => r.status === 'active');
+  const showGraceBanner = !!cycleStart && hasActiveProtocols && canClose(cycleStart, today) && !isGraceExpired(cycleStart, today);
   let graceBannerText = '';
   if (showGraceBanner) {
     const deadline = graceDeadlineDate(cycleStart);
