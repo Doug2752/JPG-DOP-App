@@ -5,7 +5,7 @@ import { todayStr } from '../utils/date';
 import {
   canClose, closeActivePeriod, describeCloseWindow,
   runAutoCloseCheck, graceDeadlineDate, getCycleData,
-  evaluateAndWriteTierCap,
+  evaluateAndWriteTierCap, auditOutcome,
   getPendingGraduationDecisions, promoteProtocol, dropProtocol,
   keepIn4x4Protocol, getKeepIn4x4Carryovers, keepIn4x4GrowthPercent,
   countCompletions,
@@ -463,7 +463,10 @@ export default function FourX4View({ onBack, user, onSave }) {
     if (!user) return;
     (async () => {
       const pending = await getPendingGraduationDecisions(user);
-      setPendingGrad(pending);
+      setPendingGrad(pending.map(rec => ({
+        ...rec,
+        audit_outcome: auditOutcome(rec.completion_rate ?? 0),
+      })));
     })();
   }, [user]);
 
@@ -594,7 +597,10 @@ export default function FourX4View({ onBack, user, onSave }) {
     const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
     setTier(tierData);
     const pending = await getPendingGraduationDecisions(user);
-    setPendingGrad(pending);
+    setPendingGrad(pending.map(rec => ({
+      ...rec,
+      audit_outcome: auditOutcome(rec.completion_rate ?? 0),
+    })));
     hasActivePeriodRef.current = false;
     if (onSave) await onSave();
     setShowCloseConfirm(false);

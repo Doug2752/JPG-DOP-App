@@ -3,16 +3,12 @@ import { GOLD, BORDER } from '../utils/constants';
 import { todayStr } from '../utils/date';
 const SHADOW = '0 1px 4px rgba(0,0,0,0.06)';
 
-function cycleWeekRange(cycleStart) {
+function cycleWeekRange(_cycleStart) {
   const iso = x => x.toISOString().slice(0, 10);
   const DAY_MS = 24 * 60 * 60 * 1000;
   const today = new Date(todayStr() + 'T00:00:00Z');
-  const start = new Date(cycleStart + 'T00:00:00Z');
-  const daysElapsed = Math.max(0, Math.floor((today - start) / DAY_MS));
-  const windowOffset = Math.floor(daysElapsed / 7) * 7;
-  const windowStart = new Date(start.getTime() + windowOffset * DAY_MS);
-  const windowEnd = new Date(windowStart.getTime() + 6 * DAY_MS);
-  return { windowStart: iso(windowStart), windowEnd: iso(windowEnd) };
+  const windowStart = new Date(today.getTime() - 6 * DAY_MS);
+  return { windowStart: iso(windowStart), windowEnd: iso(today) };
 }
 
 function pctColor(pct) {
