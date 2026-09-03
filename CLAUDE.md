@@ -266,7 +266,11 @@ Alter This Protocol button on committed cards only. One-per-period hard limit pe
 **Status:** FULLY BUILT. fourX4Period.js and all consumer files migrated. No calendar-month logic remains in DOP.
 
 ### utils/fourX4Period.js — key exports:
-- getCycleData(username) — reads hub_clients, returns { cycle_start, tracking_start_date, onramp_end, tier, cap_override_minutes }. CYCLE_FALLBACK: { cycle_start: '2026-08-01', tracking_start_date: null, onramp_end: null, tier: 4, cap_override_minutes: null }
+- getCycleData(username) — reads hub_clients. Returns explicit error objects when data is missing or invalid:
+  - localStorage parse fails or no username → { error: 'no_account' }
+  - No matching client record or missing cycle_start → { error: 'no_start_date' }
+  - Valid record → { cycle_start, tracking_start_date, onramp_end, tier, cap_override_minutes }
+  CYCLE_FALLBACK constant remains in file but is no longer returned by getCycleData().
 - graceDeadlineDate(cycleStart) — cycleStart + 34 days
 - canClose(cycleStart, todayISO) — today >= cycleStart + 30 days
 - isGraceExpired(cycleStart, todayISO) — today > cycleStart + 34 days
