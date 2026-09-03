@@ -28,12 +28,16 @@ export default function DOPApp() {
   const [user, setUser] = useState(() => {
     const raw = new URLSearchParams(window.location.search).get('hub_user');
     if (!raw) return null;
-    return Object.keys(VALID_CREDENTIALS).find(k => k.toLowerCase() === raw.trim().toLowerCase()) ?? null;
+    const trimmed = raw.trim();
+    if (trimmed) return trimmed;
+    return null;
   });
   const [firstName, setFirstName] = useState(() => {
     const raw = new URLSearchParams(window.location.search).get('hub_user');
     if (!raw) return '';
-    return Object.keys(VALID_CREDENTIALS).find(k => k.toLowerCase() === raw.trim().toLowerCase()) ?? '';
+    const trimmed = raw.trim();
+    if (trimmed) return trimmed;
+    return '';
   });
   const [view, setView] = useState('form');
   const [setup, setSetup] = useState(defaultSetup());
