@@ -369,7 +369,7 @@ export default function FourX4View({ onBack, user, onSave }) {
       const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
       setTier(tierData);
 
-      const pv = await storage.get('4x4_protocols_' + user);
+      const pv = await storage.get('4x4_protocols_' + user.toLowerCase());
       const loaded = pv && pv.value
         ? JSON.parse(pv.value).filter(p => p.status === 'active')
         : [];
@@ -470,14 +470,14 @@ export default function FourX4View({ onBack, user, onSave }) {
   useEffect(() => {
     if (!user || (section !== 'History' && section !== 'Metrics')) return;
     (async () => {
-      const hv = await storage.get('4x4_history_' + user);
+      const hv = await storage.get('4x4_history_' + user.toLowerCase());
       if (!hv || !hv.value) {
         setHistoryRecords([]);
         return;
       }
       try {
         const records = JSON.parse(hv.value);
-        const pv = await storage.get('4x4_protocols_' + user);
+        const pv = await storage.get('4x4_protocols_' + user.toLowerCase());
         const protocols = pv && pv.value ? JSON.parse(pv.value) : [];
         const byId = {};
         protocols.forEach(p => { byId[p.id] = p; });
@@ -576,7 +576,7 @@ export default function FourX4View({ onBack, user, onSave }) {
   }
 
   async function handleManualClose() {
-    const pv = await storage.get('4x4_protocols_' + user);
+    const pv = await storage.get('4x4_protocols_' + user.toLowerCase());
     const all = pv && pv.value ? JSON.parse(pv.value) : [];
     const active = all.filter(r => r.status === 'active');
     if (active.length === 0) return;
@@ -606,7 +606,7 @@ export default function FourX4View({ onBack, user, onSave }) {
 
     const isAlterationSave = drafts.some(d => d.is_alteration === true);
     const todayISO = todayStr();
-    const pv = await storage.get('4x4_protocols_' + user);
+    const pv = await storage.get('4x4_protocols_' + user.toLowerCase());
     const existingAll = pv && pv.value ? JSON.parse(pv.value) : [];
     const existingActive = existingAll.filter(r => r.status === 'active');
     if (!isAlterationSave && existingActive.length > 0) {
@@ -810,7 +810,7 @@ export default function FourX4View({ onBack, user, onSave }) {
         if (!nowAltered.includes(i)) nowAltered.push(i);
       }
       await storage.set(
-        '4x4_protocols_' + user,
+        '4x4_protocols_' + user.toLowerCase(),
         JSON.stringify(existingAll)
       );
       for (let slot = 0; slot < drafts.length; slot++) {
@@ -878,10 +878,10 @@ export default function FourX4View({ onBack, user, onSave }) {
       const tierData = await evaluateAndWriteTierCap(user, storage, hubTier, capOverride);
       setTier(tierData);
     }
-    const pv2 = await storage.get('4x4_protocols_' + user);
+    const pv2 = await storage.get('4x4_protocols_' + user.toLowerCase());
     const base = pv2 && pv2.value ? JSON.parse(pv2.value) : [];
     await storage.set(
-      '4x4_protocols_' + user,
+      '4x4_protocols_' + user.toLowerCase(),
       JSON.stringify(base.concat(records))
     );
     for (let slot = 0; slot < 4; slot++) {
@@ -1014,12 +1014,12 @@ export default function FourX4View({ onBack, user, onSave }) {
     setPendingGrad(prev => prev.map(p =>
       p.id === modifyCandidate.id ? { ...p, ...updates } : p
     ));
-    const pv = await storage.get('4x4_protocols_' + user);
+    const pv = await storage.get('4x4_protocols_' + user.toLowerCase());
     const all = pv && pv.value ? JSON.parse(pv.value) : [];
     const idx = all.findIndex(r => r.id === modifyCandidate.id);
     if (idx !== -1) {
       all[idx] = { ...all[idx], ...updates };
-      await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+      await storage.set('4x4_protocols_' + user.toLowerCase(), JSON.stringify(all));
     }
     setSaveError(null);
     setModifyCandidate(null);

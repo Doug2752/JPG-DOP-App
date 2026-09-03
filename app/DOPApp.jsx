@@ -162,7 +162,7 @@ export default function DOPApp() {
   async function reloadFourX4() {
     try {
       const px = await storage.get(
-        '4x4_protocols_' + user
+        '4x4_protocols_' + user.toLowerCase()
       );
       if (px && px.value) {
         const all = JSON.parse(px.value);

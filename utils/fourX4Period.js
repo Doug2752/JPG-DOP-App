@@ -140,7 +140,8 @@ export async function countCompletions(user, protocolId, fromISO, untilISO) {
  * the full merged array as written to storage.
  */
 export async function closeActivePeriod(user, activeUntil, overrides = {}) {
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const active = all.filter(r => r.status === 'active');
   if (active.length === 0) return { closed: false, protocols: all };
@@ -229,10 +230,10 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     alteredGradProtocols.push(gradBase);
   }
 
-  const hv = await storage.get('4x4_history_' + user);
+  const hv = await storage.get('4x4_history_' + normalizedUser);
   const existingHistory = hv && hv.value ? JSON.parse(hv.value) : [];
   await storage.set(
-    '4x4_history_' + user,
+    '4x4_history_' + normalizedUser,
     JSON.stringify(
       existingHistory.concat(historyRecords).concat(alteredHistoryRecords)
     )
@@ -276,7 +277,7 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
     .concat(closedProtocols)
     .concat(remediateCarries)
     .concat(alteredGradProtocols);
-  await storage.set('4x4_protocols_' + user, JSON.stringify(merged));
+  await storage.set('4x4_protocols_' + normalizedUser, JSON.stringify(merged));
 
   return { closed: true, protocols: merged };
 }
@@ -287,6 +288,7 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
  * all other tiers → 30 min.
  */
 export async function evaluateAndWriteTierCap(user, storage, tier, capOverride) {
+  const normalizedUser = user.toLowerCase();
   let cap;
   if (capOverride !== null && capOverride !== undefined && Number.isInteger(capOverride) && capOverride > 0) {
     cap = capOverride;
@@ -296,7 +298,7 @@ export async function evaluateAndWriteTierCap(user, storage, tier, capOverride) 
     cap = 30;
   }
   const tierData = { tier, cap };
-  await storage.set('4x4_tier_' + user, JSON.stringify(tierData));
+  await storage.set('4x4_tier_' + normalizedUser, JSON.stringify(tierData));
   return tierData;
 }
 
@@ -308,7 +310,8 @@ export async function evaluateAndWriteTierCap(user, storage, tier, capOverride) 
  * pulled from its matching History snapshot (same id).
  */
 export async function getPendingGraduationDecisions(user) {
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const pending = all.filter(r => (
     r.status !== 'active'
@@ -319,7 +322,7 @@ export async function getPendingGraduationDecisions(user) {
   ));
   if (pending.length === 0) return [];
 
-  const hv = await storage.get('4x4_history_' + user);
+  const hv = await storage.get('4x4_history_' + normalizedUser);
   const history = hv && hv.value ? JSON.parse(hv.value) : [];
 
   return pending
@@ -339,9 +342,10 @@ export async function getPendingGraduationDecisions(user) {
  * status:'active' records feed the Set Up / Edit net-cost calculation.
  */
 export async function promoteProtocol(user, protocolId, timeOfDayOverride) {
+  const normalizedUser = user.toLowerCase();
   const sk = (user || 'guest') + '_dop7_';
 
-  const pv = await storage.get('4x4_protocols_' + user);
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const idx = all.findIndex(r => r.id === protocolId);
   if (idx === -1) return null;
@@ -373,7 +377,7 @@ export async function promoteProtocol(user, protocolId, timeOfDayOverride) {
     core_outcome: 'advanced',
     dop_item_id: dopItemId,
   };
-  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  await storage.set('4x4_protocols_' + normalizedUser, JSON.stringify(all));
   return all[idx];
 }
 
@@ -382,13 +386,14 @@ export async function promoteProtocol(user, protocolId, timeOfDayOverride) {
  * snapshot stands as-is; nothing else continues, no DOP item is created.
  */
 export async function dropProtocol(user, protocolId) {
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const idx = all.findIndex(r => r.id === protocolId);
   if (idx === -1) return null;
 
   all[idx] = { ...all[idx], core_outcome: 'retry' };
-  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  await storage.set('4x4_protocols_' + normalizedUser, JSON.stringify(all));
   return all[idx];
 }
 
@@ -401,13 +406,14 @@ export async function dropProtocol(user, protocolId) {
  * created later, when the client saves the next Set Up/Edit period.
  */
 export async function keepIn4x4Protocol(user, protocolId) {
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const idx = all.findIndex(r => r.id === protocolId);
   if (idx === -1) return null;
 
   all[idx] = { ...all[idx], is_keepin4x4: true, core_outcome: null };
-  await storage.set('4x4_protocols_' + user, JSON.stringify(all));
+  await storage.set('4x4_protocols_' + normalizedUser, JSON.stringify(all));
   return all[idx];
 }
 
@@ -419,14 +425,15 @@ export async function keepIn4x4Protocol(user, protocolId) {
  * History snapshot, so the Set Up screen can flag Remediate carryovers.
  */
 export async function getKeepIn4x4Carryovers(user) {
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const carryovers = all.filter(r => (
     r.is_keepin4x4 && !all.some(o => o.linked_to === r.id)
   ));
   if (carryovers.length === 0) return [];
 
-  const hv = await storage.get('4x4_history_' + user);
+  const hv = await storage.get('4x4_history_' + normalizedUser);
   const history = hv && hv.value ? JSON.parse(hv.value) : [];
 
   return carryovers.map(p => {
@@ -478,7 +485,8 @@ export function keepIn4x4GrowthPercent(draft, carryover) {
  */
 export async function runAutoCloseCheck(user) {
   if (!user) return [];
-  const pv = await storage.get('4x4_protocols_' + user);
+  const normalizedUser = user.toLowerCase();
+  const pv = await storage.get('4x4_protocols_' + normalizedUser);
   const all = pv && pv.value ? JSON.parse(pv.value) : [];
   const active = all.filter(r => r.status === 'active');
   if (active.length === 0) return all;
@@ -487,7 +495,7 @@ export async function runAutoCloseCheck(user) {
   if (!isGraceExpired(cycleStart, todayStr())) return all;
 
   const graceEndISO = isoDate(graceDeadlineDate(cycleStart));
-  const result = await closeActivePeriod(user, graceEndISO, {
+  const result = await closeActivePeriod(normalizedUser, graceEndISO, {
     status: 'incomplete',
     core_outcome: 'incomplete',
     coach_overridden: false,
