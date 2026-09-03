@@ -174,8 +174,11 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
       ? overrides.coach_overridden
       : p.coach_overridden;
 
+    const freshPv = await storage.get('4x4_protocols_' + normalizedUser);
+    const freshAll = freshPv && freshPv.value ? JSON.parse(freshPv.value) : all;
+    const freshP = freshAll.find(r => r.id === p.id) || p;
     const base = {
-      ...p,
+      ...freshP,
       active_until: activeUntil,
       status,
       core_outcome: coreOutcome,
@@ -272,11 +275,18 @@ export async function closeActivePeriod(user, activeUntil, overrides = {}) {
   const rest = all.filter(r => (
     r.status !== 'active'
     && !(r.status === 'altered_archived' && r.cycle_start === closingCycleStart)
+    && r.core_outcome !== 'retry'
   ));
+  const seenIds = new Set();
   const merged = rest
     .concat(closedProtocols)
     .concat(remediateCarries)
-    .concat(alteredGradProtocols);
+    .concat(alteredGradProtocols)
+    .filter(r => {
+      if (seenIds.has(r.id)) return false;
+      seenIds.add(r.id);
+      return true;
+    });
   await storage.set('4x4_protocols_' + normalizedUser, JSON.stringify(merged));
 
   return { closed: true, protocols: merged };
