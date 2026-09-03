@@ -28,7 +28,7 @@ function daysBetweenInclusive(fromISO, untilISO) {
 }
 
 const CYCLE_FALLBACK = {
-  cycle_start: '2026-08-01',
+  cycle_start: '2026-09-02',
   tracking_start_date: null,
   onramp_end: null,
   tier: 4,
