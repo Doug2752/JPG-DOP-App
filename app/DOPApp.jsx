@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BG, RED, AM_STANDARD, AM_COMMON, AM_SUB_IDS, PM_STANDARD, PM_COMMON, PM_SUB_IDS, BACKUP_QUOTES } from '../utils/constants';
 import { todayStr, fmtDate } from '../utils/date';
 import { emptyForm, defaultSetup, isDayComplete, getDailyQuote, migrateSetup } from '../utils/form';
@@ -52,6 +52,9 @@ export default function DOPApp() {
   const [fourX4Protocols, setFourX4Protocols] = useState([]);
   const [loadError, setLoadError] = useState(false);
   const [saveError, setSaveError] = useState(false);
+
+  const formRef = useRef(form);
+  formRef.current = form;
 
   const sk = (user || 'guest') + '_dop7_';
 
@@ -136,24 +139,24 @@ export default function DOPApp() {
     }
   }
 
-  const upd = (f, v) => saveForm({ ...form, [f]: v });
+  const upd = (f, v) => saveForm({ ...formRef.current, [f]: v });
 
   const toggleAM = id => {
-    const c = { ...form.amChecks };
+    const c = { ...formRef.current.amChecks };
     c[id] = !c[id];
-    saveForm({ ...form, amChecks: c });
+    saveForm({ ...formRef.current, amChecks: c });
   };
   const toggleAMPitAll = () => {
-    const c = { ...form.amChecks };
+    const c = { ...formRef.current.amChecks };
     const allChecked = AM_SUB_IDS.every(id => !!c[id]);
     AM_SUB_IDS.forEach(id => { c[id] = !allChecked; });
     c['pit'] = !allChecked;
-    saveForm({ ...form, amChecks: c });
+    saveForm({ ...formRef.current, amChecks: c });
   };
   const togglePM = id => {
-    const c = { ...form.pmChecks };
+    const c = { ...formRef.current.pmChecks };
     c[id] = !c[id];
-    saveForm({ ...form, pmChecks: c });
+    saveForm({ ...formRef.current, pmChecks: c });
   };
 
   async function saveSetup(s) {
