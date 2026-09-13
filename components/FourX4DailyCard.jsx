@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GOLD, BORDER } from '../utils/constants';
+import { GOLD, BORDER, GREY } from '../utils/constants';
 import { todayStr } from '../utils/date';
 const SHADOW = '0 1px 4px rgba(0,0,0,0.06)';
 
@@ -58,6 +58,9 @@ export default function FourX4DailyCard({
     saveForm({ ...form, fourX4Checks: next });
   }
 
+  const todayDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()];
+  const isWeekend = todayDay === 'Sat' || todayDay === 'Sun';
+
   return (
     <div style={{
       background: 'white',
@@ -95,6 +98,11 @@ export default function FourX4DailyCard({
       </div>
       <div style={{ padding: '4px 0' }}>
         {protocols.map((p, i) => {
+          if (p.schedule === 'specific_days' && !(p.scheduleDays || []).includes(todayDay)) return null;
+          if (p.schedule === 'weekly_frequency') {
+            if (p.scheduleFrequencyWindow === 'weekdays' && isWeekend) return null;
+            if (p.scheduleFrequencyWindow === 'weekends' && !isWeekend) return null;
+          }
           const checked = !!checks[p.id];
           const isLast = i === protocols.length - 1;
           const coreLabel = p.foundation_core.replace(/_/g, ' ');
@@ -170,6 +178,14 @@ export default function FourX4DailyCard({
                   }}>
                     {pct}{'%'}
                   </div>
+                )}
+                {p.schedule === 'weekly_frequency' && (
+                  <div style={{
+                    fontSize: 11,
+                    color: GREY,
+                    fontStyle: 'italic',
+                    marginTop: 2,
+                  }}>Mark ✓ only on days you performed</div>
                 )}
               </div>
               <button

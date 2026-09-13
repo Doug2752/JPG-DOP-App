@@ -334,6 +334,10 @@ function emptyDraft() {
     is_remediate_carry: false,
     is_alteration: false,
     linked_to: null,
+    schedule: 'weekly_frequency',
+    scheduleDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    scheduleFrequency: 3,
+    scheduleFrequencyWindow: 'any',
   };
 }
 
@@ -403,6 +407,10 @@ export default function FourX4View({ onBack, user, onSave }) {
             is_remediate_carry: ex.is_remediate_carry === true,
             is_alteration: ex.is_alteration === true,
             linked_to: ex.linked_to ?? null,
+            schedule: ex.schedule || 'daily',
+            scheduleDays: ex.scheduleDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            scheduleFrequency: ex.scheduleFrequency ?? 3,
+            scheduleFrequencyWindow: ex.scheduleFrequencyWindow || 'any',
           });
         } else {
           let draft = emptyDraft();
@@ -448,6 +456,10 @@ export default function FourX4View({ onBack, user, onSave }) {
             wasRemediate: co.audit_outcome === 'remediate',
           },
           is_remediate_carry: false,
+          schedule: co.schedule || 'daily',
+          scheduleDays: co.scheduleDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          scheduleFrequency: co.scheduleFrequency ?? 3,
+          scheduleFrequencyWindow: co.scheduleFrequencyWindow || 'any',
         };
       });
 
@@ -572,6 +584,10 @@ export default function FourX4View({ onBack, user, onSave }) {
         original.deact_uses_weekly_target === true,
       is_alteration: true,
       linked_to: original.id,
+      schedule: original.schedule || 'daily',
+      scheduleDays: original.scheduleDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      scheduleFrequency: original.scheduleFrequency ?? 3,
+      scheduleFrequencyWindow: original.scheduleFrequencyWindow || 'any',
     };
     const newDrafts = drafts.map((d, idx) =>
       idx === i ? altDraft : d
@@ -817,6 +833,10 @@ export default function FourX4View({ onBack, user, onSave }) {
           graduated_to_dop: false,
           dop_item_id: null,
           is_alteration: true,
+          schedule: d.schedule || 'daily',
+          scheduleDays: d.scheduleDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          scheduleFrequency: d.scheduleFrequency ?? 3,
+          scheduleFrequencyWindow: d.scheduleFrequencyWindow || 'any',
         };
         existingAll.push(altered);
         if (!nowAltered.includes(i)) nowAltered.push(i);
@@ -882,6 +902,10 @@ export default function FourX4View({ onBack, user, onSave }) {
         prior_time_cost: co ? co.priorTimeCost : null,
         graduated_to_dop: false,
         dop_item_id: null,
+        schedule: d.schedule || 'daily',
+        scheduleDays: d.scheduleDays || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        scheduleFrequency: d.scheduleFrequency ?? 3,
+        scheduleFrequencyWindow: d.scheduleFrequencyWindow || 'any',
       };
     });
 
@@ -2095,6 +2119,82 @@ export default function FourX4View({ onBack, user, onSave }) {
                       Select if there is no time addition or reduction
                     </span>
                   </div>
+                </div>
+
+                {/* Schedule */}
+                <div style={{ marginTop: 8 }}>
+                  <div style={LBL}>Schedule</div>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 0 }}>
+                    <button
+                      style={selBtn(d.schedule === 'daily')}
+                      onClick={() => updateDraft(i, 'schedule', 'daily')}
+                    >Daily</button>
+                    <button
+                      style={selBtn(d.schedule === 'weekly_frequency')}
+                      onClick={() => updateDraft(i, 'schedule', 'weekly_frequency')}
+                    >Weekly Frequency</button>
+                    <button
+                      style={selBtn(d.schedule === 'specific_days')}
+                      onClick={() => updateDraft(i, 'schedule', 'specific_days')}
+                    >Specific Days</button>
+                  </div>
+                  {d.schedule === 'weekly_frequency' && (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
+                      <span style={{ fontSize: 13 }}>Times per week:</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={7}
+                        style={NUM_INPUT}
+                        value={d.scheduleFrequency ?? ''}
+                        onChange={e => {
+                          const v = parseInt(e.target.value, 10);
+                          updateDraft(i, 'scheduleFrequency', isNaN(v) ? null : Math.min(7, Math.max(1, v)));
+                        }}
+                      />
+                      <span style={{ fontSize: 13 }}>in</span>
+                      <button
+                        style={selBtn(d.scheduleFrequencyWindow === 'any')}
+                        onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'any')}
+                      >Any day</button>
+                      <button
+                        style={selBtn(d.scheduleFrequencyWindow === 'consecutive')}
+                        onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'consecutive')}
+                      >Weekdays only (Mon–Fri)</button>
+                      <button
+                        style={selBtn(d.scheduleFrequencyWindow === 'weekends')}
+                        onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'weekends')}
+                      >Weekends only (Sat–Sun)</button>
+                    </div>
+                  )}
+                  {d.schedule === 'specific_days' && (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
+                          const sel = (d.scheduleDays || []).includes(day);
+                          return (
+                            <button
+                              key={day}
+                              style={{
+                                padding: '4px 10px',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                borderRadius: 5,
+                                cursor: 'pointer',
+                                border: sel ? '1.5px solid ' + GOLD : '1.5px solid #888',
+                                background: sel ? GOLD : '#fff',
+                                color: sel ? '#000' : '#888',
+                              }}
+                              onClick={() => {
+                                const curr = d.scheduleDays || [];
+                                updateDraft(i, 'scheduleDays', sel ? curr.filter(x => x !== day) : [...curr, day]);
+                              }}
+                            >{day}</button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>
