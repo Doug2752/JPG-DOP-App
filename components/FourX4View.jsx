@@ -2158,8 +2158,8 @@ export default function FourX4View({ onBack, user, onSave }) {
                         onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'any')}
                       >Any day</button>
                       <button
-                        style={selBtn(d.scheduleFrequencyWindow === 'consecutive')}
-                        onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'consecutive')}
+                        style={selBtn(d.scheduleFrequencyWindow === 'weekdays')}
+                        onClick={() => updateDraft(i, 'scheduleFrequencyWindow', 'weekdays')}
                       >Weekdays only (Mon–Fri)</button>
                       <button
                         style={selBtn(d.scheduleFrequencyWindow === 'weekends')}

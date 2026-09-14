@@ -24,7 +24,7 @@ This is the single source of truth for everything about the DOP app — logic ru
 ## SECTION A — DOP APP IDENTITY
 
 - **App name:** Daily Operational Process (DOP)
-- **Dev port:** 5173
+- **Dev port:** 5173 (`strictPort: true` in vite.config.js — will error rather than drift to another port)
 - **Repo:** Doug2752/JPG-DOP-App
 - **Local folder:** C:\JPG-PROJECTS\JPG-DOP-App
 - **Framework:** React + Vite, Class 3 modular structure
@@ -32,7 +32,7 @@ This is the single source of truth for everything about the DOP app — logic ru
 - **Test login:** Test / JPG2026 and Doug / JPG2026 (case-insensitive)
 - **Browser for testing:** Firefox (localhost:5173)
 - **Daily-use browser:** Brave (auto-opens 5173 — stop Brave before starting dev server during work hours)
-- **CLAUDE.md:** v1.6 — updated 09/03/2026
+- **CLAUDE.md:** v1.7 — updated 09/13/2026
 
 ---
 
@@ -123,6 +123,7 @@ Used in BrandBar date picker button only. fmtDate() unchanged — still used els
 - hub_clients: DOP read-only via getCycleData() in fourX4Period.js → returns cycle_start, tracking_start_date, onramp_end, tier, cap_override_minutes
 - neverTwiceRead: form field in {user}_dop7_form_{date} — boolean, default false. Checkbox in Never Twice bar wired to this field.
 - hub_user URL passthrough (BUILT 09/03/2026): DOPApp.jsx reads hub_user from URL on mount. If present and non-empty after trim, sets user and firstName directly to the trimmed value — no VALID_CREDENTIALS or hub_clients lookup required. HUB has already authenticated the client. Falls through to login screen if absent or empty. VALID_CREDENTIALS unchanged for direct logins.
+- formRef pattern in DOPApp.jsx (FIXED): `upd`, `toggleAM`, `togglePM`, and `toggleAMPitAll` all read from `formRef.current` (not the `form` state variable directly) to avoid stale closure bugs. `formRef.current = form` is kept in sync on every render.
 
 ---
 
@@ -281,6 +282,33 @@ Alter This Protocol button on committed cards only. One-per-period hard limit pe
 
 ---
 
+## SECTION M — SCHEDULE FIELD ON PROTOCOL OBJECTS (BUILT 09/13/2026)
+
+Four fields added to every protocol object (stored in `4x4_protocols_{user}`):
+
+| Field | Type | Values |
+|---|---|---|
+| schedule | string | `'daily'` \| `'weekly_frequency'` \| `'specific_days'` |
+| scheduleDays | string[] | e.g. `['Mon','Tue','Wed','Thu','Fri']` |
+| scheduleFrequency | number | 1–7 (times per week; only used when schedule === 'weekly_frequency') |
+| scheduleFrequencyWindow | string | `'any'` \| `'weekdays'` \| `'weekends'` (only used when schedule === 'weekly_frequency') |
+
+**Defaults:**
+- New protocols (`emptyDraft()`): `schedule: 'weekly_frequency'`, `scheduleFrequency: 3`, `scheduleFrequencyWindow: 'any'`, `scheduleDays: ['Mon','Tue','Wed','Thu','Fri']`
+- Existing protocols loaded from storage (missing field): `schedule: 'daily'` fallback applied in protocol-load block, carryover block, and `handleAlter()`
+
+**Card hiding logic — FourX4DailyCard.jsx:**
+- `specific_days`: hides card if today's day name is not in `scheduleDays`
+- `weekly_frequency` + `scheduleFrequencyWindow === 'weekdays'`: hides on Sat/Sun
+- `weekly_frequency` + `scheduleFrequencyWindow === 'weekends'`: hides on Mon–Fri
+- `daily` or undefined: always renders
+
+**Instruction line:** renders below weekly progress on `weekly_frequency` cards — `"Mark ✓ only on days you performed"` — `fontSize: 11`, `color: GREY`, `fontStyle: italic`
+
+**No new storage keys.** Fields piggyback on existing `4x4_protocols_{user}` records.
+
+---
+
 ## SECTION L — TIER CAP SYSTEM (REBUILT 08/13/2026)
 
 **evaluateAndWriteTierCap(user, storage, tier, capOverride):**
@@ -310,7 +338,8 @@ Alter This Protocol button on committed cards only. One-per-period hard limit pe
 | v3.5 | 08/22/2026 | PMBlock PM section layout updated — Tomorrow's Appointments & Must-Do's removed, PM Deviation repositioned above Tomorrow's Priorities. Tomorrow's One Thing retained. PM Deviation wrapper spacing confirmed. Pending verification items list updated for August period close. |
 | v3.6 | 08/28/2026 | Header redesigned — flat text nav, grey separators, gold streak text, right group restyled. BrandBar redesigned — three-zone layout, DOP 52px title, 15px subtitle, date picker right only, 2px bottom border. fmtDateShort() added to utils/date.js. Never Twice bar built in AMBlock.jsx replacing top PITButton — GOLD_LIGHT full-width inline row wired to form.neverTwiceRead. 4x4 Suggested Protocol Library confirmed stays in DOP (not HUB). AM Lock box styling confirmed acceptable as-is. Show instructions flag confirmed working. 4x4 graduation items confirmed done via live period close. Streak badge confirmed dropped. |
 | v1.6 | 09/03/2026 | hub_user URL passthrough built — DOPApp.jsx useState initializers for user and firstName now trust hub_user URL param directly. No VALID_CREDENTIALS lookup for HUB clients. No new storage keys. No new components. |
+| v1.7 | 09/13/2026 | Schedule field built — four fields (schedule, scheduleDays, scheduleFrequency, scheduleFrequencyWindow) added to all protocol objects. Card hiding logic in FourX4DailyCard.jsx. Instruction line on weekly_frequency cards. getCycleData() explicit error objects documented. formRef pattern noted. strictPort: true noted. |
 
 ---
 
-*JPG-SYS-DOP-CodeLogic-WRK-v1.6 | Jones Performance Group LLC | CONFIDENTIAL | 09/03/2026*
+*JPG-SYS-DOP-CodeLogic-WRK-v1.7 | Jones Performance Group LLC | CONFIDENTIAL | 09/13/2026*
